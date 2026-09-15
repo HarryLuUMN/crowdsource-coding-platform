@@ -77,8 +77,10 @@ class ServerApiTests(unittest.TestCase):
         self.assertEqual(200, status)
         self.assertIn('id="tutorialGuide"', html)
         self.assertIn('data-guide-tab="tutorial"', html)
-        self.assertIn("https://mhofmann-khoury.github.io/knit_script/", html)
-        self.assertIn("Open full documentation", html)
+        self.assertIn('id="documentationPanel"', html)
+        self.assertIn('src="/documentation/"', html)
+        self.assertIn('sandbox="allow-same-origin"', html)
+        self.assertIn("View documentation", html)
 
     def test_studio_starts_with_an_empty_editor(self) -> None:
         html_status, html = self.get_text("/")

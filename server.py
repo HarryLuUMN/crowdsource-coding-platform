@@ -20,6 +20,7 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from answer_checker import TASK_ID, check_stockinette_answer
+from documentation import render_documentation
 from trace_admin import TraceAdminRepository
 from trace_store import TraceStore, utc_now
 
@@ -167,13 +168,15 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(STATIC_DIR), **kwargs)
 
     def end_headers(self) -> None:
+        is_documentation = urlparse(self.path).path.startswith("/documentation/")
         self.send_header(
             "Content-Security-Policy",
             "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
-            "connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
+            "connect-src 'self'; object-src 'none'; base-uri 'none'; "
+            + ("frame-ancestors 'self'; form-action 'none'; sandbox allow-same-origin" if is_documentation else "frame-ancestors 'none'; form-action 'self'"),
         )
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("X-Frame-Options", "SAMEORIGIN" if is_documentation else "DENY")
         self.send_header("Referrer-Policy", "no-referrer")
         super().end_headers()
 
@@ -258,6 +261,19 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         path = parsed.path
+        if path.startswith("/documentation/"):
+            try:
+                body = render_documentation(path.removeprefix("/documentation/"))
+                status = HTTPStatus.OK
+            except Exception:
+                body = b'<html><body><p>Documentation is unavailable. Please try again.</p><a href="/documentation/">Retry</a></body></html>'
+                status = HTTPStatus.BAD_GATEWAY
+            self.send_response(status)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if path == "/api/health":
             self._send_json(HTTPStatus.OK, {"ok": True, "compiler": "knit-script", "version": "0.5.0"})
             return

@@ -6,7 +6,7 @@
     <meta name="description" content="Write and run KnitScript in your browser." />
     <title>KnitScript Studio</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=5" />
+    <link rel="stylesheet" href="/styles.css?v=6" />
   </head>
   <body>
     <header class="topbar">
@@ -54,8 +54,8 @@
               <h1>Build a pattern from machine-aware blocks</h1>
               <p>KnitScript uses Python-like control flow with knitting-specific needles, carriers, and carriage passes.</p>
             </div>
-            <a class="documentation-link" id="documentationLink" href="https://mhofmann-khoury.github.io/knit_script/" target="_blank" rel="noopener noreferrer">
-              Open full documentation <span aria-hidden="true">↗</span>
+            <a class="documentation-link" id="documentationLink" href="#documentationPanel">
+              View documentation <span aria-hidden="true">→</span>
             </a>
           </div>
           <div class="tutorial-steps">
@@ -141,6 +141,10 @@
             </div>
           </div>
         </div>
+        <aside class="panel documentation-panel" id="documentationPanel" aria-label="KnitScript documentation">
+          <div class="panel-heading"><span>Documentation</span><span class="save-state">Read only</span></div>
+          <iframe id="documentationFrame" title="KnitScript documentation" src="/documentation/" sandbox="allow-same-origin" referrerpolicy="no-referrer"></iframe>
+        </aside>
       </section>
     </main>
 
@@ -176,6 +180,6 @@
         <a class="submit-button completion-link" id="prolificCompletionLink" hidden>Return to Prolific</a>
       </div>
     </dialog>
-    <script src="/app.js?v=8" defer></script>
+    <script src="/app.js?v=9" defer></script>
   </body>
 </html>

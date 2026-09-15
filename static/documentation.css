@@ -1,0 +1,7 @@
+body { margin: 0; padding: 18px; background: #191a17; color: #e8e8df; font: 14px/1.65 system-ui, sans-serif; overflow-wrap: anywhere; }
+a { color: #e5ff6f; }
+nav { margin-bottom: 18px; }
+h1 { font-size: 24px; } h2 { font-size: 20px; } h3 { font-size: 17px; }
+pre { padding: 12px; background: #11120f; overflow: auto; border-radius: 6px; }
+code { font-family: ui-monospace, monospace; }
+table { border-collapse: collapse; } td, th { padding: 6px; border: 1px solid #414338; }

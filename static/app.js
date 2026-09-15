@@ -462,6 +462,14 @@ copyButton.addEventListener("click", async () => {
 tabs.forEach((tab) => tab.addEventListener("click", () => selectTab(tab.dataset.tab, true)));
 guideTabs.forEach((tab) => tab.addEventListener("click", () => selectGuideTab(tab.dataset.guideTab, true)));
 documentationLink.addEventListener("click", () => recordEvent("guide.documentation_opened"));
+document.querySelector("#documentationFrame").addEventListener("load", (event) => {
+  const frame = event.target;
+  recordEvent("guide.documentation_navigated", { path: frame.contentWindow.location.pathname });
+  frame.contentDocument.addEventListener("click", (clickEvent) => {
+    const link = clickEvent.target.closest("a[href]");
+    if (link) recordEvent("guide.documentation_link_clicked", { path: link.getAttribute("href") });
+  });
+});
 closeCompletionButton.addEventListener("click", () => completionDialog.close());
 prolificCompletionLink.addEventListener("click", async (event) => {
   const completionUrl = prolificCompletionLink.href;
