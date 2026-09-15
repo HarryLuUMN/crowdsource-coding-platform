@@ -70,6 +70,7 @@ const context = {
 context.globalThis = context;
 
 const appSource = fs.readFileSync("static/app.js", "utf8");
+const readingSource = fs.readFileSync("static/documentation-reading.js", "utf8");
 const hooks = `
   globalThis.__telemetryTest = {
     begin(sessionId) { studyStarted = true; telemetrySessionId = sessionId; },
@@ -78,7 +79,7 @@ const hooks = `
     pendingEvents,
   };
 `;
-vm.runInNewContext(`${appSource}\n${hooks}`, context, { filename: "static/app.js" });
+vm.runInNewContext(`${readingSource}\n${appSource}\n${hooks}`, context, { filename: "static/app.js" });
 
 async function run() {
   context.__telemetryTest.begin("session-pagehide-test");
