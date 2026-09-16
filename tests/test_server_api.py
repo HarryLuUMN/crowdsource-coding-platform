@@ -115,6 +115,14 @@ class ServerApiTests(unittest.TestCase):
         self.assertEqual(401, api_status)
         self.assertFalse(payload["ok"])
 
+    def test_reading_dashboard_is_available(self) -> None:
+        status, html = self.get_text("/reading-dashboard")
+
+        self.assertEqual(200, status)
+        self.assertIn("Reading Trace Dashboard", html)
+        self.assertIn('id="timeline"', html)
+        self.assertIn('id="viewport"', html)
+
     def test_admin_can_login_and_browse_session_events_and_files(self) -> None:
         _status, session_result = self.post_json(
             "/api/sessions",

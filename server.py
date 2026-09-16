@@ -284,6 +284,10 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
             self.path = "/admin.html"
             super().do_GET()
             return
+        if path == "/reading-dashboard" or path == "/reading-dashboard/":
+            self.path = "/reading-dashboard.html"
+            super().do_GET()
+            return
         if path.startswith("/api/admin/"):
             if not self._require_admin():
                 return

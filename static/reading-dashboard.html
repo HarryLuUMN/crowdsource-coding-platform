@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Reading Trace Dashboard</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/reading-dashboard.css?v=1" />
+  </head>
+  <body>
+    <main class="login" id="loginView" hidden>
+      <form class="login-card" id="loginForm">
+        <span class="eyebrow">Private research workspace</span>
+        <h1>Reading Trace Dashboard</h1>
+        <p>Enter the administrator key to replay participant documentation reading.</p>
+        <label for="adminToken">Administrator key</label>
+        <div><input id="adminToken" type="password" required /><button type="submit">Open dashboard</button></div>
+        <p class="login-message" id="loginMessage" role="alert"></p>
+      </form>
+    </main>
+
+    <div class="app" id="dashboardView" hidden>
+      <header>
+        <div><span class="eyebrow">Behavior replay</span><h1>Reading Trace Dashboard</h1></div>
+        <label class="session-picker">Participant session<select id="sessionSelect"></select></label>
+        <button class="secondary" id="refreshButton" type="button">Refresh</button>
+        <button class="secondary" id="logoutButton" type="button">Log out</button>
+      </header>
+
+      <section class="metrics" aria-label="Reading summary">
+        <article><span>Reading events</span><strong id="eventMetric">0</strong></article>
+        <article><span>Pages visited</span><strong id="pageMetric">0</strong></article>
+        <article><span>Reading span</span><strong id="durationMetric">0s</strong></article>
+        <article><span>Deepest scroll</span><strong id="depthMetric">0%</strong></article>
+      </section>
+
+      <main class="workspace">
+        <aside class="journey-panel">
+          <div class="panel-title"><span class="eyebrow">Navigation</span><h2>Page journey</h2></div>
+          <div class="journey" id="journey"></div>
+        </aside>
+
+        <section class="replay-panel">
+          <div class="replay-header">
+            <div><span class="event-badge" id="eventBadge">—</span><strong id="pagePath">Select a session</strong><time id="eventTime">—</time></div>
+            <span id="scrollPosition">—</span>
+          </div>
+          <div class="replay-body">
+            <div class="viewport" id="viewport"><p class="empty">No reading event selected.</p></div>
+            <div class="scroll-map"><span id="scrollThumb"></span></div>
+          </div>
+          <div class="replay-footer"><span id="viewportMeta">—</span><span id="blockMeta">—</span></div>
+        </section>
+
+        <aside class="context-panel">
+          <div class="panel-title"><span class="eyebrow">Current state</span><h2>Reading context</h2></div>
+          <dl id="context"></dl>
+        </aside>
+      </main>
+
+      <section class="transport">
+        <div class="controls">
+          <button id="previousButton" class="secondary" type="button">Previous</button>
+          <button id="playButton" type="button">Play</button>
+          <button id="nextButton" class="secondary" type="button">Next</button>
+          <input id="scrubber" type="range" min="0" max="0" value="0" aria-label="Reading trace position" />
+          <span id="counter">0 / 0</span>
+        </div>
+        <div class="timeline" id="timeline" aria-label="Reading event timeline"></div>
+        <div class="legend"><span class="page">Page</span><span class="link">Link</span><span class="scroll">Scroll</span><span class="pause">Pause</span><span class="leave">Leave</span></div>
+      </section>
+    </div>
+    <script src="/reading-dashboard.js?v=1" defer></script>
+  </body>
+</html>
