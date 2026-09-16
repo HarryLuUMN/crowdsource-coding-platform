@@ -156,17 +156,15 @@ function applyReplay(event, expectedIndex) {
     style = doc.createElement("style");
     style.id = "reading-replay-style";
     style.textContent = `
-      .reading-trace-visible { position:relative; border-radius:4px; outline:2px solid rgba(229,255,111,.5); outline-offset:3px; background:rgba(229,255,111,.12)!important; box-shadow:0 0 0 5px rgba(229,255,111,.04); transition:background .15s ease,outline-color .15s ease; }
-      .reading-trace-visible.reading-trace-partial { outline-style:dashed; }
-      .reading-trace-focus { outline:3px solid #e5ff6f; background:rgba(229,255,111,.3)!important; box-shadow:0 0 24px rgba(229,255,111,.22); }
-      .reading-trace-focus::before { content:"LIKELY READING HERE"; position:absolute; z-index:20; top:-18px; left:0; padding:3px 7px; border-radius:4px 4px 0 0; color:#11120f; background:#e5ff6f; font:700 9px/1.3 ui-monospace,monospace; letter-spacing:.06em; }
+      .reading-trace-visible { border-radius:4px; background:rgba(229,255,111,.12)!important; transition:background .15s ease; }
+      .reading-trace-focus { background:rgba(229,255,111,.3)!important; }
     `;
     doc.head.append(style);
     doc.addEventListener("click", (clickEvent) => clickEvent.preventDefault(), true);
   }
   doc.querySelectorAll(".reading-trace-visible").forEach((block) => {
     block.classList.remove("reading-trace-visible", "reading-trace-partial", "reading-trace-focus");
-    ["outline", "outline-offset", "background", "box-shadow"].forEach((property) => block.style.removeProperty(property));
+    block.style.removeProperty("background");
   });
   const blocks = replayBlocks(doc);
   const snapshots = Array.isArray(payload.visible_blocks) ? payload.visible_blocks : [];
@@ -177,15 +175,11 @@ function applyReplay(event, expectedIndex) {
     if (!block) return;
     matched += 1;
     block.classList.add("reading-trace-visible");
-    block.style.setProperty("outline", `3px ${snapshot.partially_visible ? "dashed" : "solid"} rgba(229,255,111,.72)`, "important");
-    block.style.setProperty("outline-offset", "4px", "important");
     block.style.setProperty("background", "rgba(229,255,111,.16)", "important");
     if (snapshot.partially_visible) block.classList.add("reading-trace-partial");
     if (snapshot === focused) {
       block.classList.add("reading-trace-focus");
-      block.style.setProperty("outline", "4px solid #e5ff6f", "important");
       block.style.setProperty("background", "rgba(229,255,111,.34)", "important");
-      block.style.setProperty("box-shadow", "0 0 28px rgba(229,255,111,.3)", "important");
     }
   });
   view.scrollTo(Number(payload.scroll_x || 0), Number(payload.scroll_y || 0));
