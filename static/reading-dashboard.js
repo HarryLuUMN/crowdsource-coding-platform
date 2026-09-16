@@ -1,7 +1,9 @@
 "use strict";
 
 const $ = (selector) => document.querySelector(selector);
-const state = { sessions: [], events: [], index: 0, timer: null, sessionId: null };
+const state = { sessions: [], events: [], index: 0, timer: null, sessionId: null, pendingReplay: null };
+const documentFrame = $("#documentReplay");
+const blockSelector = "h1,h2,h3,h4,h5,h6,p,pre,li,dt,dd";
 
 function formatDate(value) {
   const date = new Date(value);
@@ -107,6 +109,107 @@ function addContext(label, value) {
   $("#context").append(term, description);
 }
 
+function replayUrl(payload) {
+  let path = payload.document_path || "";
+  if (!path.startsWith("/documentation/")) {
+    try {
+      const url = new URL(payload.page_url);
+      path = url.pathname + url.hash;
+    } catch {
+      path = "/documentation/";
+    }
+  }
+  return path.startsWith("/documentation/") ? path : "/documentation/";
+}
+
+function replayBlocks(doc) {
+  return [...doc.querySelectorAll(blockSelector)].filter((block) => !block.querySelector("p,pre,li"));
+}
+
+function recordedBlock(doc, blocks, snapshot) {
+  if (snapshot.block_id && !snapshot.block_id.startsWith("reading-block-")) {
+    const byId = doc.getElementById(snapshot.block_id);
+    if (byId) return byId;
+  }
+  const indexed = blocks[Number(snapshot.block_index)];
+  if (indexed) return indexed;
+  const text = (snapshot.text || "").trim();
+  return text ? blocks.find((block) => block.textContent.trim().startsWith(text.slice(0, 120))) : null;
+}
+
+function focusSnapshot(snapshots, viewportHeight) {
+  const center = Number(viewportHeight || 0) / 2;
+  return snapshots.reduce((best, snapshot) => {
+    const midpoint = (Number(snapshot.viewport_top || 0) + Number(snapshot.viewport_bottom || 0)) / 2;
+    const distance = Math.abs(midpoint - center);
+    return !best || distance < best.distance ? { snapshot, distance } : best;
+  }, null)?.snapshot;
+}
+
+function applyReplay(event, expectedIndex) {
+  if (expectedIndex !== state.index || !documentFrame.contentDocument) return;
+  const payload = event.payload || {};
+  const doc = documentFrame.contentDocument;
+  const view = documentFrame.contentWindow;
+  let style = doc.getElementById("reading-replay-style");
+  if (!style) {
+    style = doc.createElement("style");
+    style.id = "reading-replay-style";
+    style.textContent = `
+      .reading-trace-visible { position:relative; border-radius:4px; outline:2px solid rgba(229,255,111,.5); outline-offset:3px; background:rgba(229,255,111,.12)!important; box-shadow:0 0 0 5px rgba(229,255,111,.04); transition:background .15s ease,outline-color .15s ease; }
+      .reading-trace-visible.reading-trace-partial { outline-style:dashed; }
+      .reading-trace-focus { outline:3px solid #e5ff6f; background:rgba(229,255,111,.3)!important; box-shadow:0 0 24px rgba(229,255,111,.22); }
+      .reading-trace-focus::before { content:"LIKELY READING HERE"; position:absolute; z-index:20; top:-18px; left:0; padding:3px 7px; border-radius:4px 4px 0 0; color:#11120f; background:#e5ff6f; font:700 9px/1.3 ui-monospace,monospace; letter-spacing:.06em; }
+    `;
+    doc.head.append(style);
+    doc.addEventListener("click", (clickEvent) => clickEvent.preventDefault(), true);
+  }
+  doc.querySelectorAll(".reading-trace-visible").forEach((block) => {
+    block.classList.remove("reading-trace-visible", "reading-trace-partial", "reading-trace-focus");
+    ["outline", "outline-offset", "background", "box-shadow"].forEach((property) => block.style.removeProperty(property));
+  });
+  const blocks = replayBlocks(doc);
+  const snapshots = Array.isArray(payload.visible_blocks) ? payload.visible_blocks : [];
+  const focused = focusSnapshot(snapshots, payload.viewport_height);
+  let matched = 0;
+  snapshots.forEach((snapshot) => {
+    const block = recordedBlock(doc, blocks, snapshot);
+    if (!block) return;
+    matched += 1;
+    block.classList.add("reading-trace-visible");
+    block.style.setProperty("outline", `3px ${snapshot.partially_visible ? "dashed" : "solid"} rgba(229,255,111,.72)`, "important");
+    block.style.setProperty("outline-offset", "4px", "important");
+    block.style.setProperty("background", "rgba(229,255,111,.16)", "important");
+    if (snapshot.partially_visible) block.classList.add("reading-trace-partial");
+    if (snapshot === focused) {
+      block.classList.add("reading-trace-focus");
+      block.style.setProperty("outline", "4px solid #e5ff6f", "important");
+      block.style.setProperty("background", "rgba(229,255,111,.34)", "important");
+      block.style.setProperty("box-shadow", "0 0 28px rgba(229,255,111,.3)", "important");
+    }
+  });
+  view.scrollTo(Number(payload.scroll_x || 0), Number(payload.scroll_y || 0));
+  $("#blockMeta").textContent = `${matched} of ${snapshots.length} recorded blocks highlighted`;
+  $("#documentLoading").hidden = true;
+  documentFrame.hidden = false;
+}
+
+function renderReplay(event) {
+  const expectedIndex = state.index;
+  const url = replayUrl(event.payload || {});
+  state.pendingReplay = { event, expectedIndex };
+  $("#documentPlaceholder").hidden = true;
+  const current = documentFrame.contentWindow?.location;
+  const currentUrl = current && current.pathname.startsWith("/documentation/") ? current.pathname + current.hash : "";
+  if (currentUrl !== url) {
+    $("#documentLoading").hidden = false;
+    documentFrame.hidden = true;
+    documentFrame.src = url;
+    return;
+  }
+  window.requestAnimationFrame(() => applyReplay(event, expectedIndex));
+}
+
 function show(index) {
   if (!state.events.length) return;
   state.index = Math.min(state.events.length - 1, Math.max(0, index));
@@ -119,23 +222,7 @@ function show(index) {
   $("#scrollPosition").textContent = `${Number(payload.scroll_y || 0).toLocaleString()} px / ${Number(payload.document_height || 0).toLocaleString()} px`;
   $("#viewportMeta").textContent = `${payload.viewport_width || "—"} × ${payload.viewport_height || "—"} viewport`;
   $("#blockMeta").textContent = `${blocks.length} visible blocks`;
-  const viewport = $("#viewport");
-  viewport.replaceChildren();
-  if (!blocks.length) {
-    const empty = document.createElement("p"); empty.className = "empty"; empty.textContent = "No visible text was captured for this event."; viewport.append(empty);
-  }
-  blocks.forEach((block) => {
-    const article = document.createElement("article");
-    article.className = `text-block${block.partially_visible ? " partial" : ""}`;
-    const meta = document.createElement("div");
-    const tag = document.createElement("span"); tag.textContent = block.tag || "text";
-    const section = document.createElement("span"); section.textContent = block.section || "Document navigation";
-    meta.append(tag, section);
-    const text = document.createElement("pre"); text.textContent = block.text || "";
-    article.append(meta, text); viewport.append(article);
-  });
-  const maxScroll = Math.max(1, Number(payload.document_height || 1) - Number(payload.viewport_height || 0));
-  $("#scrollThumb").style.top = `${Math.min(97, Math.max(1, Number(payload.scroll_y || 0) / maxScroll * 96))}%`;
+  renderReplay(event);
   $("#scrubber").value = String(state.index);
   $("#counter").textContent = `${state.index + 1} / ${state.events.length}`;
   [...$("#timeline").children].forEach((item, itemIndex) => item.classList.toggle("active", itemIndex === state.index));
@@ -162,7 +249,7 @@ async function loadSession(sessionId) {
   $("#scrubber").max = String(Math.max(0, state.events.length - 1));
   updateMetrics(); renderJourney(); renderTimeline();
   if (state.events.length) show(0);
-  else { $("#viewport").innerHTML = '<p class="empty">This session has no reading events.</p>'; $("#counter").textContent = "0 / 0"; }
+  else { documentFrame.hidden = true; $("#documentPlaceholder").hidden = false; $("#documentPlaceholder").innerHTML = '<p class="empty">This session has no reading events.</p>'; $("#counter").textContent = "0 / 0"; }
 }
 
 async function loadSessions() {
@@ -187,5 +274,9 @@ $("#previousButton").addEventListener("click", () => { stop(); show(state.index 
 $("#nextButton").addEventListener("click", () => { stop(); show(state.index + 1); });
 $("#scrubber").addEventListener("input", (event) => { stop(); show(Number(event.target.value)); });
 $("#playButton").addEventListener("click", () => { if (state.timer) { stop(); return; } if (state.index >= state.events.length - 1) show(0); $("#playButton").textContent = "Pause"; state.timer = window.setInterval(() => { if (state.index >= state.events.length - 1) stop(); else show(state.index + 1); }, 700); });
+documentFrame.addEventListener("load", () => {
+  const pending = state.pendingReplay;
+  if (pending) window.requestAnimationFrame(() => applyReplay(pending.event, pending.expectedIndex));
+});
 
 loadSessions();

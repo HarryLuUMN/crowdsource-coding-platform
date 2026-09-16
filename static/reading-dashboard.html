@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex, nofollow" />
     <title>Reading Trace Dashboard</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/reading-dashboard.css?v=1" />
+    <link rel="stylesheet" href="/reading-dashboard.css?v=2" />
   </head>
   <body>
     <main class="login" id="loginView" hidden>
@@ -44,11 +44,12 @@
         <section class="replay-panel">
           <div class="replay-header">
             <div><span class="event-badge" id="eventBadge">—</span><strong id="pagePath">Select a session</strong><time id="eventTime">—</time></div>
-            <span id="scrollPosition">—</span>
+            <div class="replay-status"><span class="read-only">Read-only replay</span><span id="scrollPosition">—</span></div>
           </div>
           <div class="replay-body">
-            <div class="viewport" id="viewport"><p class="empty">No reading event selected.</p></div>
-            <div class="scroll-map"><span id="scrollThumb"></span></div>
+            <iframe id="documentReplay" title="Participant documentation viewport" sandbox="allow-same-origin" hidden></iframe>
+            <div class="document-placeholder" id="documentPlaceholder"><p class="empty">No reading event selected.</p></div>
+            <div class="document-loading" id="documentLoading" hidden>Loading recorded document…</div>
           </div>
           <div class="replay-footer"><span id="viewportMeta">—</span><span id="blockMeta">—</span></div>
         </section>
@@ -71,6 +72,6 @@
         <div class="legend"><span class="page">Page</span><span class="link">Link</span><span class="scroll">Scroll</span><span class="pause">Pause</span><span class="leave">Leave</span></div>
       </section>
     </div>
-    <script src="/reading-dashboard.js?v=1" defer></script>
+    <script src="/reading-dashboard.js?v=2" defer></script>
   </body>
 </html>

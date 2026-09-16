@@ -121,7 +121,9 @@ class ServerApiTests(unittest.TestCase):
         self.assertEqual(200, status)
         self.assertIn("Reading Trace Dashboard", html)
         self.assertIn('id="timeline"', html)
-        self.assertIn('id="viewport"', html)
+        self.assertIn('id="documentReplay"', html)
+        self.assertIn('sandbox="allow-same-origin"', html)
+        self.assertIn("Read-only replay", html)
 
     def test_admin_can_login_and_browse_session_events_and_files(self) -> None:
         _status, session_result = self.post_json(
