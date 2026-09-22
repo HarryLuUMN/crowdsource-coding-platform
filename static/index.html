@@ -6,7 +6,7 @@
     <meta name="description" content="Write and run KnitScript in your browser." />
     <title>KnitScript Studio</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=7" />
+    <link rel="stylesheet" href="/styles.css?v=8" />
   </head>
   <body>
     <header class="topbar">
@@ -111,6 +111,8 @@
           </div>
         </div>
 
+        <div class="workspace-resizer horizontal-resizer task-resizer" id="taskResizer" role="separator" aria-label="Resize task and coding panels" aria-orientation="horizontal" tabindex="0"></div>
+
         <div class="panel result-panel">
           <div class="result-heading">
             <div class="tabs" role="tablist" aria-label="Run output">
@@ -141,6 +143,8 @@
             </div>
           </div>
         </div>
+        <div class="workspace-resizer horizontal-resizer console-resizer" id="consoleResizer" role="separator" aria-label="Resize coding and console panels" aria-orientation="horizontal" tabindex="0"></div>
+        <div class="workspace-resizer vertical-resizer" id="columnResizer" role="separator" aria-label="Resize coding and documentation panels" aria-orientation="vertical" tabindex="0"></div>
         <aside class="panel documentation-panel" id="documentationPanel" aria-label="KnitScript documentation">
           <div class="panel-heading"><span>Documentation</span><span class="save-state">Read only</span></div>
           <iframe id="documentationFrame" title="KnitScript documentation" src="/documentation/" sandbox="allow-same-origin" referrerpolicy="no-referrer"></iframe>
@@ -181,6 +185,6 @@
       </div>
     </dialog>
     <script src="/documentation-reading.js?v=1" defer></script>
-    <script src="/app.js?v=10" defer></script>
+    <script src="/app.js?v=11" defer></script>
   </body>
 </html>

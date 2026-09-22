@@ -88,14 +88,18 @@ button { color: inherit; }
 .run-button kbd { font: 9px/1 ui-monospace, monospace; opacity: 0.6; border-left: 1px solid rgba(23, 25, 16, 0.25); padding-left: 8px; margin-left: 3px; }
 
 .workspace {
+  --task-panel-size: minmax(145px, 0.65fr);
+  --editor-panel-size: minmax(300px, 1.6fr);
+  --console-panel-size: minmax(175px, 0.75fr);
+  --coding-column-size: minmax(0, 2.35fr);
   max-width: 1720px;
   height: calc(100vh - 68px);
   margin: 0 auto;
   padding: 14px 18px 18px;
   display: grid;
-  grid-template-columns: minmax(0, 2.35fr) minmax(300px, 0.9fr);
-  grid-template-rows: minmax(145px, 0.65fr) minmax(300px, 1.6fr) minmax(175px, 0.75fr);
-  gap: 12px;
+  grid-template-columns: var(--coding-column-size) 8px minmax(300px, 0.9fr);
+  grid-template-rows: var(--task-panel-size) 8px var(--editor-panel-size) 8px var(--console-panel-size);
+  gap: 2px;
 }
 
 .guide-panel { min-width: 0; border: 1px solid var(--line); border-radius: 13px; background: linear-gradient(105deg, rgba(229, 255, 111, 0.08), transparent 42%), var(--panel); display: grid; grid-template-columns: 104px minmax(0, 1fr); box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12); overflow: hidden; }
@@ -126,9 +130,18 @@ button { color: inherit; }
 
 .guide-panel { grid-column: 1; grid-row: 1; }
 .studio { display: contents; }
-.editor-panel { grid-column: 1; grid-row: 2; }
-.result-panel { grid-column: 1; grid-row: 3; }
-.documentation-panel { grid-column: 2; grid-row: 1 / 4; }
+.editor-panel { grid-column: 1; grid-row: 3; }
+.result-panel { grid-column: 1; grid-row: 5; }
+.documentation-panel { grid-column: 3; grid-row: 1 / 6; }
+.workspace-resizer { position: relative; z-index: 2; border-radius: 999px; touch-action: none; outline: none; }
+.workspace-resizer::after { content: ""; position: absolute; border-radius: inherit; background: #3a3c34; transition: background 120ms ease, box-shadow 120ms ease; }
+.workspace-resizer:hover::after, .workspace-resizer:focus-visible::after, .workspace-resizer.dragging::after { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.vertical-resizer { grid-column: 2; grid-row: 1 / 6; cursor: col-resize; }
+.vertical-resizer::after { width: 2px; inset: 8px auto 8px 3px; }
+.horizontal-resizer { grid-column: 1; cursor: row-resize; }
+.horizontal-resizer::after { height: 2px; inset: 3px 8px auto; }
+.task-resizer { grid-row: 2; }
+.console-resizer { grid-row: 4; }
 .documentation-panel iframe { width: 100%; flex: 1; min-height: 0; border: 0; background: var(--panel); }
 .panel { min-width: 0; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.18); }
 .panel-heading, .result-heading { height: 48px; border-bottom: 1px solid var(--line); display: flex; align-items: center; padding: 0 15px; background: #1c1d19; flex: 0 0 auto; }
@@ -199,6 +212,7 @@ button { color: inherit; }
   .topbar { padding: 0 16px; }
   .compiler-state, .study-state, .topbar .ghost-button { display: none; }
   .studio { grid-template-columns: 1fr; height: auto; }
+  .workspace-resizer { display: none; }
   .panel { min-height: 520px; }
   .result-panel { min-height: 420px; }
   .tutorial-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }

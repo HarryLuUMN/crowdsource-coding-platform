@@ -42,6 +42,12 @@ const tabs = [...document.querySelectorAll(".tab")];
 const guideTabs = [...document.querySelectorAll(".guide-tab")];
 const guideViews = [...document.querySelectorAll(".guide-view")];
 const documentationLink = document.querySelector("#documentationLink");
+const workspace = document.querySelector(".workspace");
+const taskResizer = document.querySelector("#taskResizer");
+const consoleResizer = document.querySelector("#consoleResizer");
+const columnResizer = document.querySelector("#columnResizer");
+const guidePanel = document.querySelector(".guide-panel");
+const resultPanel = document.querySelector(".result-panel");
 
 let activeTab = "tests";
 let saveTimer;
@@ -57,6 +63,90 @@ let studyStarted = false;
 const pendingEvents = [];
 const telemetryStartedAt = performance.now();
 const clientInstanceId = crypto.randomUUID();
+const layoutStorageKey = "knitscript-studio-layout:v1";
+
+function clamp(value, minimum, maximum) {
+  return Math.min(Math.max(value, minimum), maximum);
+}
+
+function currentLayout() {
+  return {
+    coding_width: Math.round(guidePanel.getBoundingClientRect().width),
+    task_height: Math.round(guidePanel.getBoundingClientRect().height),
+    console_height: Math.round(resultPanel.getBoundingClientRect().height),
+  };
+}
+
+function applyLayout(layout) {
+  if (!layout || window.innerWidth <= 900) return;
+  const availableWidth = workspace.clientWidth - 8;
+  const availableHeight = workspace.clientHeight - 16;
+  const codingWidth = clamp(Number(layout.coding_width) || guidePanel.offsetWidth, 500, availableWidth - 300);
+  const taskHeight = clamp(Number(layout.task_height) || guidePanel.offsetHeight, 120, availableHeight - 475);
+  const consoleHeight = clamp(Number(layout.console_height) || resultPanel.offsetHeight, 140, availableHeight - taskHeight - 260);
+  workspace.style.setProperty("--coding-column-size", `${codingWidth}px`);
+  workspace.style.setProperty("--task-panel-size", `${taskHeight}px`);
+  workspace.style.setProperty("--editor-panel-size", "minmax(260px, 1fr)");
+  workspace.style.setProperty("--console-panel-size", `${consoleHeight}px`);
+}
+
+function saveLayout() {
+  const layout = currentLayout();
+  localStorage.setItem(layoutStorageKey, JSON.stringify(layout));
+  recordEvent("layout.resized", layout);
+}
+
+function resizeWithPointer(resizer, update) {
+  resizer.addEventListener("pointerdown", (event) => {
+    if (window.innerWidth <= 900) return;
+    event.preventDefault();
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const startLayout = currentLayout();
+    resizer.classList.add("dragging");
+    resizer.setPointerCapture(event.pointerId);
+    const move = (moveEvent) => update(startLayout, moveEvent.clientX - startX, moveEvent.clientY - startY);
+    const finish = () => {
+      resizer.classList.remove("dragging");
+      resizer.removeEventListener("pointermove", move);
+      resizer.removeEventListener("pointerup", finish);
+      resizer.removeEventListener("pointercancel", finish);
+      saveLayout();
+    };
+    resizer.addEventListener("pointermove", move);
+    resizer.addEventListener("pointerup", finish);
+    resizer.addEventListener("pointercancel", finish);
+  });
+}
+
+function resizeWithKeyboard(resizer, axis, update) {
+  resizer.addEventListener("keydown", (event) => {
+    const delta = axis === "x"
+      ? event.key === "ArrowLeft" ? -20 : event.key === "ArrowRight" ? 20 : 0
+      : event.key === "ArrowUp" ? -20 : event.key === "ArrowDown" ? 20 : 0;
+    if (!delta) return;
+    event.preventDefault();
+    update(currentLayout(), axis === "x" ? delta : 0, axis === "y" ? delta : 0);
+    saveLayout();
+  });
+}
+
+function initializeResizableLayout() {
+  try {
+    applyLayout(JSON.parse(localStorage.getItem(layoutStorageKey)));
+  } catch (_error) {
+    localStorage.removeItem(layoutStorageKey);
+  }
+  const resizeColumns = (layout, deltaX) => applyLayout({ ...layout, coding_width: layout.coding_width + deltaX });
+  const resizeTask = (layout, _deltaX, deltaY) => applyLayout({ ...layout, task_height: layout.task_height + deltaY });
+  const resizeConsole = (layout, _deltaX, deltaY) => applyLayout({ ...layout, console_height: layout.console_height - deltaY });
+  resizeWithPointer(columnResizer, resizeColumns);
+  resizeWithPointer(taskResizer, resizeTask);
+  resizeWithPointer(consoleResizer, resizeConsole);
+  resizeWithKeyboard(columnResizer, "x", resizeColumns);
+  resizeWithKeyboard(taskResizer, "y", resizeTask);
+  resizeWithKeyboard(consoleResizer, "y", resizeConsole);
+}
 
 function getPersistentId(key) {
   const existing = localStorage.getItem(key);
@@ -550,6 +640,15 @@ participantIdInput.addEventListener("input", () => {
 });
 
 participantDialog.addEventListener("cancel", (event) => event.preventDefault());
+
+initializeResizableLayout();
+window.addEventListener("resize", () => {
+  try {
+    applyLayout(JSON.parse(localStorage.getItem(layoutStorageKey)));
+  } catch (_error) {
+    localStorage.removeItem(layoutStorageKey);
+  }
+});
 
 if (hasProlificParticipant) {
   startStudy("url");
