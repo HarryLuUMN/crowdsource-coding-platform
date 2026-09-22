@@ -87,7 +87,16 @@ button { color: inherit; }
 .submit-button svg { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .run-button kbd { font: 9px/1 ui-monospace, monospace; opacity: 0.6; border-left: 1px solid rgba(23, 25, 16, 0.25); padding-left: 8px; margin-left: 3px; }
 
-.workspace { max-width: 1540px; height: calc(100vh - 68px); margin: 0 auto; padding: 20px 30px 30px; display: flex; flex-direction: column; gap: 12px; }
+.workspace {
+  max-width: 1720px;
+  height: calc(100vh - 68px);
+  margin: 0 auto;
+  padding: 14px 18px 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 2.35fr) minmax(300px, 0.9fr);
+  grid-template-rows: minmax(145px, 0.65fr) minmax(300px, 1.6fr) minmax(175px, 0.75fr);
+  gap: 12px;
+}
 
 .guide-panel { min-width: 0; border: 1px solid var(--line); border-radius: 13px; background: linear-gradient(105deg, rgba(229, 255, 111, 0.08), transparent 42%), var(--panel); display: grid; grid-template-columns: 104px minmax(0, 1fr); box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12); overflow: hidden; }
 .guide-tabs { padding: 14px 10px; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 5px; background: rgba(12, 13, 11, 0.22); }
@@ -115,7 +124,11 @@ button { color: inherit; }
 .tutorial-steps p { margin: 6px 0 0; color: var(--faint); font-size: 9px; line-height: 1.45; }
 .tutorial-steps p code { color: #c8d88a; }
 
-.studio { min-height: 0; flex: 1; display: grid; grid-template-columns: minmax(300px, 1.1fr) minmax(280px, 0.9fr) minmax(300px, 1fr); gap: 12px; }
+.guide-panel { grid-column: 1; grid-row: 1; }
+.studio { display: contents; }
+.editor-panel { grid-column: 1; grid-row: 2; }
+.result-panel { grid-column: 1; grid-row: 3; }
+.documentation-panel { grid-column: 2; grid-row: 1 / 4; }
 .documentation-panel iframe { width: 100%; flex: 1; min-height: 0; border: 0; background: var(--panel); }
 .panel { min-width: 0; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.18); }
 .panel-heading, .result-heading { height: 48px; border-bottom: 1px solid var(--line); display: flex; align-items: center; padding: 0 15px; background: #1c1d19; flex: 0 0 auto; }
@@ -182,7 +195,7 @@ button { color: inherit; }
 .participant-start { width: 100%; justify-content: center; }
 
 @media (max-width: 900px) {
-  .workspace { height: auto; padding: 28px 16px; }
+  .workspace { height: auto; padding: 28px 16px; display: flex; flex-direction: column; }
   .topbar { padding: 0 16px; }
   .compiler-state, .study-state, .topbar .ghost-button { display: none; }
   .studio { grid-template-columns: 1fr; height: auto; }
