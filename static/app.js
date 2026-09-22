@@ -79,8 +79,8 @@ function currentLayout() {
 
 function applyLayout(layout) {
   if (!layout || window.innerWidth <= 900) return;
-  const availableWidth = workspace.clientWidth - 8;
-  const availableHeight = workspace.clientHeight - 16;
+  const availableWidth = workspace.clientWidth - 5;
+  const availableHeight = workspace.clientHeight - 10;
   const codingWidth = clamp(Number(layout.coding_width) || guidePanel.offsetWidth, 500, availableWidth - 300);
   const taskHeight = clamp(Number(layout.task_height) || guidePanel.offsetHeight, 120, availableHeight - 475);
   const consoleHeight = clamp(Number(layout.console_height) || resultPanel.offsetHeight, 140, availableHeight - taskHeight - 260);
