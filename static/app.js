@@ -41,7 +41,6 @@ const participantIdError = document.querySelector("#participantIdError");
 const tabs = [...document.querySelectorAll(".tab")];
 const guideTabs = [...document.querySelectorAll(".guide-tab")];
 const guideViews = [...document.querySelectorAll(".guide-view")];
-const documentationLink = document.querySelector("#documentationLink");
 const workspace = document.querySelector(".workspace");
 const taskResizer = document.querySelector("#taskResizer");
 const consoleResizer = document.querySelector("#consoleResizer");
@@ -551,7 +550,6 @@ copyButton.addEventListener("click", async () => {
 });
 tabs.forEach((tab) => tab.addEventListener("click", () => selectTab(tab.dataset.tab, true)));
 guideTabs.forEach((tab) => tab.addEventListener("click", () => selectGuideTab(tab.dataset.guideTab, true)));
-documentationLink.addEventListener("click", () => recordEvent("guide.documentation_opened"));
 const recordDocumentationView = attachDocumentationReading(document.querySelector("#documentationFrame"), recordEvent);
 closeCompletionButton.addEventListener("click", () => completionDialog.close());
 prolificCompletionLink.addEventListener("click", async (event) => {
