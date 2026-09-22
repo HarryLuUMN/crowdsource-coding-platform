@@ -39,8 +39,6 @@ const participantForm = document.querySelector("#participantForm");
 const participantIdInput = document.querySelector("#participantIdInput");
 const participantIdError = document.querySelector("#participantIdError");
 const tabs = [...document.querySelectorAll(".tab")];
-const guideTabs = [...document.querySelectorAll(".guide-tab")];
-const guideViews = [...document.querySelectorAll(".guide-view")];
 const workspace = document.querySelector(".workspace");
 const taskResizer = document.querySelector("#taskResizer");
 const consoleResizer = document.querySelector("#consoleResizer");
@@ -361,18 +359,6 @@ function selectTab(name, logInteraction = false) {
   if (logInteraction) recordEvent(`output.${name}_viewed`);
 }
 
-function selectGuideTab(name, logInteraction = false) {
-  guideTabs.forEach((tab) => {
-    const selected = tab.dataset.guideTab === name;
-    tab.classList.toggle("active", selected);
-    tab.setAttribute("aria-selected", String(selected));
-  });
-  guideViews.forEach((view) => {
-    view.hidden = view.id !== `${name}Guide`;
-  });
-  if (logInteraction) recordEvent(`guide.${name}_viewed`);
-}
-
 function renderCheck(check) {
   if (!check || !Array.isArray(check.tests)) {
     testOutput.innerHTML = "";
@@ -549,7 +535,6 @@ copyButton.addEventListener("click", async () => {
   showToast("Knitout copied");
 });
 tabs.forEach((tab) => tab.addEventListener("click", () => selectTab(tab.dataset.tab, true)));
-guideTabs.forEach((tab) => tab.addEventListener("click", () => selectGuideTab(tab.dataset.guideTab, true)));
 const recordDocumentationView = attachDocumentationReading(document.querySelector("#documentationFrame"), recordEvent);
 closeCompletionButton.addEventListener("click", () => completionDialog.close());
 prolificCompletionLink.addEventListener("click", async (event) => {

@@ -81,14 +81,9 @@ button { color: inherit; }
   gap: 1px;
 }
 
-.guide-panel { min-width: 0; border: 1px solid var(--line); border-radius: 13px; background: linear-gradient(105deg, rgba(229, 255, 111, 0.08), transparent 42%), var(--panel); display: grid; grid-template-columns: 104px minmax(0, 1fr); box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12); overflow: hidden; }
-.guide-tabs { padding: 14px 10px; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 5px; background: rgba(12, 13, 11, 0.22); }
-.guide-tab { width: 100%; min-height: 34px; padding: 0 10px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: var(--faint); font: 650 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; text-align: left; text-transform: uppercase; cursor: pointer; }
-.guide-tab:hover { color: var(--ink); background: rgba(255, 255, 255, 0.035); }
-.guide-tab.active { border-color: rgba(229, 255, 111, 0.22); color: var(--accent); background: var(--accent-soft); }
-.guide-view { min-width: 0; padding: 16px 20px; }
-.task-guide { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 18px; align-items: center; }
-.task-label { align-self: stretch; border-right: 1px solid var(--line); color: var(--accent); display: flex; align-items: center; font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.16em; text-transform: uppercase; }
+.guide-panel { min-width: 0; border: 1px solid var(--line); border-radius: 13px; background: linear-gradient(105deg, rgba(229, 255, 111, 0.08), transparent 42%), var(--panel); display: flex; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12); overflow: hidden; }
+.guide-view { flex: 1; min-width: 0; padding: 20px 24px; }
+.task-guide { display: flex; align-items: center; }
 .task-copy h1 { margin: 0 0 5px; font-size: 16px; line-height: 1.25; font-weight: 650; }
 .task-copy p { max-width: 920px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
 .guide-panel { grid-column: 1; grid-row: 1; }
@@ -182,12 +177,7 @@ button { color: inherit; }
 }
 
 @media (max-width: 520px) {
-  .guide-panel { grid-template-columns: 1fr; }
-  .guide-tabs { padding: 9px; border-right: 0; border-bottom: 1px solid var(--line); flex-direction: row; }
-  .guide-tab { width: auto; min-width: 90px; text-align: center; }
   .guide-view { padding: 17px; }
-  .task-guide { grid-template-columns: 1fr; gap: 10px; }
-  .task-label { min-height: 18px; border-right: 0; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
   .run-button kbd { display: none; }
   .line-numbers { min-width: 43px; }
 }
