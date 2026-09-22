@@ -33,27 +33,6 @@ button, input, textarea { font: inherit; }
 
 button { color: inherit; }
 
-.topbar {
-  height: 68px;
-  padding: 0 30px;
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  background: rgba(17, 18, 16, 0.86);
-  backdrop-filter: blur(18px);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.topbar-actions { display: flex; align-items: center; gap: 10px; }
-
-.compiler-state { color: var(--muted); font-size: 12px; margin-right: 9px; }
-.compiler-state i { display: inline-block; width: 7px; height: 7px; background: var(--success); border-radius: 50%; margin-right: 7px; box-shadow: 0 0 0 4px rgba(142, 229, 160, 0.1); }
-.compiler-state.offline i { background: var(--error); box-shadow: 0 0 0 4px rgba(255, 141, 128, 0.1); }
-.study-state { padding: 6px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--faint); font: 10px/1 ui-monospace, monospace; }
-
 .ghost-button, .copy-button {
   border: 1px solid var(--line);
   background: transparent;
@@ -93,7 +72,7 @@ button { color: inherit; }
   --console-panel-size: minmax(175px, 0.75fr);
   --coding-column-size: minmax(0, 2.35fr);
   max-width: 1720px;
-  height: calc(100vh - 68px);
+  height: 100vh;
   margin: 0 auto;
   padding: 14px 18px 18px;
   display: grid;
@@ -159,6 +138,9 @@ button { color: inherit; }
 .panel-footer span:first-child { margin-right: auto; }
 
 .result-heading { justify-content: space-between; }
+.result-actions { display: flex; align-items: center; gap: 7px; }
+.result-actions .run-button, .result-actions .submit-button { min-height: 32px; padding: 0 10px; font-size: 11px; }
+.result-actions .run-button svg, .result-actions .submit-button svg { width: 14px; }
 .tabs { height: 100%; display: flex; gap: 20px; }
 .tab { position: relative; border: 0; background: none; color: var(--faint); padding: 0; font-size: 12px; cursor: pointer; }
 .tab.active { color: var(--ink); }
@@ -209,8 +191,6 @@ button { color: inherit; }
 
 @media (max-width: 900px) {
   .workspace { height: auto; padding: 28px 16px; display: flex; flex-direction: column; }
-  .topbar { padding: 0 16px; }
-  .compiler-state, .study-state, .topbar .ghost-button { display: none; }
   .studio { grid-template-columns: 1fr; height: auto; }
   .workspace-resizer { display: none; }
   .panel { min-height: 520px; }
@@ -227,7 +207,6 @@ button { color: inherit; }
   .task-label { min-height: 18px; border-right: 0; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
   .tutorial-intro { align-items: flex-start; flex-direction: column; gap: 12px; }
   .tutorial-steps { grid-template-columns: 1fr; }
-  .topbar-actions { gap: 7px; }
   .run-button kbd { display: none; }
   .line-numbers { min-width: 43px; }
 }

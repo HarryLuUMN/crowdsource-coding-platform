@@ -6,25 +6,14 @@
     <meta name="description" content="Write and run KnitScript in your browser." />
     <title>KnitScript Studio</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=9" />
+    <link rel="stylesheet" href="/styles.css?v=10" />
   </head>
   <body>
-    <header class="topbar">
-      <div class="topbar-actions">
-        <span class="compiler-state" id="compilerState"><i></i> Compiler ready</span>
-        <span class="study-state" id="studyState">Preview mode</span>
-        <button class="ghost-button" id="resetButton" type="button">Clear editor</button>
-        <button class="run-button" id="runButton" type="button">
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 8 6-8 6V4Z" /></svg>
-          <span>Run</span>
-          <kbd>⌘ ↵</kbd>
-        </button>
-        <button class="submit-button" id="submitButton" type="button">
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m4 10 4 4 8-8" /></svg>
-          <span>Submit</span>
-        </button>
-      </div>
-    </header>
+    <div hidden>
+      <span id="compilerState"><i></i> Compiler ready</span>
+      <span id="studyState">Preview mode</span>
+      <button id="resetButton" type="button">Clear editor</button>
+    </div>
 
     <main class="workspace">
       <section class="guide-panel" aria-label="Task instructions and KnitScript tutorial">
@@ -120,7 +109,18 @@
               <button class="tab" data-tab="console" role="tab" aria-selected="false">Console</button>
               <button class="tab" data-tab="knitout" role="tab" aria-selected="false">Knitout</button>
             </div>
-            <button class="copy-button" id="copyButton" type="button" hidden>Copy output</button>
+            <div class="result-actions">
+              <button class="copy-button" id="copyButton" type="button" hidden>Copy output</button>
+              <button class="run-button" id="runButton" type="button">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 8 6-8 6V4Z" /></svg>
+                <span>Run</span>
+                <kbd>⌘ ↵</kbd>
+              </button>
+              <button class="submit-button" id="submitButton" type="button">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m4 10 4 4 8-8" /></svg>
+                <span>Submit</span>
+              </button>
+            </div>
           </div>
 
           <div class="result-body">
@@ -185,6 +185,6 @@
       </div>
     </dialog>
     <script src="/documentation-reading.js?v=1" defer></script>
-    <script src="/app.js?v=12" defer></script>
+    <script src="/app.js?v=13" defer></script>
   </body>
 </html>
