@@ -71,17 +71,18 @@ button { color: inherit; }
   --editor-panel-size: minmax(300px, 1.6fr);
   --console-panel-size: minmax(175px, 0.75fr);
   --coding-column-size: minmax(0, 2.35fr);
-  max-width: 1720px;
+  width: 100vw;
+  max-width: none;
   height: 100vh;
-  margin: 0 auto;
-  padding: 14px 18px 18px;
+  margin: 0;
+  padding: 0;
   display: grid;
   grid-template-columns: var(--coding-column-size) 5px minmax(300px, 0.9fr);
   grid-template-rows: var(--task-panel-size) 5px var(--editor-panel-size) 5px var(--console-panel-size);
   gap: 1px;
 }
 
-.guide-panel { min-width: 0; border: 1px solid var(--line); border-radius: 13px; background: linear-gradient(105deg, rgba(229, 255, 111, 0.08), transparent 42%), var(--panel); display: flex; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12); overflow: hidden; }
+.guide-panel { min-width: 0; border: 1px solid var(--line); background: linear-gradient(105deg, rgba(229, 255, 111, 0.08), transparent 42%), var(--panel); display: flex; overflow: hidden; }
 .guide-view { flex: 1; min-width: 0; padding: 20px 24px; }
 .task-guide { display: flex; align-items: center; }
 .task-copy h1 { margin: 0 0 5px; font-size: 16px; line-height: 1.25; font-weight: 650; }
@@ -101,7 +102,7 @@ button { color: inherit; }
 .task-resizer { grid-row: 2; }
 .console-resizer { grid-row: 4; }
 .documentation-panel iframe { width: 100%; flex: 1; min-height: 0; border: 0; background: var(--panel); }
-.panel { min-width: 0; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.18); }
+.panel { min-width: 0; border: 1px solid var(--line); background: var(--panel); overflow: hidden; display: flex; flex-direction: column; }
 .panel-heading, .result-heading { height: 48px; border-bottom: 1px solid var(--line); display: flex; align-items: center; padding: 0 15px; background: #1c1d19; flex: 0 0 auto; }
 .panel-heading { justify-content: space-between; }
 .file-tab { height: 48px; display: flex; align-items: center; gap: 9px; font: 600 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; border-bottom: 2px solid var(--accent); }
@@ -169,7 +170,7 @@ button { color: inherit; }
 .participant-start { width: 100%; justify-content: center; }
 
 @media (max-width: 900px) {
-  .workspace { height: auto; padding: 28px 16px; display: flex; flex-direction: column; }
+  .workspace { width: 100%; height: auto; padding: 0; display: flex; flex-direction: column; }
   .studio { grid-template-columns: 1fr; height: auto; }
   .workspace-resizer { display: none; }
   .panel { min-height: 520px; }
