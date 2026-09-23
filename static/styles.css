@@ -71,13 +71,15 @@ button { color: inherit; }
   --editor-panel-size: minmax(300px, 1.6fr);
   --console-panel-size: minmax(175px, 0.75fr);
   --coding-column-size: minmax(0, 2.35fr);
-  width: 100vw;
+  position: fixed;
+  inset: 0;
+  width: auto;
   max-width: none;
   height: 100vh;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: var(--coding-column-size) 5px minmax(300px, 0.9fr);
+  grid-template-columns: var(--coding-column-size) 5px minmax(300px, 1fr);
   grid-template-rows: var(--task-panel-size) 5px var(--editor-panel-size) 5px var(--console-panel-size);
   gap: 1px;
 }
@@ -170,7 +172,7 @@ button { color: inherit; }
 .participant-start { width: 100%; justify-content: center; }
 
 @media (max-width: 900px) {
-  .workspace { width: 100%; height: auto; padding: 0; display: flex; flex-direction: column; }
+  .workspace { position: static; width: 100%; height: auto; padding: 0; display: flex; flex-direction: column; }
   .studio { grid-template-columns: 1fr; height: auto; }
   .workspace-resizer { display: none; }
   .panel { min-height: 520px; }
