@@ -53,7 +53,7 @@ const documentationPreviousMatch = document.querySelector("#documentationPreviou
 const documentationNextMatch = document.querySelector("#documentationNextMatch");
 const documentationJumpTop = document.querySelector("#documentationJumpTop");
 
-let activeTab = "tests";
+let activeTab = "knitout";
 let saveTimer;
 let toastTimer;
 let previousSource = "";
@@ -542,7 +542,7 @@ function showResult(result) {
     KnitoutVisualizer.render(visualizationOutput, result.partial_knitout || "", result.metrics || {});
   }
   renderCheck(check);
-  selectTab(check ? "tests" : "console");
+  selectTab(result.ok ? "knitout" : "console");
 }
 
 function escapeHtml(value) {
