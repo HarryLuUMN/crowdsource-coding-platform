@@ -28,6 +28,7 @@ const runSummary = document.querySelector("#runSummary");
 const testOutput = document.querySelector("#testOutput");
 const consoleOutput = document.querySelector("#consoleOutput");
 const knitoutOutput = document.querySelector("#knitoutOutput");
+const visualizationOutput = document.querySelector("#visualizationOutput");
 const copyButton = document.querySelector("#copyButton");
 const toast = document.querySelector("#toast");
 const completionDialog = document.querySelector("#completionDialog");
@@ -478,6 +479,7 @@ function selectTab(name, logInteraction = false) {
   testOutput.hidden = name !== "tests";
   consoleOutput.hidden = name !== "console";
   knitoutOutput.hidden = name !== "knitout";
+  visualizationOutput.hidden = name !== "visualization";
   copyButton.hidden = name !== "knitout" || !knitoutOutput.textContent;
   if (logInteraction) recordEvent(`output.${name}_viewed`);
 }
@@ -523,6 +525,7 @@ function showResult(result) {
     consoleOutput.textContent = messages || "Compilation completed without messages.";
     consoleOutput.classList.remove("error");
     knitoutOutput.textContent = result.knitout || "";
+    KnitoutVisualizer.render(visualizationOutput, result.knitout || "", metrics);
   } else {
     const error = result.error || {};
     runSummary.innerHTML = [
@@ -536,6 +539,7 @@ function showResult(result) {
       .join("\n\n");
     consoleOutput.classList.add("error");
     knitoutOutput.textContent = "";
+    KnitoutVisualizer.render(visualizationOutput, result.partial_knitout || "", result.metrics || {});
   }
   renderCheck(check);
   selectTab(check ? "tests" : "console");

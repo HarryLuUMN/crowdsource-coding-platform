@@ -164,6 +164,25 @@ button { color: inherit; }
 .output { margin: 0; padding: 18px; color: #c9c9c2; white-space: pre-wrap; overflow-wrap: anywhere; }
 .output.error { color: #ffb3aa; }
 
+.visualization-output { min-height: 100%; padding: 12px; }
+.visualization-stats { display: grid; grid-template-columns: repeat(4, minmax(110px, 1fr)); gap: 8px; margin-bottom: 10px; }
+.visualization-stat { min-height: 62px; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: #1b1c19; display: flex; flex-direction: column; justify-content: center; }
+.visualization-stat strong { color: var(--ink); font-size: 20px; line-height: 1; }
+.visualization-stat span { margin-top: 7px; color: var(--muted); font-size: 9px; line-height: 1; letter-spacing: .08em; text-transform: uppercase; }
+.visualization-chart { min-height: 230px; height: calc(100% - 72px); border: 1px solid var(--line); border-radius: 8px; background: #171815; overflow: auto; }
+.visualization-chart svg { display: block; width: 100%; min-width: 620px; min-height: 230px; height: 100%; }
+.course-guide { stroke: #292c29; stroke-width: 1; }
+.course-label { fill: var(--muted); font: 11px/1 ui-monospace, monospace; }
+.course-connection { stroke: #c99055; stroke-width: 2.5; }
+.loop-connection { stroke: #718bad; stroke-width: 2; }
+.loop-node circle { fill: #1b1c19; stroke: #63c9d7; stroke-width: 2.5; }
+.loop-node text { fill: var(--ink); font: 700 10px/1 ui-monospace, monospace; pointer-events: none; }
+.loop-tuck circle { stroke: var(--accent); }
+.loop-split circle { stroke: var(--warning); }
+.visualization-empty { min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; color: var(--faint); }
+.visualization-empty strong { color: var(--ink); font-size: 14px; }
+.visualization-empty span { max-width: 330px; font-size: 11px; line-height: 1.5; }
+
 .toast { position: fixed; left: 50%; bottom: 25px; transform: translate(-50%, 20px); padding: 10px 15px; border: 1px solid var(--line); border-radius: 8px; background: #282a24; color: var(--ink); font-size: 12px; opacity: 0; pointer-events: none; transition: 180ms ease; }
 .toast.visible { opacity: 1; transform: translate(-50%, 0); }
 
@@ -201,4 +220,5 @@ button { color: inherit; }
   .line-numbers { min-width: 43px; }
   .documentation-tools { grid-template-columns: minmax(80px, 1fr) auto 28px 28px; }
   .documentation-top-button { grid-column: 1 / -1; }
+  .visualization-stats { grid-template-columns: repeat(2, minmax(100px, 1fr)); }
 }

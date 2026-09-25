@@ -6,7 +6,7 @@
     <meta name="description" content="Write and run KnitScript in your browser." />
     <title>KnitScript Studio</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=17" />
+    <link rel="stylesheet" href="/styles.css?v=18" />
   </head>
   <body>
     <div hidden>
@@ -57,6 +57,7 @@
               <button class="tab active" data-tab="tests" role="tab" aria-selected="true">Test Results</button>
               <button class="tab" data-tab="console" role="tab" aria-selected="false">Console</button>
               <button class="tab" data-tab="knitout" role="tab" aria-selected="false">Knitout</button>
+              <button class="tab" data-tab="visualization" role="tab" aria-selected="false">Visualization</button>
             </div>
             <div class="result-actions">
               <button class="copy-button" id="copyButton" type="button" hidden>Copy output</button>
@@ -89,6 +90,7 @@
               <div class="test-output" id="testOutput"></div>
               <pre class="output" id="consoleOutput" hidden></pre>
               <pre class="output" id="knitoutOutput" hidden></pre>
+              <div class="visualization-output" id="visualizationOutput" hidden></div>
             </div>
           </div>
         </div>
@@ -146,6 +148,7 @@
       </div>
     </dialog>
     <script src="/documentation-reading.js?v=1" defer></script>
-    <script src="/app.js?v=17" defer></script>
+    <script src="/knitout-visualizer.js?v=1" defer></script>
+    <script src="/app.js?v=18" defer></script>
   </body>
 </html>
