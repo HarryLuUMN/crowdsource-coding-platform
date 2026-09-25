@@ -1,6 +1,8 @@
 import unittest
 
-from documentation import DocumentationParser, documentation_url
+from unittest.mock import patch
+
+from documentation import DocumentationParser, documentation_url, render_documentation
 
 
 class DocumentationTests(unittest.TestCase):
@@ -35,3 +37,20 @@ class DocumentationTests(unittest.TestCase):
         self.assertIn('class="k"', output)
         self.assertIn('<caption><span class="caption-text">Quick reference</span></caption>', output)
         self.assertIn('<colgroup><col><col></colgroup>', output)
+
+    @patch("documentation.urlopen")
+    def test_home_page_adds_stable_navigation_without_duplicating_it_on_articles(self, mock_urlopen):
+        response = mock_urlopen.return_value.__enter__.return_value
+        response.url = documentation_url("")
+        response.read.return_value = b"<main><h1>KnitScript</h1></main>"
+        render_documentation.cache_clear()
+        home = render_documentation("").decode("utf-8")
+
+        self.assertIn('class="documentation-index"', home)
+        self.assertIn("Getting Started", home)
+        self.assertIn('/documentation/quickstart.html', home)
+
+        response.url = documentation_url("quickstart.html")
+        render_documentation.cache_clear()
+        article = render_documentation("quickstart.html").decode("utf-8")
+        self.assertNotIn('class="documentation-index"', article)

@@ -6,6 +6,26 @@ from urllib.parse import quote, unquote, urljoin, urlparse
 from urllib.request import urlopen
 
 BASE = "https://mhofmann-khoury.github.io/knit_script/"
+HOME_NAVIGATION = (
+    '<nav class="documentation-index" aria-label="Documentation sections">'
+    '<section><p>Getting Started</p><ul>'
+    '<li><a href="/documentation/installation.html">Installation</a></li>'
+    '<li><a href="/documentation/quickstart.html">Quick Start</a></li>'
+    '</ul></section>'
+    '<section><p>Language Guide</p><ul>'
+    '<li><a href="/documentation/language_reference.html">Language Reference</a></li>'
+    '<li><a href="/documentation/machine_operations.html">Machine Operations</a></li>'
+    '</ul></section>'
+    '<section><p>API Reference</p><ul>'
+    '<li><a href="/documentation/api/knit_script.html">knit_script package</a></li>'
+    '</ul></section>'
+    '<section><p>Project Information</p><ul>'
+    '<li><a href="/documentation/dependencies.html">Dependencies</a></li>'
+    '<li><a href="/documentation/related_projects.html">Related Projects</a></li>'
+    '<li><a href="/documentation/acknowledgments.html">Acknowledgments</a></li>'
+    '</ul></section>'
+    '</nav>'
+)
 
 
 def documentation_url(path):
@@ -77,8 +97,9 @@ def render_documentation(path):
             raise ValueError("Documentation page too large")
     parser = DocumentationParser(url)
     parser.feed(source.decode("utf-8"))
+    navigation = HOME_NAVIGATION if path in {"", "/"} else ""
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width, initial-scale=1">'
-            '<title>KnitScript documentation</title><link rel="stylesheet" href="/documentation.css?v=4">'
+            '<title>KnitScript documentation</title><link rel="stylesheet" href="/documentation.css?v=5">'
             '</head><body><nav><a href="/documentation/">Documentation home</a></nav>'
-            + "".join(parser.output) + '</body></html>').encode("utf-8")
+            + navigation + "".join(parser.output) + '</body></html>').encode("utf-8")
