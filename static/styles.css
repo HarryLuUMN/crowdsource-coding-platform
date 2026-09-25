@@ -106,6 +106,11 @@ button { color: inherit; }
 .documentation-panel iframe { width: 100%; flex: 1; min-height: 0; border: 0; background: var(--panel); }
 .documentation-heading { min-height: 78px; border-bottom: 1px solid var(--line); padding: 10px 12px; display: flex; flex-direction: column; gap: 9px; background: #1c1d19; flex: 0 0 auto; }
 .documentation-title { display: flex; align-items: center; justify-content: space-between; font-size: 18px; line-height: 1.2; font-weight: 700; }
+.documentation-view-tabs { display: flex; align-items: center; gap: 16px; align-self: stretch; }
+.documentation-view-tab { position: relative; align-self: stretch; border: 0; padding: 0; background: none; color: var(--faint); cursor: pointer; font-size: 16px; font-weight: 700; }
+.documentation-view-tab.active { color: var(--ink); }
+.documentation-view-tab.active::after { content: ""; position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: var(--accent); }
+.documentation-view-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .documentation-tools { display: grid; grid-template-columns: minmax(90px, 1fr) auto 28px 28px auto; gap: 5px; align-items: center; }
 .documentation-search { height: 30px; min-width: 0; border: 1px solid #3b3c36; border-radius: 6px; padding: 0 8px; display: flex; align-items: center; gap: 6px; background: #151613; }
 .documentation-search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }

@@ -27,6 +27,7 @@ function documentationReadingSnapshot(frame) {
     });
   });
   return {
+    guide_kind: view.location.pathname === "/tutorial.html" ? "tutorial" : "documentation",
     page_url: view.location.href,
     document_path: view.location.pathname + view.location.hash,
     observed_at: new Date().toISOString(),
@@ -48,7 +49,7 @@ function attachDocumentationReading(frame, record) {
     cleanup();
     const view = frame.contentWindow;
     const doc = frame.contentDocument;
-    if (!doc || !view.location.pathname.startsWith("/documentation/")) return;
+    if (!doc || !(view.location.pathname.startsWith("/documentation/") || view.location.pathname === "/tutorial.html")) return;
     let timer;
     let lastScroll = 0;
     const emit = (type, extra = {}) => record(type, { ...documentationReadingSnapshot(frame), ...extra });
@@ -89,7 +90,7 @@ function attachDocumentationReading(frame, record) {
   frame.addEventListener("load", bind);
   if (frame.contentDocument?.readyState === "complete") bind();
   return () => {
-    if (frame.contentDocument && frame.contentWindow.location.pathname.startsWith("/documentation/")) {
+    if (frame.contentDocument && (frame.contentWindow.location.pathname.startsWith("/documentation/") || frame.contentWindow.location.pathname === "/tutorial.html")) {
       record("guide.documentation_view_left", documentationReadingSnapshot(frame));
     }
   };

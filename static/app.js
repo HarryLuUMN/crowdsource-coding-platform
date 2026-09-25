@@ -47,6 +47,9 @@ const columnResizer = document.querySelector("#columnResizer");
 const guidePanel = document.querySelector(".guide-panel");
 const resultPanel = document.querySelector(".result-panel");
 const documentationFrame = document.querySelector("#documentationFrame");
+const tutorialFrame = document.querySelector("#tutorialFrame");
+const documentationViewTabs = [...document.querySelectorAll(".documentation-view-tab")];
+const documentationTools = document.querySelector(".documentation-tools");
 const documentationSearch = document.querySelector("#documentationSearch");
 const documentationMatchCount = document.querySelector("#documentationMatchCount");
 const documentationPreviousMatch = document.querySelector("#documentationPreviousMatch");
@@ -289,6 +292,22 @@ function initializeDocumentationTools() {
     updateDocumentationSearchControls();
     if (documentationSearch.value.trim()) searchDocumentation();
   });
+}
+
+function selectDocumentationView(name, logInteraction = false) {
+  const tutorialSelected = name === "tutorial";
+  documentationFrame.hidden = tutorialSelected;
+  tutorialFrame.hidden = !tutorialSelected;
+  documentationTools.hidden = tutorialSelected;
+  documentationViewTabs.forEach((tab) => {
+    const selected = tab.dataset.documentationView === name;
+    tab.classList.toggle("active", selected);
+    tab.setAttribute("aria-selected", String(selected));
+  });
+  if (logInteraction) {
+    const frame = tutorialSelected ? tutorialFrame : documentationFrame;
+    recordEvent("guide.view_tab_selected", { view: name, ...documentationReadingSnapshot(frame) });
+  }
 }
 
 async function initializeTelemetrySession() {
@@ -663,7 +682,9 @@ copyButton.addEventListener("click", async () => {
 });
 tabs.forEach((tab) => tab.addEventListener("click", () => selectTab(tab.dataset.tab, true)));
 initializeDocumentationTools();
+documentationViewTabs.forEach((tab) => tab.addEventListener("click", () => selectDocumentationView(tab.dataset.documentationView, true)));
 const recordDocumentationView = attachDocumentationReading(documentationFrame, recordEvent);
+const recordTutorialView = attachDocumentationReading(tutorialFrame, recordEvent);
 closeCompletionButton.addEventListener("click", () => completionDialog.close());
 prolificCompletionLink.addEventListener("click", async (event) => {
   const completionUrl = prolificCompletionLink.href;
@@ -682,6 +703,7 @@ document.addEventListener("visibilitychange", () => {
 
 window.addEventListener("pagehide", () => {
   recordDocumentationView();
+  recordTutorialView();
   if (!telemetrySessionId || telemetryEnded) return;
   recordEvent("session.ended", { source_length: editor.value.length });
   sendPendingEventsWithBeacon();

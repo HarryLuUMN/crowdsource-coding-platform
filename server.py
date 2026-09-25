@@ -168,15 +168,16 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(STATIC_DIR), **kwargs)
 
     def end_headers(self) -> None:
-        is_documentation = urlparse(self.path).path.startswith("/documentation/")
+        path = urlparse(self.path).path
+        is_embeddable_guide = path.startswith("/documentation/") or path == "/tutorial.html"
         self.send_header(
             "Content-Security-Policy",
             "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
             "connect-src 'self'; object-src 'none'; base-uri 'none'; "
-            + ("frame-ancestors 'self'; form-action 'none'; sandbox allow-same-origin" if is_documentation else "frame-ancestors 'none'; form-action 'self'"),
+            + ("frame-ancestors 'self'; form-action 'none'; sandbox allow-same-origin" if is_embeddable_guide else "frame-ancestors 'none'; form-action 'self'"),
         )
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("X-Frame-Options", "SAMEORIGIN" if is_documentation else "DENY")
+        self.send_header("X-Frame-Options", "SAMEORIGIN" if is_embeddable_guide else "DENY")
         self.send_header("Referrer-Policy", "no-referrer")
         super().end_headers()
 

@@ -6,7 +6,7 @@
     <meta name="description" content="Write and run KnitScript in your browser." />
     <title>KnitScript Studio</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=18" />
+    <link rel="stylesheet" href="/styles.css?v=19" />
   </head>
   <body>
     <div hidden>
@@ -98,7 +98,13 @@
         <div class="workspace-resizer vertical-resizer" id="columnResizer" role="separator" aria-label="Resize coding and documentation panels" aria-orientation="vertical" tabindex="0"></div>
         <aside class="panel documentation-panel" id="documentationPanel" aria-label="KnitScript documentation">
           <div class="documentation-heading">
-            <div class="documentation-title"><span>Documentation</span><span class="save-state">Read only</span></div>
+            <div class="documentation-title">
+              <div class="documentation-view-tabs" role="tablist" aria-label="Learning resources">
+                <button class="documentation-view-tab active" data-documentation-view="documentation" role="tab" aria-selected="true" type="button">Documentation</button>
+                <button class="documentation-view-tab" data-documentation-view="tutorial" role="tab" aria-selected="false" type="button">Tutorial</button>
+              </div>
+              <span class="save-state">Read only</span>
+            </div>
             <div class="documentation-tools" role="search">
               <label class="documentation-search">
                 <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" /><path d="m12.5 12.5 4 4" /></svg>
@@ -111,6 +117,7 @@
             </div>
           </div>
           <iframe id="documentationFrame" title="KnitScript documentation" src="/documentation/" sandbox="allow-same-origin" referrerpolicy="no-referrer"></iframe>
+          <iframe id="tutorialFrame" title="Knitting background tutorial" src="/tutorial.html" sandbox="allow-same-origin" referrerpolicy="no-referrer" hidden></iframe>
         </aside>
       </section>
     </main>
@@ -147,8 +154,8 @@
         <a class="submit-button completion-link" id="prolificCompletionLink" hidden>Return to Prolific</a>
       </div>
     </dialog>
-    <script src="/documentation-reading.js?v=1" defer></script>
+    <script src="/documentation-reading.js?v=2" defer></script>
     <script src="/knitout-visualizer.js?v=1" defer></script>
-    <script src="/app.js?v=18" defer></script>
+    <script src="/app.js?v=19" defer></script>
   </body>
 </html>
