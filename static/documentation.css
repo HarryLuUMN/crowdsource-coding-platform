@@ -4,11 +4,6 @@ body { margin: 0; padding: 18px; background: var(--panel); color: var(--ink); fo
 a { color: var(--accent); text-underline-offset: 2px; }
 a:hover { color: #efffa3; }
 nav { margin-bottom: 18px; }
-.documentation-index { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 24px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
-.documentation-index section { min-width: 0; padding: 12px 13px; border: 1px solid var(--line); border-radius: 7px; background: #1c1d19; }
-.documentation-index p { margin: 0 0 7px; color: #f4f2eb; font-size: 13px; font-weight: 700; }
-.documentation-index ul { margin: 0; padding-left: 1.2em; }
-.documentation-index li { margin: 3px 0; font-size: 12px; }
 h1, h2, h3, h4, h5, h6 { margin: 1.4em 0 .55em; color: #f4f2eb; line-height: 1.25; scroll-margin-top: 12px; }
 h1 { margin-top: .35em; font-size: 24px; }
 h2 { font-size: 20px; }
@@ -47,7 +42,13 @@ dt { margin-top: 12px; color: #f4f2eb; font-weight: 650; }
 dd { margin: 4px 0 8px 18px; }
 .sig, .property { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
 .sig { display: block; max-width: 100%; padding: 8px 10px; border-left: 2px solid #55584b; background: #151613; overflow-wrap: anywhere; }
-.wy-nav-side, .wy-nav-top, .wy-breadcrumbs, .rst-footer-buttons, .headerlink, footer { display: none; }
+.wy-nav-top, .wy-breadcrumbs, .rst-footer-buttons, .headerlink, footer { display: none; }
+.wy-nav-side { margin: 0 0 24px; padding: 0 0 22px; border-bottom: 1px solid var(--line); }
+.wy-side-nav-search { display: none; }
+.wy-menu-vertical > p { margin: 13px 0 5px; color: #f4f2eb; font-size: 13px; font-weight: 700; }
+.wy-menu-vertical > p:first-child { margin-top: 0; }
+.wy-menu-vertical > ul { margin: 0; }
+.wy-menu-vertical li { margin: 3px 0; font-size: 12px; }
 .wy-grid-for-nav, .wy-nav-content-wrap, .wy-nav-content, .rst-content, .document, section { max-width: 100%; }
 img { max-width: 100%; height: auto; }
 sub, sup { line-height: 0; }
@@ -58,5 +59,4 @@ mark[data-documentation-search] { border-radius: 2px; }
   h2 { font-size: 18px; }
   pre { padding: 11px; }
   td, th { padding: 6px 7px; }
-  .documentation-index { grid-template-columns: 1fr; }
 }

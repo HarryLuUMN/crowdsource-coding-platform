@@ -1,8 +1,6 @@
 import unittest
 
-from unittest.mock import patch
-
-from documentation import DocumentationParser, documentation_url, render_documentation
+from documentation import DocumentationParser, documentation_url
 
 
 class DocumentationTests(unittest.TestCase):
@@ -38,19 +36,16 @@ class DocumentationTests(unittest.TestCase):
         self.assertIn('<caption><span class="caption-text">Quick reference</span></caption>', output)
         self.assertIn('<colgroup><col><col></colgroup>', output)
 
-    @patch("documentation.urlopen")
-    def test_home_page_adds_stable_navigation_without_duplicating_it_on_articles(self, mock_urlopen):
-        response = mock_urlopen.return_value.__enter__.return_value
-        response.url = documentation_url("")
-        response.read.return_value = b"<main><h1>KnitScript</h1></main>"
-        render_documentation.cache_clear()
-        home = render_documentation("").decode("utf-8")
+    def test_parser_preserves_upstream_documentation_navigation(self):
+        parser = DocumentationParser(documentation_url(""))
+        parser.feed(
+            '<nav class="wy-nav-side"><div class="wy-menu wy-menu-vertical">'
+            '<p class="caption"><span class="caption-text">Getting Started</span></p>'
+            '<ul><li class="toctree-l1"><a href="quickstart.html">Quick Start</a></li></ul>'
+            '</div></nav>'
+        )
+        output = "".join(parser.output)
 
-        self.assertIn('class="documentation-index"', home)
-        self.assertIn("Getting Started", home)
-        self.assertIn('/documentation/quickstart.html', home)
-
-        response.url = documentation_url("quickstart.html")
-        render_documentation.cache_clear()
-        article = render_documentation("quickstart.html").decode("utf-8")
-        self.assertNotIn('class="documentation-index"', article)
+        self.assertIn('class="wy-nav-side"', output)
+        self.assertIn('class="wy-menu wy-menu-vertical"', output)
+        self.assertIn('href="/documentation/quickstart.html"', output)
