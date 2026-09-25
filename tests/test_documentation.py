@@ -18,3 +18,20 @@ class DocumentationTests(unittest.TestCase):
         for unsafe in ["script", "alert", "onclick", "target", "example.com", "iframe"]:
             self.assertNotIn(unsafe, output)
         self.assertIn("<p>Text</p>", output)
+
+    def test_parser_preserves_sphinx_code_and_table_markup(self):
+        parser = DocumentationParser(documentation_url("language_reference.html"))
+        parser.feed(
+            '<div class="highlight-knitscript notranslate"><div class="highlight"><pre>'
+            '<span class="k">if</span> <span class="n">condition</span>'
+            '</pre></div></div>'
+            '<table class="docutils align-default"><caption><span class="caption-text">Quick reference</span></caption>'
+            '<colgroup><col style="width: 30.0%"><col style="width: 70.0%"></colgroup>'
+            '<tbody><tr><td><p>Construct</p></td><td><code>syntax</code></td></tr></tbody></table>'
+        )
+        output = "".join(parser.output)
+
+        self.assertIn('class="highlight-knitscript notranslate"', output)
+        self.assertIn('class="k"', output)
+        self.assertIn('<caption><span class="caption-text">Quick reference</span></caption>', output)
+        self.assertIn('<colgroup><col><col></colgroup>', output)

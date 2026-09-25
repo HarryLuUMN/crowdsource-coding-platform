@@ -1,6 +1,7 @@
 from functools import lru_cache
 from html import escape
 from html.parser import HTMLParser
+import re
 from urllib.parse import quote, unquote, urljoin, urlparse
 from urllib.request import urlopen
 
@@ -20,7 +21,7 @@ def documentation_url(path):
 
 
 class DocumentationParser(HTMLParser):
-    allowed = set("h1 h2 h3 h4 h5 h6 p div section article nav ul ol li pre code strong em b i table thead tbody tr th td blockquote hr br dl dt dd span a".split())
+    allowed = set("h1 h2 h3 h4 h5 h6 p div section article nav footer ul ol li pre code strong em b i table caption colgroup col thead tbody tr th td blockquote hr br dl dt dd span a figure figcaption kbd samp var sub sup abbr".split())
 
     def __init__(self, url):
         super().__init__(convert_charrefs=True)
@@ -37,6 +38,9 @@ class DocumentationParser(HTMLParser):
         safe = ""
         if attributes.get("id"):
             safe += f' id="{escape(attributes["id"], quote=True)}"'
+        class_names = [name for name in attributes.get("class", "").split() if re.fullmatch(r"[A-Za-z0-9_-]{1,64}", name)]
+        if class_names:
+            safe += f' class="{escape(" ".join(class_names[:32]), quote=True)}"'
         if tag == "a" and attributes.get("href"):
             try:
                 destination = documentation_url(urljoin(self.url, attributes["href"]))
@@ -75,6 +79,6 @@ def render_documentation(path):
     parser.feed(source.decode("utf-8"))
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width, initial-scale=1">'
-            '<title>KnitScript documentation</title><link rel="stylesheet" href="/documentation.css">'
+            '<title>KnitScript documentation</title><link rel="stylesheet" href="/documentation.css?v=4">'
             '</head><body><nav><a href="/documentation/">Documentation home</a></nav>'
             + "".join(parser.output) + '</body></html>').encode("utf-8")
