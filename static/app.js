@@ -45,6 +45,12 @@ const consoleResizer = document.querySelector("#consoleResizer");
 const columnResizer = document.querySelector("#columnResizer");
 const guidePanel = document.querySelector(".guide-panel");
 const resultPanel = document.querySelector(".result-panel");
+const documentationFrame = document.querySelector("#documentationFrame");
+const documentationSearch = document.querySelector("#documentationSearch");
+const documentationMatchCount = document.querySelector("#documentationMatchCount");
+const documentationPreviousMatch = document.querySelector("#documentationPreviousMatch");
+const documentationNextMatch = document.querySelector("#documentationNextMatch");
+const documentationJumpTop = document.querySelector("#documentationJumpTop");
 
 let activeTab = "tests";
 let saveTimer;
@@ -57,6 +63,8 @@ let telemetryInFlightBatch = null;
 let telemetryEnded = false;
 let sessionReady = Promise.resolve();
 let studyStarted = false;
+let documentationMatches = [];
+let activeDocumentationMatch = -1;
 const pendingEvents = [];
 const telemetryStartedAt = performance.now();
 const clientInstanceId = crypto.randomUUID();
@@ -165,6 +173,121 @@ function recordEvent(type, payload = {}) {
     payload,
   });
   if (pendingEvents.length >= 50) void flushEvents();
+}
+
+function documentationEventPayload(extra = {}) {
+  try {
+    return { ...documentationReadingSnapshot(documentationFrame), ...extra };
+  } catch (_error) {
+    return extra;
+  }
+}
+
+function clearDocumentationHighlights() {
+  const doc = documentationFrame.contentDocument;
+  if (!doc) return;
+  doc.querySelectorAll("mark[data-documentation-search]").forEach((mark) => mark.replaceWith(doc.createTextNode(mark.textContent)));
+  doc.body?.normalize();
+  documentationMatches = [];
+  activeDocumentationMatch = -1;
+}
+
+function updateDocumentationSearchControls() {
+  const total = documentationMatches.length;
+  documentationMatchCount.textContent = total ? `${activeDocumentationMatch + 1} / ${total}` : "0 / 0";
+  documentationPreviousMatch.disabled = total === 0;
+  documentationNextMatch.disabled = total === 0;
+}
+
+function showDocumentationMatch(index, direction = "current") {
+  if (!documentationMatches.length) return;
+  activeDocumentationMatch = (index + documentationMatches.length) % documentationMatches.length;
+  documentationMatches.forEach((mark, matchIndex) => mark.classList.toggle("documentation-search-current", matchIndex === activeDocumentationMatch));
+  const match = documentationMatches[activeDocumentationMatch];
+  match.scrollIntoView({ block: "center", behavior: "smooth" });
+  updateDocumentationSearchControls();
+  recordEvent("guide.documentation_search_result_navigated", documentationEventPayload({
+    query: documentationSearch.value.trim(),
+    match_index: activeDocumentationMatch,
+    match_count: documentationMatches.length,
+    direction,
+    matched_text: match.textContent,
+  }));
+}
+
+function searchDocumentation() {
+  clearDocumentationHighlights();
+  const query = documentationSearch.value.trim();
+  const doc = documentationFrame.contentDocument;
+  if (!query || !doc?.body) {
+    updateDocumentationSearchControls();
+    recordEvent("guide.documentation_search_changed", documentationEventPayload({ query, match_count: 0 }));
+    return;
+  }
+  const search = query.toLocaleLowerCase();
+  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (!node.textContent.trim() || node.parentElement?.closest("script,style,noscript,mark[data-documentation-search]")) return NodeFilter.FILTER_REJECT;
+      return node.textContent.toLocaleLowerCase().includes(search) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    },
+  });
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach((node) => {
+    const text = node.textContent;
+    const lower = text.toLocaleLowerCase();
+    const fragment = doc.createDocumentFragment();
+    let start = 0;
+    let matchStart = lower.indexOf(search);
+    while (matchStart !== -1) {
+      fragment.append(doc.createTextNode(text.slice(start, matchStart)));
+      const mark = doc.createElement("mark");
+      mark.dataset.documentationSearch = "";
+      mark.textContent = text.slice(matchStart, matchStart + query.length);
+      fragment.append(mark);
+      documentationMatches.push(mark);
+      start = matchStart + query.length;
+      matchStart = lower.indexOf(search, start);
+    }
+    fragment.append(doc.createTextNode(text.slice(start)));
+    node.replaceWith(fragment);
+  });
+  if (documentationMatches.length) {
+    if (!doc.querySelector("style[data-documentation-search-style]")) {
+      const style = doc.createElement("style");
+      style.dataset.documentationSearchStyle = "";
+      style.textContent = "mark[data-documentation-search]{background:#596326;color:inherit;border-radius:2px;padding:0 1px}mark.documentation-search-current{background:#e5ff6f;color:#171910;box-shadow:0 0 0 2px rgba(229,255,111,.22)}";
+      doc.head.append(style);
+    }
+    showDocumentationMatch(0, "search");
+  } else {
+    updateDocumentationSearchControls();
+  }
+  recordEvent("guide.documentation_search_changed", documentationEventPayload({ query, match_count: documentationMatches.length }));
+}
+
+function initializeDocumentationTools() {
+  let searchTimer;
+  documentationSearch.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(searchDocumentation, 180);
+  });
+  documentationSearch.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    showDocumentationMatch(activeDocumentationMatch + (event.shiftKey ? -1 : 1), event.shiftKey ? "previous" : "next");
+  });
+  documentationPreviousMatch.addEventListener("click", () => showDocumentationMatch(activeDocumentationMatch - 1, "previous"));
+  documentationNextMatch.addEventListener("click", () => showDocumentationMatch(activeDocumentationMatch + 1, "next"));
+  documentationJumpTop.addEventListener("click", () => {
+    documentationFrame.contentWindow?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    recordEvent("guide.documentation_jumped_to_top", documentationEventPayload());
+  });
+  documentationFrame.addEventListener("load", () => {
+    clearDocumentationHighlights();
+    updateDocumentationSearchControls();
+    if (documentationSearch.value.trim()) searchDocumentation();
+  });
 }
 
 async function initializeTelemetrySession() {
@@ -535,7 +658,8 @@ copyButton.addEventListener("click", async () => {
   showToast("Knitout copied");
 });
 tabs.forEach((tab) => tab.addEventListener("click", () => selectTab(tab.dataset.tab, true)));
-const recordDocumentationView = attachDocumentationReading(document.querySelector("#documentationFrame"), recordEvent);
+initializeDocumentationTools();
+const recordDocumentationView = attachDocumentationReading(documentationFrame, recordEvent);
 closeCompletionButton.addEventListener("click", () => completionDialog.close());
 prolificCompletionLink.addEventListener("click", async (event) => {
   const completionUrl = prolificCompletionLink.href;
