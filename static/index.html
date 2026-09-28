@@ -6,7 +6,7 @@
     <meta name="description" content="Write and run KnitScript in your browser." />
     <title>KnitScript Studio</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=19" />
+    <link rel="stylesheet" href="/styles.css?v=20" />
   </head>
   <body>
     <div hidden>
@@ -19,8 +19,9 @@
       <section class="guide-panel" aria-label="Task instructions">
         <div class="guide-view task-guide">
           <div class="task-copy">
+            <span class="task-phase-badge" id="taskPhaseBadge" hidden>Practice · not part of the study</span>
             <h1>Task Description</h1>
-            <p>Write a KnitScript program that produces a 10-stitch-wide stockinette swatch on the front bed. The swatch should begin with a secure cast-on, transition cleanly into the main fabric, and contain six complete stockinette rows. Keep the fabric within the intended width and avoid operations that alter its basic structure. Run your code to evaluate the result, then submit when all tests pass.</p>
+            <p id="taskDescription">Write a KnitScript program that produces a 10-stitch-wide stockinette swatch on the front bed. The swatch should begin with a secure cast-on, transition cleanly into the main fabric, and contain six complete stockinette rows. Keep the fabric within the intended width and avoid operations that alter its basic structure. Run your code to evaluate the result, then submit when all tests pass.</p>
           </div>
         </div>
 
@@ -29,14 +30,14 @@
       <section class="studio" aria-label="KnitScript editor">
         <div class="panel editor-panel">
           <div class="panel-heading">
-            <div class="file-tab"><span class="file-dot"></span>swatch.ks</div>
+            <div class="file-tab"><span class="file-dot"></span><span id="fileName">swatch.ks</span></div>
             <span class="save-state" id="saveState">Saved locally</span>
           </div>
           <div class="editor-shell">
             <pre class="line-numbers" id="lineNumbers" aria-hidden="true">1</pre>
             <textarea
               id="sourceEditor"
-              aria-label="KnitScript source code"
+              aria-label="Source code"
               autocomplete="off"
               autocapitalize="off"
               spellcheck="false"
@@ -44,7 +45,7 @@
           </div>
           <div class="panel-footer">
             <span id="cursorPosition">Ln 1, Col 1</span>
-            <span>KnitScript</span>
+            <span id="editorLanguage">KnitScript</span>
             <span>UTF-8</span>
           </div>
         </div>
@@ -54,8 +55,8 @@
         <div class="panel result-panel">
           <div class="result-heading">
             <div class="tabs" role="tablist" aria-label="Run output">
-              <button class="tab active" data-tab="knitout" role="tab" aria-selected="true">Knitout</button>
-              <button class="tab" data-tab="visualization" role="tab" aria-selected="false">Visualization</button>
+              <button class="tab active" id="knitoutTab" data-tab="knitout" role="tab" aria-selected="true">Knitout</button>
+              <button class="tab" id="visualizationTab" data-tab="visualization" role="tab" aria-selected="false">Visualization</button>
               <button class="tab" data-tab="tests" role="tab" aria-selected="false">Test Results</button>
               <button class="tab" data-tab="console" role="tab" aria-selected="false">Console</button>
             </div>
@@ -81,8 +82,8 @@
                   <path d="M78 66c8-17 18-25 29-21" />
                 </svg>
               </span>
-              <h2>Run your code against the task</h2>
-              <p>You will see a result for each requirement here before submitting.</p>
+              <h2 id="emptyStateTitle">Run your code against the task</h2>
+              <p id="emptyStateMessage">You will see a result for each requirement here before submitting.</p>
             </div>
 
             <div class="result-content" id="resultContent" hidden>
@@ -156,6 +157,7 @@
     </dialog>
     <script src="/documentation-reading.js?v=2" defer></script>
     <script src="/knitout-visualizer.js?v=1" defer></script>
-    <script src="/app.js?v=19" defer></script>
+    <script src="/practice-task.js?v=1" defer></script>
+    <script src="/app.js?v=20" defer></script>
   </body>
 </html>

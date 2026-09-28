@@ -87,6 +87,7 @@ button { color: inherit; }
 .guide-panel { min-width: 0; border: 1px solid var(--line); background: linear-gradient(105deg, rgba(229, 255, 111, 0.08), transparent 42%), var(--panel); display: flex; overflow: hidden; }
 .guide-view { flex: 1; min-width: 0; padding: 20px 24px; }
 .task-guide { display: flex; align-items: center; }
+.task-phase-badge { display: inline-flex; margin-bottom: 9px; border: 1px solid rgba(246, 199, 109, .42); border-radius: 999px; padding: 5px 9px; color: var(--warning); background: rgba(246, 199, 109, .08); font-size: 10px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
 .task-copy h1 { margin: 0 0 8px; font-size: 20px; line-height: 1.2; font-weight: 700; }
 .task-copy p { max-width: 1040px; margin: 0; color: #c9c8c1; font-size: 14px; line-height: 1.62; font-weight: 450; }
 .guide-panel { grid-column: 1; grid-row: 1; }

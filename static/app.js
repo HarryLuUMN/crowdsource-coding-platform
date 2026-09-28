@@ -10,6 +10,8 @@ const previewMode = queryParameters.get("preview") === "1";
 let hasProlificParticipant = Boolean(prolificRecruitment.prolific_pid);
 let participantId = hasProlificParticipant ? prolificRecruitment.prolific_pid : "";
 let sourceStorageKey = "";
+let practiceCompletionKey = "";
+let currentStudyPhase = "practice";
 const STARTER_SOURCE = "";
 const TELEMETRY_BATCH_SIZE = 25;
 
@@ -55,6 +57,14 @@ const documentationMatchCount = document.querySelector("#documentationMatchCount
 const documentationPreviousMatch = document.querySelector("#documentationPreviousMatch");
 const documentationNextMatch = document.querySelector("#documentationNextMatch");
 const documentationJumpTop = document.querySelector("#documentationJumpTop");
+const taskPhaseBadge = document.querySelector("#taskPhaseBadge");
+const taskDescription = document.querySelector("#taskDescription");
+const fileName = document.querySelector("#fileName");
+const editorLanguage = document.querySelector("#editorLanguage");
+const knitoutTab = document.querySelector("#knitoutTab");
+const visualizationTab = document.querySelector("#visualizationTab");
+const emptyStateTitle = document.querySelector("#emptyStateTitle");
+const emptyStateMessage = document.querySelector("#emptyStateMessage");
 
 let activeTab = "knitout";
 let saveTimer;
@@ -174,7 +184,7 @@ function recordEvent(type, payload = {}) {
     type,
     client_timestamp: new Date().toISOString(),
     elapsed_ms: Math.round(performance.now() - telemetryStartedAt),
-    payload,
+    payload: { study_phase: currentStudyPhase, ...payload },
   });
   if (pendingEvents.length >= 50) void flushEvents();
 }
@@ -448,6 +458,41 @@ function setInitialSource() {
   updateEditorChrome();
 }
 
+function clearResult() {
+  emptyState.hidden = false;
+  resultContent.hidden = true;
+  runSummary.innerHTML = "";
+  testOutput.innerHTML = "";
+  consoleOutput.textContent = "";
+  knitoutOutput.textContent = "";
+  visualizationOutput.innerHTML = "";
+}
+
+function setStudyPhase(phase, sourceStorageScope) {
+  currentStudyPhase = phase;
+  const practice = phase === "practice";
+  sourceStorageKey = practice
+    ? `coding-platform-practice-source:v1:${sourceStorageScope}`
+    : `knitscript-studio-source:${TASK_ID}:from-scratch-v1:${sourceStorageScope}`;
+  taskPhaseBadge.hidden = !practice;
+  taskDescription.textContent = practice
+    ? "This short practice task is only for learning how to use the coding platform. It is not part of the formal study, and the formal task may use a different programming language. Write a Python program that prints exactly: Hello, coding platform! Use Run to check your program, then Submit to continue to the formal task."
+    : "Write a KnitScript program that produces a 10-stitch-wide stockinette swatch on the front bed. The swatch should begin with a secure cast-on, transition cleanly into the main fabric, and contain six complete stockinette rows. Keep the fabric within the intended width and avoid operations that alter its basic structure. Run your code to evaluate the result, then submit when all tests pass.";
+  fileName.textContent = practice ? "practice.py" : "swatch.ks";
+  editorLanguage.textContent = practice ? "Python" : "KnitScript";
+  editor.setAttribute("aria-label", practice ? "Python practice source code" : "KnitScript source code");
+  knitoutTab.hidden = practice;
+  visualizationTab.hidden = practice;
+  emptyStateTitle.textContent = practice ? "Run your practice program" : "Run your code against the task";
+  emptyStateMessage.textContent = practice
+    ? "Use Run to check the output, then Submit when the practice test passes."
+    : "You will see a result for each requirement here before submitting.";
+  setInitialSource();
+  previousSource = editor.value;
+  clearResult();
+  selectTab(practice ? "tests" : "knitout");
+}
+
 function updateLineNumbers() {
   const lines = editor.value.split("\n").length;
   lineNumbers.textContent = Array.from({ length: lines }, (_, index) => index + 1).join("\n");
@@ -564,6 +609,57 @@ function showResult(result) {
   selectTab(result.ok ? "knitout" : "console");
 }
 
+function showPracticeResult(result) {
+  emptyState.hidden = true;
+  resultContent.hidden = false;
+  runSummary.innerHTML = `<span class="summary-pill ${result.passed ? "success" : "error"}">${result.passed ? "✓ Practice check passed" : "× Practice check needs revision"}</span>`;
+  renderCheck({
+    tests: [{
+      passed: result.passed,
+      label: "Print the requested message",
+      message: result.message,
+    }],
+  });
+  consoleOutput.textContent = result.passed ? result.output : "No output yet.";
+  consoleOutput.classList.toggle("error", !result.passed);
+  selectTab("tests");
+}
+
+async function executePractice(mode, trigger) {
+  clearToast();
+  const isSubmission = mode === "submit";
+  const activeButton = isSubmission ? submitButton : runButton;
+  runButton.disabled = true;
+  submitButton.disabled = true;
+  activeButton.querySelector("span").textContent = isSubmission ? "Submitting…" : "Running…";
+  try {
+    await sessionReady;
+    recordEvent(`practice.${mode}.requested`, { trigger, source_length: editor.value.length });
+    const result = PracticeTask.check(editor.value);
+    showPracticeResult(result);
+    recordEvent(`practice.${mode}.${result.passed ? "passed" : "failed"}`, {
+      source: editor.value,
+      output: result.output,
+    });
+    await flushEvents();
+    if (isSubmission && result.passed) {
+      localStorage.setItem(practiceCompletionKey, "completed");
+      const sourceStorageScope = prolificRecruitment.prolific_session_id || participantId;
+      setStudyPhase("formal", sourceStorageScope);
+      recordEvent("formal_task.started", { transition: "practice_completed" });
+      await flushEvents();
+      showToast("Practice complete — the formal task has started");
+      editor.focus();
+    } else if (isSubmission) {
+      showToast("Complete the practice task before continuing");
+    }
+  } finally {
+    runButton.disabled = false;
+    submitButton.disabled = false;
+    activeButton.querySelector("span").textContent = isSubmission ? "Submit" : "Run";
+  }
+}
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -590,6 +686,7 @@ function showCompletion(result) {
 
 async function executeSource(mode, trigger = "button") {
   if (runButton.disabled || submitButton.disabled) return;
+  if (currentStudyPhase === "practice") return executePractice(mode, trigger);
   clearToast();
   const isSubmission = mode === "submit";
   const activeButton = isSubmission ? submitButton : runButton;
@@ -736,12 +833,11 @@ function startStudy(identityMethod) {
   if (studyStarted) return;
   if (!participantId) participantId = getPersistentId("knitscript-participant-id");
   const sourceStorageScope = prolificRecruitment.prolific_session_id || participantId;
-  sourceStorageKey = `knitscript-studio-source:${TASK_ID}:from-scratch-v1:${sourceStorageScope}`;
+  practiceCompletionKey = `coding-platform-practice-complete:v1:${sourceStorageScope}`;
   studyStarted = true;
   setStudyControlsEnabled(true);
   studyState.textContent = hasProlificParticipant ? "Prolific session" : "Preview mode";
-  setInitialSource();
-  previousSource = editor.value;
+  setStudyPhase(localStorage.getItem(practiceCompletionKey) === "completed" ? "formal" : "practice", sourceStorageScope);
   sessionReady = initializeTelemetrySession();
   sessionReady.then(() => {
     if (identityMethod === "manual") recordEvent("participant.id_provided", { method: identityMethod });
