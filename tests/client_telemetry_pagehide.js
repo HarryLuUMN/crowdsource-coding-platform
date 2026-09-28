@@ -26,7 +26,11 @@ function createElement() {
 const windowListeners = new Map();
 const fetchCalls = [];
 const beaconCalls = [];
+const storedValues = new Map();
 let rejectEventUploads = false;
+let rejectSessionCreation = false;
+let rejectEndSession = false;
+let reportMissingSession = false;
 let uuidCounter = 0;
 const context = {
   Blob,
@@ -42,13 +46,28 @@ const context = {
   },
   fetch: async (url, options = {}) => {
     fetchCalls.push({ url, options });
+    if (url === "/api/sessions") {
+      if (rejectSessionCreation) return { ok: false, status: 503, json: async () => ({}), text: async () => "" };
+      return { ok: true, status: 201, json: async () => ({ session: { session_id: `recovered-${uuidCounter}` } }), text: async () => "" };
+    }
+    if (url === "/api/sessions/end") {
+      return { ok: !rejectEndSession, status: rejectEndSession ? 503 : 200, json: async () => ({}), text: async () => "" };
+    }
+    if (url === "/api/events" && reportMissingSession) {
+      reportMissingSession = false;
+      return { ok: false, status: 404, json: async () => ({}), text: async () => "" };
+    }
     if (url === "/api/events" && (options.keepalive || rejectEventUploads)) {
       throw new TypeError("simulated interrupted upload");
     }
-    return { ok: true, json: async () => ({}), text: async () => "" };
+    return { ok: true, status: 200, json: async () => ({}), text: async () => "" };
   },
   history: { replaceState() {} },
-  localStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+  localStorage: {
+    getItem: (key) => storedValues.get(key) ?? null,
+    setItem: (key, value) => storedValues.set(key, String(value)),
+    removeItem: (key) => storedValues.delete(key),
+  },
   navigator: {
     language: "en-US",
     clipboard: { writeText: async () => {} },
@@ -73,11 +92,29 @@ const appSource = fs.readFileSync("static/app.js", "utf8");
 const readingSource = fs.readFileSync("static/documentation-reading.js", "utf8");
 const hooks = `
   globalThis.__telemetryTest = {
-    begin(sessionId) { studyStarted = true; currentStudyPhase = "formal"; telemetrySessionId = sessionId; },
+    begin(sessionId) {
+      studyStarted = true;
+      currentStudyPhase = "formal";
+      telemetrySessionId = sessionId;
+      telemetryStorageKey = "knitscript-telemetry-outbox:test";
+      persistTelemetryOutbox();
+    },
+    simulateReload() {
+      telemetrySessionId = null;
+      telemetrySeq = 0;
+      pendingEvents.splice(0);
+      return restoreTelemetryOutbox();
+    },
+    disconnectSession() {
+      telemetrySessionId = null;
+      persistTelemetryOutbox();
+    },
     setPhase(phase) { currentStudyPhase = phase; },
     recordEvent,
     flushEvents,
+    finishTelemetrySession,
     pendingEvents,
+    getSessionId() { return telemetrySessionId; },
   };
 `;
 vm.runInNewContext(`${readingSource}\n${appSource}\n${hooks}`, context, { filename: "static/app.js" });
@@ -100,6 +137,36 @@ async function run() {
   context.__telemetryTest.setPhase("formal");
 
   rejectEventUploads = true;
+  context.__telemetryTest.recordEvent("editor.edit", { inserted_text: "must survive reload" });
+  await context.__telemetryTest.flushEvents();
+  assert.ok(
+    [...storedValues.keys()].some((key) => key.startsWith("knitscript-telemetry-outbox:")),
+    "failed event uploads must be persisted outside page memory before a reload",
+  );
+  assert.equal(context.__telemetryTest.simulateReload(), true, "a reload must restore the active trace outbox");
+  assert.equal(context.__telemetryTest.pendingEvents.length, 1, "the failed event must survive a reload");
+  rejectEventUploads = false;
+  await context.__telemetryTest.flushEvents();
+  assert.equal(context.__telemetryTest.pendingEvents.length, 0, "restored events must upload after connectivity returns");
+
+  context.__telemetryTest.recordEvent("editor.edit", { inserted_text: "before server restart" });
+  reportMissingSession = true;
+  await context.__telemetryTest.flushEvents();
+  assert.match(context.__telemetryTest.getSessionId(), /^recovered-/, "a missing server session must be replaced");
+  assert.equal(context.__telemetryTest.pendingEvents.length, 0, "the recovered session marker must upload immediately");
+
+  context.__telemetryTest.disconnectSession();
+  rejectSessionCreation = true;
+  context.__telemetryTest.recordEvent("editor.edit", { inserted_text: "while session service is offline" });
+  await context.__telemetryTest.flushEvents();
+  assert.equal(context.__telemetryTest.simulateReload(), true, "queued events without a session must survive reload");
+  assert.equal(context.__telemetryTest.getSessionId(), null, "an unavailable session service must not invent a session id");
+  rejectSessionCreation = false;
+  await context.__telemetryTest.flushEvents();
+  assert.match(context.__telemetryTest.getSessionId(), /^recovered-/, "session creation must retry after recovery");
+  assert.equal(context.__telemetryTest.pendingEvents.length, 0, "pre-session events must upload after session recovery");
+
+  rejectEventUploads = true;
   for (let index = 0; index < 120; index += 1) {
     context.__telemetryTest.recordEvent("editor.edit", { inserted_text: "x".repeat(128), index });
   }
@@ -108,8 +175,8 @@ async function run() {
 
   assert.equal(
     context.__telemetryTest.pendingEvents.length,
-    121,
-    "pagehide must retain every unacknowledged event, including session.ended",
+    120,
+    "pagehide must retain every unacknowledged event without prematurely ending the session",
   );
   assert.ok(
     beaconCalls.some((call) => call.url === "/api/events"),
@@ -120,10 +187,18 @@ async function run() {
     "every keepalive payload must stay below the browser 64 KiB limit",
   );
   assert.equal(
-    fetchCalls.some((call) => call.url === "/api/sessions/end" && call.options.keepalive),
+    beaconCalls.some((call) => call.url === "/api/sessions/end"),
     false,
-    "pagehide must not fall back to an oversized keepalive end-session request",
+    "pagehide must not finalize a session that can still be resumed",
   );
+
+  rejectEventUploads = false;
+  rejectEndSession = true;
+  assert.equal(await context.__telemetryTest.finishTelemetrySession(), false, "failed finalization must block completion");
+  assert.ok(storedValues.has("knitscript-telemetry-outbox:test"), "failed finalization must retain recovery state");
+  rejectEndSession = false;
+  assert.equal(await context.__telemetryTest.finishTelemetrySession(), true, "finalization must retry successfully");
+  assert.equal(storedValues.has("knitscript-telemetry-outbox:test"), false, "successful finalization must clear recovery state");
 }
 
 run().catch((error) => {

@@ -11,6 +11,7 @@ let hasProlificParticipant = Boolean(prolificRecruitment.prolific_pid);
 let participantId = hasProlificParticipant ? prolificRecruitment.prolific_pid : "";
 let sourceStorageKey = "";
 let practiceCompletionKey = "";
+let telemetryStorageKey = "";
 let currentStudyPhase = "practice";
 const STARTER_SOURCE = "";
 const TELEMETRY_BATCH_SIZE = 25;
@@ -72,8 +73,8 @@ let toastTimer;
 let previousSource = "";
 let telemetrySessionId = null;
 let telemetrySeq = 0;
+let telemetryInitialSource = "";
 let telemetryFlush = Promise.resolve();
-let telemetryInFlightBatch = null;
 let telemetryEnded = false;
 let sessionReady = Promise.resolve();
 let studyStarted = false;
@@ -175,6 +176,43 @@ function getPersistentId(key) {
   return value;
 }
 
+function persistTelemetryOutbox() {
+  if (!telemetryStorageKey || telemetryEnded) return;
+  try {
+    localStorage.setItem(telemetryStorageKey, JSON.stringify({
+      version: 1,
+      task_id: TASK_ID,
+      session_id: telemetrySessionId,
+      seq: telemetrySeq,
+      initial_source: telemetryInitialSource,
+      pending_events: pendingEvents,
+    }));
+  } catch (_error) {
+    showToast("Logging recovery storage is unavailable — keep this page open");
+  }
+}
+
+function restoreTelemetryOutbox() {
+  if (!telemetryStorageKey) return false;
+  try {
+    const saved = JSON.parse(localStorage.getItem(telemetryStorageKey));
+    if (
+      saved?.version !== 1
+      || saved.task_id !== TASK_ID
+      || (saved.session_id !== null && typeof saved.session_id !== "string")
+      || !Array.isArray(saved.pending_events)
+    ) return false;
+    telemetrySessionId = saved.session_id;
+    telemetrySeq = Number.isInteger(saved.seq) ? saved.seq : 0;
+    telemetryInitialSource = typeof saved.initial_source === "string" ? saved.initial_source : editor.value;
+    pendingEvents.splice(0, pendingEvents.length, ...saved.pending_events);
+    return true;
+  } catch (_error) {
+    localStorage.removeItem(telemetryStorageKey);
+    return false;
+  }
+}
+
 function recordEvent(type, payload = {}) {
   if (!studyStarted || currentStudyPhase !== "formal" || telemetryEnded) return;
   telemetrySeq += 1;
@@ -186,6 +224,7 @@ function recordEvent(type, payload = {}) {
     elapsed_ms: Math.round(performance.now() - telemetryStartedAt),
     payload: { study_phase: currentStudyPhase, ...payload },
   });
+  persistTelemetryOutbox();
   if (pendingEvents.length >= 50) void flushEvents();
 }
 
@@ -320,7 +359,7 @@ function selectDocumentationView(name, logInteraction = false) {
   }
 }
 
-async function initializeTelemetrySession() {
+async function createTelemetrySession(initialSource, eventType, eventPayload = {}) {
   try {
     const response = await fetch("/api/sessions", {
       method: "POST",
@@ -328,7 +367,7 @@ async function initializeTelemetrySession() {
       body: JSON.stringify({
         participant_id: participantId,
         task_id: TASK_ID,
-        initial_source: editor.value,
+        initial_source: initialSource,
         recruitment: hasProlificParticipant ? prolificRecruitment : { source: "direct" },
         client: {
           client_instance_id: clientInstanceId,
@@ -338,36 +377,77 @@ async function initializeTelemetrySession() {
         },
       }),
     });
-    if (!response.ok) return;
+    if (!response.ok) return false;
     const body = await response.json();
     telemetrySessionId = body.session.session_id;
-    recordEvent("session.started", { source_length: editor.value.length });
+    telemetryInitialSource = initialSource;
+    persistTelemetryOutbox();
+    recordEvent(eventType, { source_length: initialSource.length, ...eventPayload });
+    return true;
   } catch (_error) {
-    // Compilation remains usable if telemetry storage is temporarily unavailable.
+    return false;
   }
+}
+
+async function initializeTelemetrySession() {
+  const restored = restoreTelemetryOutbox();
+  if (restored && telemetrySessionId) {
+    recordEvent("session.resumed", { source_length: editor.value.length, pending_event_count: pendingEvents.length });
+    return true;
+  }
+  const initialSource = restored ? telemetryInitialSource : editor.value;
+  return createTelemetrySession(initialSource, restored ? "session.connected" : "session.started", {
+    queued_event_count: pendingEvents.length,
+  });
+}
+
+async function recoverMissingTelemetrySession() {
+  const missingSessionId = telemetrySessionId;
+  const droppedEventCount = pendingEvents.length;
+  telemetrySessionId = null;
+  telemetrySeq = 0;
+  telemetryInitialSource = editor.value;
+  pendingEvents.splice(0);
+  localStorage.removeItem(telemetryStorageKey);
+  return createTelemetrySession(editor.value, "session.recovered", {
+    missing_session_id: missingSessionId,
+    recovered_from_source_checkpoint: true,
+    dropped_event_count: droppedEventCount,
+  });
 }
 
 async function flushEvents() {
   telemetryFlush = telemetryFlush.catch(() => false).then(async () => {
     await sessionReady;
-    if (!telemetrySessionId) return false;
+    if (!telemetrySessionId) {
+      const connected = await createTelemetrySession(
+        telemetryInitialSource,
+        "session.connected",
+        { queued_event_count: pendingEvents.length },
+      );
+      if (!connected) return false;
+    }
     while (pendingEvents.length > 0) {
-      const events = pendingEvents.splice(0, TELEMETRY_BATCH_SIZE);
+      const events = pendingEvents.slice(0, TELEMETRY_BATCH_SIZE);
       const batchId = crypto.randomUUID();
-      telemetryInFlightBatch = { batch_id: batchId, events };
       try {
         const response = await fetch("/api/events", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ session_id: telemetrySessionId, batch_id: batchId, events }),
         });
+        if (response.status === 400 || response.status === 404) {
+          await response.text();
+          if (await recoverMissingTelemetrySession()) continue;
+          return false;
+        }
         if (!response.ok) throw new Error("Telemetry upload failed");
         await response.text();
+        pendingEvents.splice(0, events.length);
+        persistTelemetryOutbox();
       } catch (_error) {
-        pendingEvents.unshift(...events);
+        persistTelemetryOutbox();
         return false;
-      } finally {
-        telemetryInFlightBatch = null;
       }
     }
     return true;
@@ -388,32 +468,31 @@ function eventBatchesFor(events) {
 
 function sendPendingEventsWithBeacon() {
   if (!telemetrySessionId) return;
-  const events = [
-    ...(telemetryInFlightBatch ? telemetryInFlightBatch.events : []),
-    ...pendingEvents,
-  ];
-  eventBatchesFor(events).forEach((batch) => {
+  persistTelemetryOutbox();
+  eventBatchesFor(pendingEvents).forEach((batch) => {
     const payload = JSON.stringify({ session_id: telemetrySessionId, ...batch });
     navigator.sendBeacon("/api/events", new Blob([payload], { type: "application/json" }));
   });
 }
 
 async function finishTelemetrySession() {
-  if (!telemetrySessionId || telemetryEnded) return;
+  if (!telemetrySessionId || telemetryEnded) return telemetryEnded;
   recordEvent("session.ended", { source_length: editor.value.length });
-  await flushEvents();
+  if (!await flushEvents()) return false;
   try {
     const response = await fetch("/api/sessions/end", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ session_id: telemetrySessionId, final_source: editor.value }),
     });
-    if (!response.ok) return;
+    if (!response.ok) return false;
     await response.text();
   } catch (_error) {
-    return;
+    return false;
   }
   telemetryEnded = true;
+  localStorage.removeItem(telemetryStorageKey);
+  return true;
 }
 
 function describeEdit(before, after, inputType = "") {
@@ -488,6 +567,7 @@ function setStudyPhase(phase, sourceStorageScope) {
     ? "Use Run to check the output, then Submit when the practice test passes."
     : "You will see a result for each requirement here before submitting.";
   setInitialSource();
+  if (!practice) telemetryInitialSource = editor.value;
   previousSource = editor.value;
   clearResult();
   selectTab(practice ? "tests" : "knitout");
@@ -784,8 +864,13 @@ prolificCompletionLink.addEventListener("click", async (event) => {
   event.preventDefault();
   prolificCompletionLink.setAttribute("aria-disabled", "true");
   prolificCompletionLink.textContent = "Saving trace…";
-  await finishTelemetrySession();
-  window.location.assign(completionUrl);
+  if (await finishTelemetrySession()) {
+    window.location.assign(completionUrl);
+    return;
+  }
+  prolificCompletionLink.removeAttribute("aria-disabled");
+  prolificCompletionLink.textContent = "Return to Prolific";
+  showToast("Your trace is still saving — try again in a moment");
 });
 
 document.addEventListener("visibilitychange", () => {
@@ -797,16 +882,12 @@ window.addEventListener("pagehide", () => {
   recordDocumentationView();
   recordTutorialView();
   if (!telemetrySessionId || telemetryEnded) return;
-  recordEvent("session.ended", { source_length: editor.value.length });
+  persistTelemetryOutbox();
   sendPendingEventsWithBeacon();
-  const payload = JSON.stringify({
-    session_id: telemetrySessionId,
-    final_source: editor.value,
-  });
-  navigator.sendBeacon("/api/sessions/end", new Blob([payload], { type: "application/json" }));
 });
 
 window.addEventListener("pageshow", () => void flushEvents());
+window.addEventListener("online", () => void flushEvents());
 
 fetch("/api/health")
   .then((response) => {
@@ -829,6 +910,7 @@ function startStudy(identityMethod) {
   if (!participantId) participantId = getPersistentId("knitscript-participant-id");
   const sourceStorageScope = prolificRecruitment.prolific_session_id || participantId;
   practiceCompletionKey = `coding-platform-practice-complete:v1:${sourceStorageScope}`;
+  telemetryStorageKey = `knitscript-telemetry-outbox:${TASK_ID}:${sourceStorageScope}`;
   studyStarted = true;
   setStudyControlsEnabled(true);
   studyState.textContent = hasProlificParticipant ? "Prolific session" : "Preview mode";
