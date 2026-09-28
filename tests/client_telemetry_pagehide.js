@@ -73,7 +73,8 @@ const appSource = fs.readFileSync("static/app.js", "utf8");
 const readingSource = fs.readFileSync("static/documentation-reading.js", "utf8");
 const hooks = `
   globalThis.__telemetryTest = {
-    begin(sessionId) { studyStarted = true; telemetrySessionId = sessionId; },
+    begin(sessionId) { studyStarted = true; currentStudyPhase = "formal"; telemetrySessionId = sessionId; },
+    setPhase(phase) { currentStudyPhase = phase; },
     recordEvent,
     flushEvents,
     pendingEvents,
@@ -92,6 +93,11 @@ async function run() {
     "normal telemetry uploads must not use the browser keepalive quota",
   );
   assert.equal(fetchCalls.find((call) => call.url === "/api/events").options.keepalive, undefined);
+
+  context.__telemetryTest.setPhase("practice");
+  context.__telemetryTest.recordEvent("editor.edit", { inserted_text: "practice" });
+  assert.equal(context.__telemetryTest.pendingEvents.length, 0, "practice activity must not enter the trace pipeline");
+  context.__telemetryTest.setPhase("formal");
 
   rejectEventUploads = true;
   for (let index = 0; index < 120; index += 1) {

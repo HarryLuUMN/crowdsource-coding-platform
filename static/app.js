@@ -176,7 +176,7 @@ function getPersistentId(key) {
 }
 
 function recordEvent(type, payload = {}) {
-  if (!studyStarted || telemetryEnded) return;
+  if (!studyStarted || currentStudyPhase !== "formal" || telemetryEnded) return;
   telemetrySeq += 1;
   pendingEvents.push({
     client_event_id: `${clientInstanceId}:${telemetrySeq}`,
@@ -625,7 +625,7 @@ function showPracticeResult(result) {
   selectTab("tests");
 }
 
-async function executePractice(mode, trigger) {
+async function executePractice(mode) {
   clearToast();
   const isSubmission = mode === "submit";
   const activeButton = isSubmission ? submitButton : runButton;
@@ -633,19 +633,14 @@ async function executePractice(mode, trigger) {
   submitButton.disabled = true;
   activeButton.querySelector("span").textContent = isSubmission ? "Submitting…" : "Running…";
   try {
-    await sessionReady;
-    recordEvent(`practice.${mode}.requested`, { trigger, source_length: editor.value.length });
     const result = PracticeTask.check(editor.value);
     showPracticeResult(result);
-    recordEvent(`practice.${mode}.${result.passed ? "passed" : "failed"}`, {
-      source: editor.value,
-      output: result.output,
-    });
-    await flushEvents();
     if (isSubmission && result.passed) {
       localStorage.setItem(practiceCompletionKey, "completed");
       const sourceStorageScope = prolificRecruitment.prolific_session_id || participantId;
       setStudyPhase("formal", sourceStorageScope);
+      sessionReady = initializeTelemetrySession();
+      await sessionReady;
       recordEvent("formal_task.started", { transition: "practice_completed" });
       await flushEvents();
       showToast("Practice complete — the formal task has started");
@@ -686,7 +681,7 @@ function showCompletion(result) {
 
 async function executeSource(mode, trigger = "button") {
   if (runButton.disabled || submitButton.disabled) return;
-  if (currentStudyPhase === "practice") return executePractice(mode, trigger);
+  if (currentStudyPhase === "practice") return executePractice(mode);
   clearToast();
   const isSubmission = mode === "submit";
   const activeButton = isSubmission ? submitButton : runButton;
@@ -838,11 +833,13 @@ function startStudy(identityMethod) {
   setStudyControlsEnabled(true);
   studyState.textContent = hasProlificParticipant ? "Prolific session" : "Preview mode";
   setStudyPhase(localStorage.getItem(practiceCompletionKey) === "completed" ? "formal" : "practice", sourceStorageScope);
-  sessionReady = initializeTelemetrySession();
-  sessionReady.then(() => {
-    if (identityMethod === "manual") recordEvent("participant.id_provided", { method: identityMethod });
-    return flushEvents();
-  });
+  if (currentStudyPhase === "formal") {
+    sessionReady = initializeTelemetrySession();
+    sessionReady.then(() => {
+      if (identityMethod === "manual") recordEvent("participant.id_provided", { method: identityMethod });
+      return flushEvents();
+    });
+  }
 }
 
 participantForm.addEventListener("submit", (event) => {
