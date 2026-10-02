@@ -145,3 +145,5 @@ button { color: inherit; }
  .cell-button.candidate::after { border: 1px dashed #ffcc66; background: #ffcc6630; }
  .detection-card pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; }
  .detection-card summary { margin: 8px 0; font-size: 12px; cursor: pointer; }
+ .rule-review button { padding: 6px 9px; border: 1px solid var(--line-strong); border-radius: 6px; color: var(--text); background: var(--panel); cursor: pointer; }
+ .rule-review button:hover { border-color: var(--lime); }
