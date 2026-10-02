@@ -346,7 +346,7 @@ function renderDetail() {
 function renderRuleEvidence(stepIndex) {
   const all = state.rules?.detections || [];
   const pending = all.filter(d => d.status === "candidate" && !state.decisions[d.id]);
-  $("#ruleSummary").textContent = `${all.filter(d => d.status === "auto").length} detected · ${pending.length} pending candidates`;
+  $("#ruleSummary").textContent = `${all.filter(d => d.status === "auto").length} detected · ${pending.length} pending · ${all.filter(d => state.decisions[d.id] === "uncertain").length} uncertain`;
   const container = $("#ruleEvidence"); container.replaceChildren();
   all.filter(d => d.step === stepIndex).forEach(d => {
     const card = document.createElement("div"); card.className = "detection-card";
@@ -360,7 +360,7 @@ function renderRuleEvidence(stepIndex) {
     summary.textContent = "Inspect source and diagnostic evidence";
     raw.textContent = JSON.stringify(d.evidence, null, 2);
     details.append(summary, raw); card.append(details);
-    for (const [label, decision] of [["Confirm", "confirmed"], ["Reject", "rejected"]]) {
+    for (const [label, decision] of [["Confirm", "confirmed"], ["Reject", "rejected"], ["Uncertain", "uncertain"]]) {
       const button = document.createElement("button"); button.type = "button"; button.textContent = label;
       button.addEventListener("click", () => {
         state.decisions[d.id] = decision;

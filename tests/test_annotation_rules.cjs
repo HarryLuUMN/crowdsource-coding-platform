@@ -54,4 +54,9 @@ assert(run([
   {event:'run.requested',source:'knit n;'}, {event:'run.completed',source:'knit n;'},
   {event:'run.requested',source:'knit n; drop n;'}, {event:'run.completed',source:'knit n; drop n;'},
 ]).some(d=>d.code==='INCREMENTAL' && d.status==='auto'));
+assert(run([{event:'run.failed',payload:{error_type:'No_Declared_Carrier_Error'},source:'knit n;'}]).some(d=>d.code==='INCORRECT_DECLARATION' && d.status==='auto'));
+assert(run([
+  {event:'run.requested',source:'x=1; y=2;'}, {event:'run.completed',source:'x=1; y=2;'},
+  {event:'run.requested',source:'x=2; y=1;'},
+]).some(d=>d.code==='LOCAL_REVISION' && d.status==='auto'));
 console.log('Annotation rule evidence and false-positive tests passed');

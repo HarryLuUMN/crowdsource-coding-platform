@@ -90,10 +90,13 @@ function detectAnnotationRules(dataset) {
         const oldStatements = annotationStatements(before), newStatements = annotationStatements(source);
         const changedStatements = oldStatements && newStatements && oldStatements.length === newStatements.length
           ? oldStatements.filter((s, i) => s !== newStatements[i]).length : null;
-        const local = changedStatements === 1 && !/[;{}\n]/.test(delta.removed + delta.inserted)
-          && (delta.removed.trim() || delta.inserted.trim()) && delta.removed.length < (oldStatements.find((s, i) => s !== newStatements[i]) || "").length;
+        const local = changedStatements > 0 && oldStatements.every((s, i) => {
+          if (s === newStatements[i]) return true;
+          const part = annotationSourceChange(s, newStatements[i]);
+          return !/[;{}]/.test(part.removed + part.inserted) && part.removed.length < s.length;
+        });
         if (local) {
-          add(step, "LOCAL_REVISION", "auto", "One existing semicolon-delimited statement changes internally before reevaluation.", [previousEvaluation]);
+          add(step, "LOCAL_REVISION", "auto", "Existing semicolon-delimited statements change internally before reevaluation; no full statement or block delimiter changes.", [previousEvaluation]);
           if (previousOutcome?.event === "run.failed" && /parsing|syntax|parse/i.test(previousOutcome.payload?.error_type || "")) add(step, "LOCAL_AFTER_SYNTAX", "auto", "The preceding evaluation reported a parser/syntax error.", [previousOutcome]);
           const check = previousOutcome?.payload?.check;
           if (check && check.passed_count < check.total_count && previousOutcome.event === "run.completed") add(step, "LOCAL_AFTER_OUTPUT", "auto", "The preceding successful execution failed task checks.", [previousOutcome]);
@@ -101,7 +104,10 @@ function detectAnnotationRules(dataset) {
             localAttempts++;
             if (localAttempts >= 2) add(step, "TRIAL_ERROR", errorViewed ? "auto" : "candidate", errorViewed ? "After opening the error console, at least two local revision/evaluation attempts occur." : "At least two local attempts follow an error; verify that the error was read.", [previousEvaluation]);
           }
-        } else add(step, "LOCAL_REVISION", "candidate", "Source changed since the last evaluation; inspect whether the change is smaller than a complete statement.", [previousEvaluation]);
+        } else {
+          localAttempts = 0;
+          add(step, "LOCAL_REVISION", "candidate", "Source changed since the last evaluation; inspect whether the change is smaller than a complete statement.", [previousEvaluation]);
+        }
         if (oldStatements && newStatements && newStatements.length === oldStatements.length + 1) {
           let i = 0, j = 0, added = [];
           while (j < newStatements.length) { if (oldStatements[i] === newStatements[j]) { i++; j++; } else added.push(newStatements[j++]); }
@@ -114,6 +120,7 @@ function detectAnnotationRules(dataset) {
       const error = `${p.error_type || ""} ${p.error_message || p.message || ""} ${p.stderr || ""}`;
       const syntax = /parsing|syntax|parse/i.test(error);
       if (/^(run|submit)\.failed$/.test(step.event)) {
+        if (/No_Declared_Carrier_Error/.test(error)) add(step, "INCORRECT_DECLARATION", "auto", "The compiler explicitly reports that no carrier has been declared.");
         if (/undefined|not defined|unknown (variable|identifier)|NameError/i.test(error)) add(step, "IDENTIFIER_ISSUE", "auto", "The compiler explicitly reports an undefined/unknown identifier.");
         if (/unexpected (end|eof)|unterminated|unclosed|missing.*(brace|parenthesis|delimiter)/i.test(error)) {
           add(step, "INCOMPLETE_STRUCTURE", "auto", "The diagnostic explicitly reports an unclosed or missing structural delimiter.");
@@ -133,7 +140,7 @@ function detectAnnotationRules(dataset) {
         if (increment) {
           const oldStatements = annotationStatements(increment.evidence.before) || [], newStatements = annotationStatements(increment.evidence.after) || [];
           const added = newStatements.filter(s => !oldStatements.includes(s));
-          if (added.length === 1 && /^\s*(knit|tuck|miss|xfer|drop|releasehook|inhook|outhook)\b/.test(added[0])) {
+          if (added.length === 1 && /^\s*(knit|tuck|miss|xfer|drop|releasehook|inhook|outhook|cut)\b/.test(added[0])) {
             increment.status = "auto";
             increment.reason = "One machine-operation statement was added and the subsequent execution succeeded, establishing grammatical validity and a behavior effect.";
             increment.evidence.events.push(step.sourceSteps?.[0] ?? step.index);
@@ -141,6 +148,8 @@ function detectAnnotationRules(dataset) {
         }
         if (check && Number.isFinite(check.passed_count) && check.total_count > 0 && check.passed_count < check.total_count) add(step, "VALID_WRONG_OUTPUT", "auto", `Execution succeeded but only ${check.passed_count}/${check.total_count} task checks passed.`);
         if (previousOutcome?.event === "run.failed" && /parsing|syntax|parse/i.test(previousOutcome.payload?.error_type || "")) add(step, "SYNTAX_SEMANTICS", "candidate", "A successful execution follows a syntax error; inspect the remaining trace for subsequent behavioral repairs.", [previousOutcome]);
+        localAttempts = 0;
+        errorViewed = false;
       }
       if (!previousEvaluation) previousEvaluation = step;
       previousOutcome = step;
