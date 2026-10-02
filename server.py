@@ -299,6 +299,9 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                 return
             try:
                 repository = get_admin_repository()
+                if path == "/api/admin/annotation-review/67aa5":
+                    self._send_json(HTTPStatus.OK, json.loads((ANNOTATION_DATA_DIR / "67aa5-review.json").read_text()))
+                    return
                 if path == "/api/admin/annotation-dataset/s4":
                     dataset_path = ANNOTATION_DATA_DIR / "s4.json"
                     self._send_json(HTTPStatus.OK, {"ok": True, "dataset": json.loads(dataset_path.read_text())})

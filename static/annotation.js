@@ -48,9 +48,9 @@ function storageKey() {
 function loadAnnotations() {
   try {
     const stored = JSON.parse(localStorage.getItem(storageKey()) || "{}");
-    state.annotations = stored.annotations && typeof stored.annotations === "object" ? stored.annotations : {};
+    state.annotations = stored.annotations && typeof stored.annotations === "object" ? stored.annotations : structuredClone(state.dataset.annotations || {});
   } catch {
-    state.annotations = {};
+    state.annotations = structuredClone(state.dataset.annotations || {});
   }
 }
 
@@ -379,6 +379,16 @@ async function loadDataset() {
   try {
     const payload = await api("/api/admin/annotation-dataset/s4");
     state.dataset = payload.dataset;
+    if (new URLSearchParams(location.search).get("trace") === "67aa5") {
+      const review = await api("/api/admin/annotation-review/67aa5");
+      const [detail, stream, initial] = await Promise.all([
+        api(`/api/admin/sessions/${review.session}`),
+        api(`/api/admin/sessions/${review.session}/events?limit=10000`),
+        api(`/api/admin/sessions/${review.session}/file?path=code/source-initial.ks`),
+      ]);
+      state.dataset = buildSessionDataset(detail, stream.events, payload.dataset.codebook, initial.content || "", review.review);
+      document.querySelector('[aria-label="Search traces"]').value = review.participant;
+    }
     state.codes = visibleCodebook().flatMap((group, groupIndex) => group.codes.map((code) => ({ ...code, group: group.group, groupIndex })));
     loadAnnotations();
     renderTrace(); renderLegend(); renderMatrix(); renderDetail(); updateProgress();

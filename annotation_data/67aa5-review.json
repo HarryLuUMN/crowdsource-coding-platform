@@ -1,0 +1,10 @@
+{
+  "session": "b8c98aac-ad68-4c62-8a4f-aaf0dbbc3f21",
+  "participant": "67aa54c162dc637de018fe18",
+  "review": {
+    "13": {"codes": ["DOC_FIRST"], "reason": "Tutorial scrolling occurs before the first code edit (event 252)."},
+    "537": {"codes": ["INCORRECT_VALUE"], "reason": "Evaluation fails with Blocked_by_Yarn_Inserting_Hook_Error on tuck + f9. Changing the cast-on slice starts from 0/1 to 1/0 resolves this runtime failure; this is not a syntax error."},
+    "549": {"codes": ["LOCAL_REVISION"], "reason": "After the failed evaluation, events 545–548 change only two numeric slice-start values within existing statements, then evaluate again."},
+    "550": {"codes": ["VALID_WRONG_OUTPUT"], "reason": "Compilation succeeds but only 4/5 checks pass: the two securing rows before releasehook are absent. The next revision adds a loop with multiple statements, so it is not labelled incremental construction or sub-statement revision."}
+  }
+}
