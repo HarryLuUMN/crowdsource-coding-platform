@@ -1,7 +1,7 @@
 "use strict";
 
 const $ = (selector) => document.querySelector(selector);
-const state = { dataset: null, codes: [], selectedStep: 0, annotations: {}, activeTab: "code" };
+const state = { dataset: null, codes: [], selectedStep: 0, annotations: {}, decisions: {}, rules: null, activeTab: "code" };
 const STORAGE_PREFIX = "trace-annotations:";
 const TRACE_CATALOG = [
   { key: "s4", id: "443bbe19-51d6-431e-bd0f-55baecdcc183", participant: "6638e8aa3d1f38846080806a", steps: 57, unit: "semantic steps" },
@@ -54,10 +54,12 @@ function storageKey() {
 function loadAnnotations() {
   try {
     const stored = JSON.parse(localStorage.getItem(storageKey()) || "{}");
+    state.decisions = stored.ruleDecisions || {};
     state.annotations = stored.annotations && typeof stored.annotations === "object"
       ? { ...structuredClone(state.dataset.annotations || {}), ...stored.annotations }
       : structuredClone(state.dataset.annotations || {});
   } catch {
+    state.decisions = {};
     state.annotations = structuredClone(state.dataset.annotations || {});
   }
 }
@@ -69,13 +71,17 @@ function saveAnnotations() {
     participant: state.dataset.trace.participant,
     updatedAt: new Date().toISOString(),
     annotations: state.annotations,
+    ruleDecisions: state.decisions,
   }));
   $("#saveState").textContent = "Saved locally";
   updateProgress();
 }
 
 function selectedCodes(stepIndex) {
-  return Array.isArray(state.annotations[stepIndex]) ? state.annotations[stepIndex] : [];
+  const manual = Array.isArray(state.annotations[stepIndex]) ? state.annotations[stepIndex] : [];
+  const inferred = (state.rules?.detections || []).filter(d => d.step === stepIndex &&
+    (state.decisions[d.id] === "confirmed" || (d.status === "auto" && state.decisions[d.id] !== "rejected"))).map(d => d.code);
+  return [...new Set([...manual, ...inferred])];
 }
 
 function visibleCodebook() {
@@ -85,7 +91,7 @@ function visibleCodebook() {
 function updateProgress() {
   const total = state.dataset.steps.length;
   const visibleIds = new Set(state.codes.map((code) => code.id));
-  const complete = Object.values(state.annotations).filter((codes) => Array.isArray(codes) && codes.some((id) => visibleIds.has(id))).length;
+  const complete = state.dataset.steps.filter(step => selectedCodes(step.index).some(id => visibleIds.has(id))).length;
   $("#progressText").textContent = `${complete} / ${total} steps annotated`;
   $("#progressBar").style.width = `${total ? (complete / total) * 100 : 0}%`;
 }
@@ -215,6 +221,10 @@ function refreshMatrix() {
     row.querySelectorAll(".cell-button").forEach((button) => {
       const selected = applied.has(button.dataset.code);
       button.classList.toggle("selected", selected);
+      const detection = state.rules?.detections.find(d => d.step === stepIndex && d.code === button.dataset.code);
+      const pending = detection?.status === "candidate" && !state.decisions[detection.id] && !selected;
+      button.classList.toggle("candidate", !!pending);
+      if (detection) button.title = `${detection.status === "auto" ? "Detected" : "Candidate"}: ${detection.reason}`;
       button.setAttribute("aria-pressed", String(selected));
     });
   });
@@ -224,6 +234,8 @@ function toggleCode(stepIndex, codeId) {
   const selected = new Set(selectedCodes(stepIndex));
   if (selected.has(codeId)) selected.delete(codeId);
   else selected.add(codeId);
+  const detection = state.rules?.detections.find(d => d.step === stepIndex && d.code === codeId);
+  if (detection) state.decisions[detection.id] = selected.has(codeId) ? "confirmed" : "rejected";
   state.annotations[stepIndex] = [...selected];
   state.selectedStep = stepIndex;
   saveAnnotations();
@@ -328,6 +340,32 @@ function renderDetail() {
   renderDiff(step);
   renderReading(step);
   renderAppliedCodes(step.index);
+  renderRuleEvidence(step.index);
+}
+
+function renderRuleEvidence(stepIndex) {
+  const all = state.rules?.detections || [];
+  const pending = all.filter(d => d.status === "candidate" && !state.decisions[d.id]);
+  $("#ruleSummary").textContent = `${all.filter(d => d.status === "auto").length} detected · ${pending.length} pending candidates`;
+  const container = $("#ruleEvidence"); container.replaceChildren();
+  all.filter(d => d.step === stepIndex).forEach(d => {
+    const card = document.createElement("div"); card.className = "detection-card";
+    const title = document.createElement("strong");
+    title.textContent = `${state.codes.find(c => c.id === d.code)?.label || d.code} · ${state.decisions[d.id] || d.status}`;
+    const evidence = document.createElement("p"); evidence.textContent = `${d.reason} Events: ${d.evidence.events.join(", ")}`;
+    card.append(title, evidence);
+    for (const [label, decision] of [["Confirm", "confirmed"], ["Reject", "rejected"]]) {
+      const button = document.createElement("button"); button.type = "button"; button.textContent = label;
+      button.addEventListener("click", () => {
+        state.decisions[d.id] = decision;
+        if (decision === "rejected") state.annotations[stepIndex] = (state.annotations[stepIndex] || []).filter(id => id !== d.code);
+        saveAnnotations(); refreshMatrix(); renderDetail();
+      });
+      card.append(button);
+    }
+    container.append(card);
+  });
+  if (!container.childElementCount) container.textContent = "No rule matches at this step.";
 }
 
 function selectStep(index) {
@@ -349,6 +387,8 @@ function exportAnnotations() {
     codebookVersion: "behavioral-properties-2026-10-02",
     exportedAt: new Date().toISOString(),
     annotations: state.dataset.steps.map((step) => ({ step: step.index, codes: selectedCodes(step.index) })),
+    ruleDetections: state.rules,
+    ruleDecisions: state.decisions,
   };
   const anchor = document.createElement("a");
   anchor.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
@@ -362,6 +402,7 @@ async function importAnnotations(file) {
   if (payload.trace?.id !== state.dataset.trace.id || !Array.isArray(payload.annotations)) throw new Error("This file does not contain annotations for the selected trace.");
   const validCodes = new Set(state.dataset.codebook.flatMap((group) => group.codes.map((code) => code.id)));
   state.annotations = {};
+  state.decisions = payload.ruleDecisions || {};
   payload.annotations.forEach((entry) => {
     if (!Number.isInteger(entry.step) || !Array.isArray(entry.codes)) return;
     state.annotations[entry.step] = entry.codes.filter((code) => validCodes.has(code));
@@ -372,6 +413,11 @@ async function importAnnotations(file) {
 }
 
 function bindInteractions() {
+  $("#nextCandidate").addEventListener("click", () => {
+    const pending = (state.rules?.detections || []).filter(d => d.status === "candidate" && !state.decisions[d.id]);
+    const next = pending.find(d => d.step > state.selectedStep) || pending[0];
+    if (next) { selectStep(next.step); $("#matrixBody").rows[next.step]?.scrollIntoView({ block: "center" }); }
+  });
   $("#traceSearch").addEventListener("input", renderTraceList);
   $("#stepFilter").addEventListener("input", (event) => {
     const query = event.target.value.trim().toLowerCase();
@@ -385,6 +431,7 @@ function bindInteractions() {
   new ResizeObserver(() => { if (fitMatrix) fitAllSteps(); }).observe($("#matrixShell"));
   $("#clearStepButton").addEventListener("click", () => {
     state.annotations[state.selectedStep] = [];
+    for (const d of state.rules?.detections || []) if (d.step === state.selectedStep) state.decisions[d.id] = "rejected";
     saveAnnotations(); refreshMatrix(); renderDetail();
   });
   document.querySelectorAll("[data-detail-tab]").forEach((button) => button.addEventListener("click", () => setDetailTab(button.dataset.detailTab)));
@@ -425,6 +472,7 @@ async function loadDataset(traceName = new URLSearchParams(location.search).get(
       if (review.outcome) dataset.trace.dataNote += ` ${review.outcome}`;
     }
     state.dataset = dataset;
+    state.rules = detectAnnotationRules(dataset);
     state.selectedStep = 0;
     $("#stepFilter").value = "";
     const url = new URL(location.href); url.searchParams.set("trace", traceName); history.replaceState(null, "", url);

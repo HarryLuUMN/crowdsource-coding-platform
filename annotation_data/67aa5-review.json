@@ -3,14 +3,8 @@
   "participant": "67aa54c162dc637de018fe18",
   "review": {
     "13": {"codes": ["DOC_FIRST"], "reason": "Tutorial scrolling occurs before the first code edit (event 252)."},
-    "252": {"codes": ["INITIAL_STRUCTURE", "TRANSLATE_REQUIREMENTS"], "reason": "First programming construction begins after the documentation phase; the participant turns the task requirements into the initial KnitScript scaffold. The individual keystrokes that follow are retained as raw events, not relabeled as separate behaviors."},
-    "464": {"codes": ["PASTE_DOC"], "reason": "A paste event introduces a larger code fragment during construction. The surrounding editor events preserve the exact source before and after the paste."},
     "537": {"codes": ["INCORRECT_VALUE"], "reason": "Evaluation fails with Blocked_by_Yarn_Inserting_Hook_Error on tuck + f9. Changing the cast-on slice starts from 0/1 to 1/0 resolves this runtime failure; this is not a syntax error."},
     "549": {"codes": ["LOCAL_REVISION"], "reason": "After the failed evaluation, events 545–548 change only two numeric slice-start values within existing statements, then evaluate again."},
-    "550": {"codes": ["VALID_WRONG_OUTPUT", "RELEASEHOOK_ROWS"], "reason": "Compilation succeeds but only 4/5 checks pass: the two securing rows before releasehook are absent. This is an observable releasehook/row coordination problem."},
-    "581": {"codes": ["REPAIR_STRUCTURE", "WIDTH_ROW_STRUCTURE"], "reason": "After inspecting the failed result, the participant starts a new construction phase with a larger structural rewrite aimed at matching the required width and row pattern."},
-    "583": {"codes": ["PASTE_DOC"], "reason": "A paste event supplies a code fragment during the second construction phase; subsequent edits adapt it to the task."},
-    "634": {"codes": ["INCREMENTAL", "VALID_CAST_ON", "RELEASEHOOK_ROWS", "WIDTH_ROW_STRUCTURE"], "reason": "The completed construction is evaluated and passes all 5/5 task checks, providing direct evidence that the cast-on, width/row structure, and releasehook coordination are valid."},
-    "645": {"codes": ["INCREMENTAL"], "reason": "The accepted submission records the final verified program after the successful 5/5 evaluation."}
+    "550": {"codes": ["VALID_WRONG_OUTPUT"], "reason": "Compilation succeeds but only 4/5 checks pass: the two securing rows before releasehook are absent. The later passing program does not establish incremental construction; the revision adds multiple statements."}
   }
 }

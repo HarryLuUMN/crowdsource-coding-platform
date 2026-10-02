@@ -16,7 +16,7 @@ function buildSessionDataset(detail, events, codebook, initialSource = "", revie
     const evidence = review[event.seq];
     const blocks = p.visible_blocks || [];
     return {
-      index, event: event.type, elapsedMs: event.elapsed_ms, source, previousSource,
+      index, event: event.type, elapsedMs: event.elapsed_ms, source, previousSource, payload: p,
       sourceSteps: [event.seq], changed: source !== previousSource, legacyLabels: [],
       note: evidence?.reason || `Event #${event.seq}: ${event.type}${p.error_type ? ` · ${p.error_type}` : ""}${p.check ? ` · ${p.check.passed_count}/${p.check.total_count} tests passed` : ""}`,
       reading: event.type.startsWith("guide.") ? {
