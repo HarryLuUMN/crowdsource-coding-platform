@@ -46,6 +46,20 @@ class AnnotationFixtureTests(unittest.TestCase):
                     self.assertIn("does not pass all task checks", dataset["steps"][int(index)]["note"])
             self.assertTrue(any(s["source"].strip() for s in dataset["steps"]))
 
+    def test_67658_review_retains_candidate_uncertainty(self) -> None:
+        review = json.loads((ROOT / "annotation_data" / "67658-review.json").read_text())
+        self.assertEqual("6765829a949d1203926e1ade", review["participant"])
+        self.assertEqual(31, len(review["review"]))
+        self.assertEqual(88, len(review["ruleDecisions"]))
+        self.assertEqual("rejected", review["ruleDecisions"]["102:LOCAL_REVISION"])
+        self.assertEqual("uncertain", review["ruleDecisions"]["512:PASTE_DOC"])
+        self.assertEqual("confirmed", review["ruleDecisions"]["273:PASTE_DOC"])
+        self.assertEqual(set(review["ruleDecisions"]), set(review["ruleReviewNotes"]))
+        supported = {c["id"] for g in self.dataset["codebook"][:2] for c in g["codes"]}
+        for entry in review["review"].values():
+            self.assertTrue(set(entry["codes"]) <= supported)
+            self.assertTrue(entry["reason"])
+
 
 if __name__ == "__main__":
     unittest.main()

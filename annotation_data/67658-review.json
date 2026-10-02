@@ -1,1 +1,378 @@
-{"session":"9da1b0a5-2c84-4720-abac-c8b3a7fa78aa","participant":"6765829a949d1203926e1ade","review":{},"ruleDecisions":{},"ruleReviewNotes":{}}
+{
+  "session": "9da1b0a5-2c84-4720-abac-c8b3a7fa78aa",
+  "participant": "6765829a949d1203926e1ade",
+  "review": {
+    "3": {
+      "codes": [
+        "DOC_FIRST"
+      ],
+      "reason": "Recorded tutorial exposure and reading interactions precede first paste #11; visibility is not proof of attention."
+    },
+    "11": {
+      "codes": [
+        "PASTE_FIRST"
+      ],
+      "reason": "The first source-changing editor event is a paste."
+    },
+    "22": {
+      "codes": [
+        "VALID_WRONG_OUTPUT"
+      ],
+      "reason": "Execution succeeded but only 3/5 task checks passed."
+    },
+    "55": {
+      "codes": [
+        "PASTE_DOC"
+      ],
+      "reason": "Pasted pip install knit-script matches previously visible documentation code at #45. It is a shell example, not valid KnitScript."
+    },
+    "58": {
+      "codes": [
+        "WRONG_TOKEN",
+        "NON_LANGUAGE"
+      ],
+      "reason": "The evaluated source contains pip install knit-script, a shell command in the DSL editor. Removing it resolves the parser failure. pip install is a shell command, not a KnitScript construct."
+    },
+    "79": {
+      "codes": [
+        "VALID_WRONG_OUTPUT"
+      ],
+      "reason": "Execution succeeded but only 4/5 task checks passed."
+    },
+    "100": {
+      "codes": [
+        "DELETE_REPASTE"
+      ],
+      "reason": "The previous paste was removed before being edited, followed by another paste."
+    },
+    "105": {
+      "codes": [
+        "IDENTIFIER_ISSUE"
+      ],
+      "reason": "The compiler explicitly reports an undefined/unknown identifier."
+    },
+    "108": {
+      "codes": [
+        "LOCAL_REVISION"
+      ],
+      "reason": "Only the terminating semicolon is inserted in an existing function call before reevaluation."
+    },
+    "111": {
+      "codes": [
+        "IDENTIFIER_ISSUE"
+      ],
+      "reason": "The compiler explicitly reports an undefined/unknown identifier."
+    },
+    "131": {
+      "codes": [
+        "VALID_WRONG_OUTPUT"
+      ],
+      "reason": "Execution succeeded but only 4/5 task checks passed."
+    },
+    "214": {
+      "codes": [
+        "VALID_WRONG_OUTPUT"
+      ],
+      "reason": "Execution succeeded but only 3/5 task checks passed."
+    },
+    "241": {
+      "codes": [
+        "VALID_WRONG_OUTPUT"
+      ],
+      "reason": "Execution succeeded but only 4/5 task checks passed."
+    },
+    "245": {
+      "codes": [
+        "LOCAL_REVISION",
+        "LOCAL_AFTER_OUTPUT"
+      ],
+      "reason": "Existing semicolon-delimited statements change internally before reevaluation; no full statement or block delimiter changes. The preceding successful execution failed task checks."
+    },
+    "246": {
+      "codes": [
+        "VALID_WRONG_OUTPUT"
+      ],
+      "reason": "Execution succeeded but only 4/5 task checks passed."
+    },
+    "255": {
+      "codes": [
+        "VALID_WRONG_OUTPUT"
+      ],
+      "reason": "Execution succeeded but only 4/5 task checks passed."
+    },
+    "274": {
+      "codes": [
+        "PASTE_DOC"
+      ],
+      "reason": "The pasted alt_tuck_cast_on definition matches recorded documentation example #82."
+    },
+    "307": {
+      "codes": [
+        "VALID_WRONG_OUTPUT"
+      ],
+      "reason": "Execution succeeded but only 4/5 task checks passed."
+    },
+    "310": {
+      "codes": [
+        "LOCAL_REVISION",
+        "LOCAL_AFTER_OUTPUT"
+      ],
+      "reason": "Existing semicolon-delimited statements change internally before reevaluation; no full statement or block delimiter changes. The preceding successful execution failed task checks."
+    },
+    "311": {
+      "codes": [
+        "VALID_WRONG_OUTPUT"
+      ],
+      "reason": "Execution succeeded but only 3/5 task checks passed."
+    },
+    "334": {
+      "codes": [
+        "DELETE_REPASTE"
+      ],
+      "reason": "The previous paste was removed before being edited, followed by another paste."
+    },
+    "357": {
+      "codes": [
+        "VALID_WRONG_OUTPUT"
+      ],
+      "reason": "Execution succeeded but only 3/5 task checks passed."
+    },
+    "376": {
+      "codes": [
+        "LOCAL_REVISION",
+        "LOCAL_AFTER_OUTPUT"
+      ],
+      "reason": "Existing semicolon-delimited statements change internally before reevaluation; no full statement or block delimiter changes. The preceding successful execution failed task checks."
+    },
+    "377": {
+      "codes": [
+        "INCORRECT_VALUE"
+      ],
+      "reason": "The slice starts were swapped from 1/0 to 0/1 immediately before repeated machine-state failures; changing width to equal numeric 10 does not fix them. Returning to the original 1/0 cast-on succeeds. This supports incorrect needle-selection values."
+    },
+    "379": {
+      "codes": [
+        "INCORRECT_VALUE"
+      ],
+      "reason": "The slice starts were swapped from 1/0 to 0/1 immediately before repeated machine-state failures; changing width to equal numeric 10 does not fix them. Returning to the original 1/0 cast-on succeeds. This supports incorrect needle-selection values."
+    },
+    "384": {
+      "codes": [
+        "LOCAL_REVISION"
+      ],
+      "reason": "Existing semicolon-delimited statements change internally before reevaluation; no full statement or block delimiter changes."
+    },
+    "385": {
+      "codes": [
+        "INCORRECT_VALUE"
+      ],
+      "reason": "The slice starts were swapped from 1/0 to 0/1 immediately before repeated machine-state failures; changing width to equal numeric 10 does not fix them. Returning to the original 1/0 cast-on succeeds. This supports incorrect needle-selection values."
+    },
+    "416": {
+      "codes": [
+        "PASTE_DOC"
+      ],
+      "reason": "The replacement stockinette program matches previously visible documentation example #23."
+    },
+    "419": {
+      "codes": [
+        "VALID_WRONG_OUTPUT"
+      ],
+      "reason": "Execution succeeded but only 3/5 task checks passed."
+    },
+    "422": {
+      "codes": [
+        "LOCAL_REVISION",
+        "LOCAL_AFTER_OUTPUT"
+      ],
+      "reason": "Existing semicolon-delimited statements change internally before reevaluation; no full statement or block delimiter changes. The preceding successful execution failed task checks."
+    },
+    "423": {
+      "codes": [
+        "VALID_WRONG_OUTPUT"
+      ],
+      "reason": "Execution succeeded but only 4/5 task checks passed."
+    }
+  },
+  "ruleDecisions": {
+    "2:DOC_FIRST": "confirmed",
+    "10:PASTE_FIRST": "confirmed",
+    "10:PASTE_DOC": "uncertain",
+    "14:PASTE_DOC": "uncertain",
+    "21:VALID_WRONG_OUTPUT": "confirmed",
+    "54:PASTE_DOC": "confirmed",
+    "55:LOCAL_REVISION": "rejected",
+    "57:WRONG_TOKEN": "confirmed",
+    "57:INCOMPLETE_TOKEN": "rejected",
+    "57:INCOMPLETE_STRUCTURE": "rejected",
+    "57:INCORRECT_ARRANGEMENT": "rejected",
+    "57:NON_LANGUAGE": "confirmed",
+    "77:LOCAL_REVISION": "rejected",
+    "78:VALID_WRONG_OUTPUT": "confirmed",
+    "78:SYNTAX_SEMANTICS": "rejected",
+    "99:DELETE_REPASTE": "confirmed",
+    "99:PASTE_DOC": "uncertain",
+    "102:LOCAL_REVISION": "rejected",
+    "102:LOCAL_AFTER_OUTPUT": "rejected",
+    "104:IDENTIFIER_ISSUE": "confirmed",
+    "104:INCORRECT_VALUE": "rejected",
+    "104:INCORRECT_BINDING": "rejected",
+    "104:INCORRECT_DECLARATION": "rejected",
+    "104:INCORRECT_REFERENCE": "rejected",
+    "104:INCORRECT_ARRANGEMENT": "rejected",
+    "107:LOCAL_REVISION": "confirmed",
+    "110:IDENTIFIER_ISSUE": "confirmed",
+    "110:INCORRECT_VALUE": "rejected",
+    "110:INCORRECT_BINDING": "rejected",
+    "110:INCORRECT_DECLARATION": "rejected",
+    "110:INCORRECT_REFERENCE": "rejected",
+    "110:INCORRECT_ARRANGEMENT": "rejected",
+    "129:LOCAL_REVISION": "rejected",
+    "130:VALID_WRONG_OUTPUT": "confirmed",
+    "212:LOCAL_REVISION": "rejected",
+    "213:VALID_WRONG_OUTPUT": "confirmed",
+    "223:PASTE_DOC": "uncertain",
+    "227:PASTE_DOC": "uncertain",
+    "239:LOCAL_REVISION": "rejected",
+    "240:VALID_WRONG_OUTPUT": "confirmed",
+    "244:LOCAL_REVISION": "confirmed",
+    "244:LOCAL_AFTER_OUTPUT": "confirmed",
+    "245:VALID_WRONG_OUTPUT": "confirmed",
+    "252:PASTE_DOC": "uncertain",
+    "253:LOCAL_REVISION": "rejected",
+    "254:VALID_WRONG_OUTPUT": "confirmed",
+    "273:PASTE_DOC": "confirmed",
+    "281:PASTE_DOC": "uncertain",
+    "290:PASTE_DOC": "uncertain",
+    "291:LOCAL_REVISION": "rejected",
+    "304:PASTE_DOC": "uncertain",
+    "306:VALID_WRONG_OUTPUT": "confirmed",
+    "309:LOCAL_REVISION": "confirmed",
+    "309:LOCAL_AFTER_OUTPUT": "confirmed",
+    "310:VALID_WRONG_OUTPUT": "confirmed",
+    "323:PASTE_DOC": "uncertain",
+    "333:DELETE_REPASTE": "confirmed",
+    "333:PASTE_DOC": "uncertain",
+    "343:PASTE_DOC": "uncertain",
+    "353:PASTE_DOC": "uncertain",
+    "354:LOCAL_REVISION": "rejected",
+    "356:VALID_WRONG_OUTPUT": "confirmed",
+    "375:LOCAL_REVISION": "confirmed",
+    "375:LOCAL_AFTER_OUTPUT": "confirmed",
+    "376:INCORRECT_VALUE": "confirmed",
+    "376:INCORRECT_BINDING": "rejected",
+    "376:INCORRECT_DECLARATION": "rejected",
+    "376:INCORRECT_REFERENCE": "rejected",
+    "376:INCORRECT_ARRANGEMENT": "rejected",
+    "378:INCORRECT_VALUE": "confirmed",
+    "378:INCORRECT_BINDING": "rejected",
+    "378:INCORRECT_DECLARATION": "rejected",
+    "378:INCORRECT_REFERENCE": "rejected",
+    "378:INCORRECT_ARRANGEMENT": "rejected",
+    "383:LOCAL_REVISION": "confirmed",
+    "384:INCORRECT_VALUE": "confirmed",
+    "384:INCORRECT_BINDING": "rejected",
+    "384:INCORRECT_DECLARATION": "rejected",
+    "384:INCORRECT_REFERENCE": "rejected",
+    "384:INCORRECT_ARRANGEMENT": "rejected",
+    "415:PASTE_DOC": "confirmed",
+    "417:LOCAL_REVISION": "rejected",
+    "418:VALID_WRONG_OUTPUT": "confirmed",
+    "421:LOCAL_REVISION": "confirmed",
+    "421:LOCAL_AFTER_OUTPUT": "confirmed",
+    "422:VALID_WRONG_OUTPUT": "confirmed",
+    "512:PASTE_DOC": "uncertain",
+    "516:LOCAL_REVISION": "rejected"
+  },
+  "ruleReviewNotes": {
+    "2:DOC_FIRST": "Recorded tutorial exposure and reading interactions precede first paste #11; visibility is not proof of attention.",
+    "10:PASTE_FIRST": "The first source-changing editor event is a paste.",
+    "10:PASTE_DOC": "A paste is recorded, but the fragment has no established documentation-example provenance. Short variable names or editor duplication are insufficient.",
+    "14:PASTE_DOC": "A paste is recorded, but the fragment has no established documentation-example provenance. Short variable names or editor duplication are insufficient.",
+    "21:VALID_WRONG_OUTPUT": "Execution succeeded but only 3/5 task checks passed.",
+    "54:PASTE_DOC": "Pasted pip install knit-script matches previously visible documentation code at #45. It is a shell example, not valid KnitScript.",
+    "55:LOCAL_REVISION": "Adds the complete pip install command, not a local revision.",
+    "57:WRONG_TOKEN": "The evaluated source contains pip install knit-script, a shell command in the DSL editor. Removing it resolves the parser failure.",
+    "57:INCOMPLETE_TOKEN": "No truncated lexical token is present; the command belongs outside the language.",
+    "57:INCOMPLETE_STRUCTURE": "Adding a semicolon would not make the shell command valid KnitScript; this is not primarily a missing delimiter.",
+    "57:INCORRECT_ARRANGEMENT": "The pip command is foreign vocabulary, not valid components incorrectly nested.",
+    "57:NON_LANGUAGE": "pip install is a shell command, not a KnitScript construct.",
+    "77:LOCAL_REVISION": "The interval removes a whole pip command and changes the loop; beyond a sub-statement revision.",
+    "78:VALID_WRONG_OUTPUT": "Execution succeeded but only 4/5 task checks passed.",
+    "78:SYNTAX_SEMANTICS": "The participant continues behavioral revisions after removing the shell command, including securing-row repairs.",
+    "99:DELETE_REPASTE": "The previous paste was removed before being edited, followed by another paste.",
+    "99:PASTE_DOC": "A paste is recorded, but the fragment has no established documentation-example provenance. Short variable names or editor duplication are insufficient.",
+    "102:LOCAL_REVISION": "Since the prior evaluation, a whole alt_tuck_cast_on call was inserted. This is not a sub-statement revision.",
+    "102:LOCAL_AFTER_OUTPUT": "This interval inserts a whole call rather than a sub-statement change.",
+    "104:IDENTIFIER_ISSUE": "The compiler explicitly reports an undefined/unknown identifier.",
+    "104:INCORRECT_VALUE": "The evaluation reports NameError for an undeclared helper call. IDENTIFIER_ISSUE covers the evidence; no value, carrier binding, declaration, arrangement or resource-reference failure is established.",
+    "104:INCORRECT_BINDING": "The evaluation reports NameError for an undeclared helper call. IDENTIFIER_ISSUE covers the evidence; no value, carrier binding, declaration, arrangement or resource-reference failure is established.",
+    "104:INCORRECT_DECLARATION": "The evaluation reports NameError for an undeclared helper call. IDENTIFIER_ISSUE covers the evidence; no value, carrier binding, declaration, arrangement or resource-reference failure is established.",
+    "104:INCORRECT_REFERENCE": "The evaluation reports NameError for an undeclared helper call. IDENTIFIER_ISSUE covers the evidence; no value, carrier binding, declaration, arrangement or resource-reference failure is established.",
+    "104:INCORRECT_ARRANGEMENT": "The evaluation reports NameError for an undeclared helper call. IDENTIFIER_ISSUE covers the evidence; no value, carrier binding, declaration, arrangement or resource-reference failure is established.",
+    "107:LOCAL_REVISION": "Only the terminating semicolon is inserted in an existing function call before reevaluation.",
+    "110:IDENTIFIER_ISSUE": "The compiler explicitly reports an undefined/unknown identifier.",
+    "110:INCORRECT_VALUE": "The evaluation reports NameError for an undeclared helper call. IDENTIFIER_ISSUE covers the evidence; no value, carrier binding, declaration, arrangement or resource-reference failure is established.",
+    "110:INCORRECT_BINDING": "The evaluation reports NameError for an undeclared helper call. IDENTIFIER_ISSUE covers the evidence; no value, carrier binding, declaration, arrangement or resource-reference failure is established.",
+    "110:INCORRECT_DECLARATION": "The evaluation reports NameError for an undeclared helper call. IDENTIFIER_ISSUE covers the evidence; no value, carrier binding, declaration, arrangement or resource-reference failure is established.",
+    "110:INCORRECT_REFERENCE": "The evaluation reports NameError for an undeclared helper call. IDENTIFIER_ISSUE covers the evidence; no value, carrier binding, declaration, arrangement or resource-reference failure is established.",
+    "110:INCORRECT_ARRANGEMENT": "The evaluation reports NameError for an undeclared helper call. IDENTIFIER_ISSUE covers the evidence; no value, carrier binding, declaration, arrangement or resource-reference failure is established.",
+    "129:LOCAL_REVISION": "Deletes an entire function-call statement.",
+    "130:VALID_WRONG_OUTPUT": "Execution succeeded but only 4/5 task checks passed.",
+    "212:LOCAL_REVISION": "Moves the complete releasehook statement across the loop.",
+    "213:VALID_WRONG_OUTPUT": "Execution succeeded but only 3/5 task checks passed.",
+    "223:PASTE_DOC": "A paste is recorded, but the fragment has no established documentation-example provenance. Short variable names or editor duplication are insufficient.",
+    "227:PASTE_DOC": "A paste is recorded, but the fragment has no established documentation-example provenance. Short variable names or editor duplication are insufficient.",
+    "239:LOCAL_REVISION": "Adds a full additional loop and knit statement as well as modifying its iteration bound.",
+    "240:VALID_WRONG_OUTPUT": "Execution succeeded but only 4/5 task checks passed.",
+    "244:LOCAL_REVISION": "Existing semicolon-delimited statements change internally before reevaluation; no full statement or block delimiter changes.",
+    "244:LOCAL_AFTER_OUTPUT": "The preceding successful execution failed task checks.",
+    "245:VALID_WRONG_OUTPUT": "Execution succeeded but only 4/5 task checks passed.",
+    "252:PASTE_DOC": "A paste is recorded, but the fragment has no established documentation-example provenance. Short variable names or editor duplication are insufficient.",
+    "253:LOCAL_REVISION": "Adds a complete loop, direction scope and knit statement.",
+    "254:VALID_WRONG_OUTPUT": "Execution succeeded but only 4/5 task checks passed.",
+    "273:PASTE_DOC": "The pasted alt_tuck_cast_on definition matches recorded documentation example #82.",
+    "281:PASTE_DOC": "A paste is recorded, but the fragment has no established documentation-example provenance. Short variable names or editor duplication are insufficient.",
+    "290:PASTE_DOC": "A paste is recorded, but the fragment has no established documentation-example provenance. Short variable names or editor duplication are insufficient.",
+    "291:LOCAL_REVISION": "Adds a function definition and replaces complete row loops with references.",
+    "304:PASTE_DOC": "A paste is recorded, but the fragment has no established documentation-example provenance. Short variable names or editor duplication are insufficient.",
+    "306:VALID_WRONG_OUTPUT": "Execution succeeded but only 4/5 task checks passed.",
+    "309:LOCAL_REVISION": "Existing semicolon-delimited statements change internally before reevaluation; no full statement or block delimiter changes.",
+    "309:LOCAL_AFTER_OUTPUT": "The preceding successful execution failed task checks.",
+    "310:VALID_WRONG_OUTPUT": "Execution succeeded but only 3/5 task checks passed.",
+    "323:PASTE_DOC": "A paste is recorded, but the fragment has no established documentation-example provenance. Short variable names or editor duplication are insufficient.",
+    "333:DELETE_REPASTE": "The previous paste was removed before being edited, followed by another paste.",
+    "333:PASTE_DOC": "A paste is recorded, but the fragment has no established documentation-example provenance. Short variable names or editor duplication are insufficient.",
+    "343:PASTE_DOC": "A paste is recorded, but the fragment has no established documentation-example provenance. Short variable names or editor duplication are insufficient.",
+    "353:PASTE_DOC": "A paste is recorded, but the fragment has no established documentation-example provenance. Short variable names or editor duplication are insufficient.",
+    "354:LOCAL_REVISION": "Removes full tuck direction scopes, in addition to numeric slice changes.",
+    "356:VALID_WRONG_OUTPUT": "Execution succeeded but only 3/5 task checks passed.",
+    "375:LOCAL_REVISION": "Existing semicolon-delimited statements change internally before reevaluation; no full statement or block delimiter changes.",
+    "375:LOCAL_AFTER_OUTPUT": "The preceding successful execution failed task checks.",
+    "376:INCORRECT_VALUE": "The slice starts were swapped from 1/0 to 0/1 immediately before repeated machine-state failures; changing width to equal numeric 10 does not fix them. Returning to the original 1/0 cast-on succeeds. This supports incorrect needle-selection values.",
+    "376:INCORRECT_BINDING": "The source and subsequent successful restoration support slice-selection values, not a carrier declaration, binding, reference or block-arrangement cause.",
+    "376:INCORRECT_DECLARATION": "The source and subsequent successful restoration support slice-selection values, not a carrier declaration, binding, reference or block-arrangement cause.",
+    "376:INCORRECT_REFERENCE": "The source and subsequent successful restoration support slice-selection values, not a carrier declaration, binding, reference or block-arrangement cause.",
+    "376:INCORRECT_ARRANGEMENT": "The source and subsequent successful restoration support slice-selection values, not a carrier declaration, binding, reference or block-arrangement cause.",
+    "378:INCORRECT_VALUE": "The slice starts were swapped from 1/0 to 0/1 immediately before repeated machine-state failures; changing width to equal numeric 10 does not fix them. Returning to the original 1/0 cast-on succeeds. This supports incorrect needle-selection values.",
+    "378:INCORRECT_BINDING": "The source and subsequent successful restoration support slice-selection values, not a carrier declaration, binding, reference or block-arrangement cause.",
+    "378:INCORRECT_DECLARATION": "The source and subsequent successful restoration support slice-selection values, not a carrier declaration, binding, reference or block-arrangement cause.",
+    "378:INCORRECT_REFERENCE": "The source and subsequent successful restoration support slice-selection values, not a carrier declaration, binding, reference or block-arrangement cause.",
+    "378:INCORRECT_ARRANGEMENT": "The source and subsequent successful restoration support slice-selection values, not a carrier declaration, binding, reference or block-arrangement cause.",
+    "383:LOCAL_REVISION": "Existing semicolon-delimited statements change internally before reevaluation; no full statement or block delimiter changes.",
+    "384:INCORRECT_VALUE": "The slice starts were swapped from 1/0 to 0/1 immediately before repeated machine-state failures; changing width to equal numeric 10 does not fix them. Returning to the original 1/0 cast-on succeeds. This supports incorrect needle-selection values.",
+    "384:INCORRECT_BINDING": "The source and subsequent successful restoration support slice-selection values, not a carrier declaration, binding, reference or block-arrangement cause.",
+    "384:INCORRECT_DECLARATION": "The source and subsequent successful restoration support slice-selection values, not a carrier declaration, binding, reference or block-arrangement cause.",
+    "384:INCORRECT_REFERENCE": "The source and subsequent successful restoration support slice-selection values, not a carrier declaration, binding, reference or block-arrangement cause.",
+    "384:INCORRECT_ARRANGEMENT": "The source and subsequent successful restoration support slice-selection values, not a carrier declaration, binding, reference or block-arrangement cause.",
+    "415:PASTE_DOC": "The replacement stockinette program matches previously visible documentation example #23.",
+    "417:LOCAL_REVISION": "Replaces the function-based program with a complete inline program.",
+    "418:VALID_WRONG_OUTPUT": "Execution succeeded but only 3/5 task checks passed.",
+    "421:LOCAL_REVISION": "Existing semicolon-delimited statements change internally before reevaluation; no full statement or block delimiter changes.",
+    "421:LOCAL_AFTER_OUTPUT": "The preceding successful execution failed task checks.",
+    "422:VALID_WRONG_OUTPUT": "Execution succeeded but only 4/5 task checks passed.",
+    "512:PASTE_DOC": "A paste is recorded, but the fragment has no established documentation-example provenance. Short variable names or editor duplication are insufficient.",
+    "516:LOCAL_REVISION": "Adds a full securing loop, direction scope and knit statement."
+  },
+  "outcome": "528 raw events inspected through evaluation intervals, paste fragments and recorded documentation evidence. Candidate decisions distinguish supported labels from unknown provenance or missing diagnostic detail."
+}
