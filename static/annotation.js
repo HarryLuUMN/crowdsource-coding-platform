@@ -80,7 +80,7 @@ function saveAnnotations() {
 function selectedCodes(stepIndex) {
   const manual = Array.isArray(state.annotations[stepIndex]) ? state.annotations[stepIndex] : [];
   const inferred = (state.rules?.detections || []).filter(d => d.step === stepIndex &&
-    (state.decisions[d.id] === "confirmed" || (d.status === "auto" && state.decisions[d.id] !== "rejected"))).map(d => d.code);
+    (state.decisions[d.id] === "confirmed" || (d.status === "auto" && !state.decisions[d.id]))).map(d => d.code);
   return [...new Set([...manual, ...inferred])];
 }
 
