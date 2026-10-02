@@ -4,6 +4,7 @@ const $ = (selector) => document.querySelector(selector);
 const state = { dataset: null, codes: [], selectedStep: 0, annotations: {}, decisions: {}, rules: null, activeTab: "code" };
 const STORAGE_PREFIX = "trace-annotations:";
 const TRACE_CATALOG = [
+  { key: "67658", id: "9da1b0a5-2c84-4720-abac-c8b3a7fa78aa", participant: "6765829a949d1203926e1ade", steps: 528, unit: "events" },
   { key: "5f427", id: "74e1401c-cbf1-46f1-911d-84986fd65515", participant: "5f4275b5981d7745acd1f912", steps: 78, unit: "semantic steps" },
   { key: "691de", id: "043522f2-206f-432a-9a35-1d8a83d8e585", participant: "691de59e3f1a40f37d2864af", steps: 52, unit: "semantic steps" },
   { key: "s4", id: "443bbe19-51d6-431e-bd0f-55baecdcc183", participant: "6638e8aa3d1f38846080806a", steps: 57, unit: "semantic steps" },
@@ -471,7 +472,7 @@ async function loadDataset(traceName = new URLSearchParams(location.search).get(
     const payload = await api("/api/admin/annotation-dataset/s4");
     let dataset = payload.dataset;
     if (["5f427", "691de"].includes(traceName)) dataset = (await api(`/api/admin/annotation-dataset/${traceName}`)).dataset;
-    if (["67aa5", "65fda"].includes(traceName)) {
+    if (["67aa5", "65fda", "67658"].includes(traceName)) {
       const review = await api(`/api/admin/annotation-review/${traceName}`);
       const [detail, stream, initial] = await Promise.all([
         api(`/api/admin/sessions/${review.session}`),

@@ -311,7 +311,7 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                             step["note"] += " Annotation evidence: " + reason
                     self._send_json(HTTPStatus.OK, {"ok": True, "dataset": dataset})
                     return
-                if path in {f"/api/admin/annotation-review/{name}" for name in ("67aa5", "65fda", "5f427", "691de")}:
+                if path in {f"/api/admin/annotation-review/{name}" for name in ("67aa5", "65fda", "5f427", "691de", "67658")}:
                     review_name = path.rsplit("/", 1)[1]
                     self._send_json(HTTPStatus.OK, json.loads((ANNOTATION_DATA_DIR / f"{review_name}-review.json").read_text()))
                     return
