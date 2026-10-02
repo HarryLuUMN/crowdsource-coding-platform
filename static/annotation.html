@@ -61,6 +61,13 @@
             <div><span class="eyebrow">Codebook matrix</span><h2>Step-by-step annotations</h2></div>
             <label class="filter"><span>Filter steps</span><input id="stepFilter" type="search" placeholder="Event, note, step…" /></label>
             <button class="secondary" id="clearStepButton" type="button">Clear selected step</button>
+            <div class="matrix-zoom" role="group" aria-label="Grid zoom">
+              <button class="secondary" id="zoomOutButton" type="button" aria-label="Zoom out">−</button>
+              <output id="zoomValue" aria-live="polite">100%</output>
+              <button class="secondary" id="zoomInButton" type="button" aria-label="Zoom in">+</button>
+              <button class="secondary" id="fitGridButton" type="button">Fit all</button>
+              <button class="secondary" id="resetZoomButton" type="button">Reset</button>
+            </div>
           </div>
           <div class="codebook-legend" id="codebookLegend"></div>
           <div class="matrix-shell" id="matrixShell">

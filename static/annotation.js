@@ -3,6 +3,28 @@
 const $ = (selector) => document.querySelector(selector);
 const state = { dataset: null, codes: [], selectedStep: 0, annotations: {}, activeTab: "code" };
 const STORAGE_PREFIX = "trace-annotations:";
+let matrixZoom = 1;
+let fitMatrix = false;
+
+function setMatrixZoom(value, fit = false) {
+  matrixZoom = Math.max(0.05, Math.min(2, value));
+  fitMatrix = fit;
+  $("#annotationMatrix").style.zoom = matrixZoom;
+  $("#zoomValue").textContent = `${Math.round(matrixZoom * 100)}%`;
+  $("#zoomOutButton").disabled = matrixZoom <= 0.05;
+  $("#zoomInButton").disabled = matrixZoom >= 2;
+  $("#fitGridButton").setAttribute("aria-pressed", String(fit));
+}
+
+function fitAllSteps() {
+  const shell = $("#matrixShell");
+  const table = $("#annotationMatrix");
+  if (!shell.clientWidth || !shell.clientHeight) return;
+  setMatrixZoom(1, true);
+  const bounds = table.getBoundingClientRect();
+  setMatrixZoom(Math.min(1, (shell.clientWidth - 4) / bounds.width, (shell.clientHeight - 4) / bounds.height), true);
+  shell.scrollTo(0, 0);
+}
 
 async function api(path, options = {}) {
   const response = await fetch(path, {
@@ -317,7 +339,13 @@ function bindInteractions() {
   $("#stepFilter").addEventListener("input", (event) => {
     const query = event.target.value.trim().toLowerCase();
     [...$("#matrixBody").rows].forEach((row) => row.classList.toggle("filtered", query && !row.dataset.search.includes(query)));
+    if (fitMatrix) fitAllSteps();
   });
+  $("#zoomOutButton").addEventListener("click", () => setMatrixZoom(matrixZoom / 1.2));
+  $("#zoomInButton").addEventListener("click", () => setMatrixZoom(matrixZoom * 1.2));
+  $("#fitGridButton").addEventListener("click", fitAllSteps);
+  $("#resetZoomButton").addEventListener("click", () => setMatrixZoom(1));
+  new ResizeObserver(() => { if (fitMatrix) fitAllSteps(); }).observe($("#matrixShell"));
   $("#clearStepButton").addEventListener("click", () => {
     state.annotations[state.selectedStep] = [];
     saveAnnotations(); refreshMatrix(); renderDetail();
