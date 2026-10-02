@@ -3,6 +3,12 @@
 const $ = (selector) => document.querySelector(selector);
 const state = { dataset: null, codes: [], selectedStep: 0, annotations: {}, activeTab: "code" };
 const STORAGE_PREFIX = "trace-annotations:";
+const TRACE_CATALOG = [
+  { key: "s4", id: "443bbe19-51d6-431e-bd0f-55baecdcc183", participant: "6638e8aa3d1f38846080806a", steps: 57, unit: "semantic steps" },
+  { key: "67aa5", id: "b8c98aac-ad68-4c62-8a4f-aaf0dbbc3f21", participant: "67aa54c162dc637de018fe18", steps: 646, unit: "events" },
+  { key: "65fda", id: "053e926a-ff9f-4c4a-8868-14f331800b21", participant: "65fda4aa45ba55e983e2a2d9", steps: 865, unit: "events" },
+];
+let loadingTrace = false;
 let matrixZoom = 1;
 let fitMatrix = false;
 
@@ -96,12 +102,34 @@ function eventName(value) {
 
 function renderTrace() {
   const trace = state.dataset.trace;
-  $("#traceLabel").textContent = trace.label;
-  $("#participantId").textContent = trace.participant;
-  $("#traceStepCount").textContent = trace.stepCount;
+  const entry = TRACE_CATALOG.find((item) => item.id === trace.id);
+  if (entry) entry.steps = trace.stepCount;
+  renderTraceList();
   $("#traceTask").textContent = trace.task;
   $("#dataNote").textContent = trace.dataNote;
   $("#traceStatus").textContent = trace.status || "Passed";
+}
+
+function renderTraceList() {
+  const list = $("#traceList");
+  list.replaceChildren();
+  const query = $("#traceSearch").value.trim().toLowerCase();
+  TRACE_CATALOG.filter((item) => `${item.participant} ${item.id}`.includes(query)).forEach((item) => {
+    const button = document.createElement("button");
+    const selected = item.id === state.dataset?.trace.id;
+    button.className = `trace-card${selected ? " active" : ""}`;
+    button.type = "button";
+    button.disabled = loadingTrace;
+    button.setAttribute("aria-pressed", String(selected));
+    const dot = document.createElement("span"); dot.className = "status-dot";
+    const title = document.createElement("strong"); title.textContent = `Trace ${item.participant.slice(0, 5)}`;
+    const participant = document.createElement("small"); participant.textContent = item.participant; participant.title = item.participant;
+    const stats = document.createElement("span"); stats.className = "trace-stats"; stats.textContent = `${item.steps} ${item.unit} · Annotated`;
+    button.append(dot, title, participant, stats);
+    button.addEventListener("click", () => { if (!selected) loadDataset(item.key); });
+    list.append(button);
+  });
+  if (!list.childElementCount) { const empty = document.createElement("p"); empty.className = "data-note"; empty.textContent = "No matching annotated traces."; list.append(empty); }
 }
 
 function renderLegend() {
@@ -342,6 +370,7 @@ async function importAnnotations(file) {
 }
 
 function bindInteractions() {
+  $("#traceSearch").addEventListener("input", renderTraceList);
   $("#stepFilter").addEventListener("input", (event) => {
     const query = event.target.value.trim().toLowerCase();
     [...$("#matrixBody").rows].forEach((row) => row.classList.toggle("filtered", query && !row.dataset.search.includes(query)));
@@ -376,11 +405,13 @@ function showLogin(message = "") {
   $("#loginMessage").textContent = message;
 }
 
-async function loadDataset() {
+async function loadDataset(traceName = new URLSearchParams(location.search).get("trace") || "s4") {
+  if (loadingTrace) return;
+  loadingTrace = true;
+  if (state.dataset) { saveAnnotations(); renderTraceList(); }
   try {
     const payload = await api("/api/admin/annotation-dataset/s4");
-    state.dataset = payload.dataset;
-    const traceName = new URLSearchParams(location.search).get("trace");
+    let dataset = payload.dataset;
     if (["67aa5", "65fda"].includes(traceName)) {
       const review = await api(`/api/admin/annotation-review/${traceName}`);
       const [detail, stream, initial] = await Promise.all([
@@ -388,10 +419,13 @@ async function loadDataset() {
         api(`/api/admin/sessions/${review.session}/events?limit=10000`),
         api(`/api/admin/sessions/${review.session}/file?path=code/source-initial.ks`),
       ]);
-      state.dataset = buildSessionDataset(detail, stream.events, payload.dataset.codebook, initial.content || "", review.review);
-      if (review.outcome) state.dataset.trace.dataNote += ` ${review.outcome}`;
-      document.querySelector('[aria-label="Search traces"]').value = review.participant;
+      dataset = buildSessionDataset(detail, stream.events, payload.dataset.codebook, initial.content || "", review.review);
+      if (review.outcome) dataset.trace.dataNote += ` ${review.outcome}`;
     }
+    state.dataset = dataset;
+    state.selectedStep = 0;
+    $("#stepFilter").value = "";
+    const url = new URL(location.href); url.searchParams.set("trace", traceName); history.replaceState(null, "", url);
     state.codes = visibleCodebook().flatMap((group, groupIndex) => group.codes.map((code) => ({ ...code, group: group.group, groupIndex })));
     loadAnnotations();
     renderTrace(); renderLegend(); renderMatrix(); renderDetail(); updateProgress();
@@ -400,6 +434,9 @@ async function loadDataset() {
   } catch (error) {
     if (error.status === 401 || error.status === 503) showLogin(error.status === 503 ? "Set TRACE_ADMIN_TOKEN before using this studio." : "");
     else showLogin(error.message);
+  } finally {
+    loadingTrace = false;
+    if (state.dataset) renderTraceList();
   }
 }
 

@@ -37,7 +37,10 @@ button { color: inherit; }
 .search input, .filter input { width: 100%; border: 1px solid var(--line); border-radius: 7px; background: #0d0f0d; color: var(--text); outline: none; }
 .search input { height: 36px; padding: 0 10px; }
 .search input:focus, .filter input:focus { border-color: var(--lime); }
-.trace-card { position: relative; display: grid; gap: 5px; margin: 4px 10px; padding: 14px 14px 14px 35px; text-align: left; border: 1px solid var(--lime); border-radius: 9px; background: var(--lime-soft); cursor: pointer; }
+.trace-list { display: grid; gap: 8px; padding: 4px 10px; overflow-y: auto; flex-shrink: 0; max-height: 45vh; }
+.trace-card { position: relative; display: grid; gap: 5px; margin: 0; padding: 14px 14px 14px 35px; text-align: left; border: 1px solid var(--line); border-radius: 9px; background: transparent; cursor: pointer; min-width: 0; }
+.trace-card:hover { border-color: var(--muted); }
+.trace-card.active { border-color: var(--lime); background: var(--lime-soft); }
 .trace-card .status-dot { position: absolute; top: 18px; left: 15px; width: 8px; height: 8px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 4px rgba(223,255,98,.1); }
 .trace-card small { overflow: hidden; color: var(--muted); text-overflow: ellipsis; }
 .trace-stats { margin-top: 8px; color: var(--muted); font-size: 12px; }

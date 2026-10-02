@@ -36,13 +36,8 @@
       <main class="workspace">
         <aside class="trace-panel panel">
           <div class="panel-heading"><span class="eyebrow">Dataset</span><h2>Trace browser</h2></div>
-          <label class="search"><span>Search traces</span><input value="6638e" aria-label="Search traces" /></label>
-          <button class="trace-card active" type="button">
-            <span class="status-dot"></span>
-            <strong id="traceLabel">Trace 6638e</strong>
-            <small id="participantId">Loading…</small>
-            <span class="trace-stats"><b id="traceStepCount">—</b> semantic steps</span>
-          </button>
+          <label class="search"><span>Search traces</span><input id="traceSearch" type="search" placeholder="Participant or trace ID…" aria-label="Search traces" /></label>
+          <div id="traceList" class="trace-list" aria-label="Annotated traces"></div>
           <div class="trace-meta">
             <span>Task</span><strong id="traceTask">—</strong>
             <span>Status</span><strong id="traceStatus">—</strong>

@@ -305,7 +305,9 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                     return
                 if path == "/api/admin/annotation-dataset/s4":
                     dataset_path = ANNOTATION_DATA_DIR / "s4.json"
-                    self._send_json(HTTPStatus.OK, {"ok": True, "dataset": json.loads(dataset_path.read_text())})
+                    dataset = json.loads(dataset_path.read_text())
+                    dataset["annotations"] = json.loads((ANNOTATION_DATA_DIR / "s4-review.json").read_text())
+                    self._send_json(HTTPStatus.OK, {"ok": True, "dataset": dataset})
                     return
                 if path == "/api/admin/sessions":
                     self._send_json(HTTPStatus.OK, {"ok": True, **repository.list_sessions()})
