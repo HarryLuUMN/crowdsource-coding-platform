@@ -30,6 +30,22 @@ class AnnotationFixtureTests(unittest.TestCase):
         self.assertEqual(31, len(codes))
         self.assertEqual(len(codes), len({code["id"] for code in codes}))
 
+    def test_earlier_reviews_preserve_steps_and_supported_labels(self) -> None:
+        for prefix, count, annotated in (("5f427", 78, 29), ("691de", 52, 23)):
+            dataset = json.loads((ROOT / "annotation_data" / f"{prefix}.json").read_text())
+            review = json.loads((ROOT / "annotation_data" / f"{prefix}-review.json").read_text())
+            self.assertEqual(count, len(dataset["steps"]))
+            self.assertEqual(list(range(count)), [s["index"] for s in dataset["steps"]])
+            self.assertEqual(review["session"], dataset["trace"]["id"])
+            self.assertEqual(annotated, len(review["annotations"]))
+            supported = {c["id"] for g in dataset["codebook"][:2] for c in g["codes"]}
+            for index, labels in review["annotations"].items():
+                self.assertLess(int(index), count)
+                self.assertTrue(set(labels) <= supported)
+                if "VALID_WRONG_OUTPUT" in labels:
+                    self.assertIn("does not pass all task checks", dataset["steps"][int(index)]["note"])
+            self.assertTrue(any(s["source"].strip() for s in dataset["steps"]))
+
 
 if __name__ == "__main__":
     unittest.main()
