@@ -88,7 +88,8 @@ button { color: inherit; }
 .cell-button { width: 100%; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .cell-button::after { content: ""; display: block; width: 15px; height: 15px; margin: auto; border: 1px solid #3d4438; border-radius: 4px; background: #10120f; }
 .cell-button:hover::after { border-color: var(--lime); }
-.cell-button.selected::after { border-color: var(--lime); background: var(--lime); box-shadow: inset 0 0 0 3px #1b1f17; }
+.cell-button.selected { background: var(--lime); color: #10120f; }
+.cell-button.selected::after { content: "✓"; border: 0; background: transparent; color: inherit; font-weight: 800; }
 .grid-footer { display: flex; justify-content: space-between; align-items: center; padding: 0 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
 #saveState { color: var(--lime); }
 .detail-panel { display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) auto auto; }
