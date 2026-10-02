@@ -109,6 +109,15 @@ const hooks = `
       telemetrySessionId = null;
       persistTelemetryOutbox();
     },
+    configureSourceRestore(sourceKey, outboxKey) {
+      currentStudyPhase = "formal";
+      sourceStorageKey = sourceKey;
+      telemetryStorageKey = outboxKey;
+    },
+    loadInitialSource() {
+      setInitialSource();
+      return editor.value;
+    },
     setPhase(phase) { currentStudyPhase = phase; },
     recordEvent,
     flushEvents,
@@ -120,6 +129,32 @@ const hooks = `
 vm.runInNewContext(`${readingSource}\n${appSource}\n${hooks}`, context, { filename: "static/app.js" });
 
 async function run() {
+  const sourceKey = "knitscript-source:participant";
+  const outboxKey = "knitscript-outbox:participant";
+  context.__telemetryTest.configureSourceRestore(sourceKey, outboxKey);
+  storedValues.set(sourceKey, "previous passing solution");
+  assert.equal(
+    context.__telemetryTest.loadInitialSource(),
+    "",
+    "a completed or abandoned source without an active trace must not prefill a new formal attempt",
+  );
+  assert.equal(storedValues.has(sourceKey), false, "stale formal source must be removed");
+
+  storedValues.set(sourceKey, "in-progress source");
+  storedValues.set(outboxKey, JSON.stringify({
+    version: 1,
+    task_id: "stockinette-swatch-v1",
+    session_id: "active-session",
+    pending_events: [],
+  }));
+  assert.equal(
+    context.__telemetryTest.loadInitialSource(),
+    "in-progress source",
+    "an active trace must retain reload recovery",
+  );
+  storedValues.delete(sourceKey);
+  storedValues.delete(outboxKey);
+
   context.__telemetryTest.begin("session-pagehide-test");
   context.__telemetryTest.recordEvent("editor.edit", { inserted_text: "x" });
   await context.__telemetryTest.flushEvents();
@@ -197,8 +232,10 @@ async function run() {
   assert.equal(await context.__telemetryTest.finishTelemetrySession(), false, "failed finalization must block completion");
   assert.ok(storedValues.has("knitscript-telemetry-outbox:test"), "failed finalization must retain recovery state");
   rejectEndSession = false;
+  storedValues.set(sourceKey, "accepted solution");
   assert.equal(await context.__telemetryTest.finishTelemetrySession(), true, "finalization must retry successfully");
   assert.equal(storedValues.has("knitscript-telemetry-outbox:test"), false, "successful finalization must clear recovery state");
+  assert.equal(storedValues.has(sourceKey), false, "successful finalization must clear the saved source");
 }
 
 run().catch((error) => {

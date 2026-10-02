@@ -492,6 +492,7 @@ async function finishTelemetrySession() {
   }
   telemetryEnded = true;
   localStorage.removeItem(telemetryStorageKey);
+  localStorage.removeItem(sourceStorageKey);
   return true;
 }
 
@@ -532,8 +533,24 @@ function eventTypeForInput(inputType = "") {
   return "editor.edit";
 }
 
+function hasResumableFormalSession() {
+  if (!telemetryStorageKey) return false;
+  try {
+    const saved = JSON.parse(localStorage.getItem(telemetryStorageKey));
+    return saved?.version === 1
+      && saved.task_id === TASK_ID
+      && typeof saved.session_id === "string"
+      && saved.session_id.length > 0;
+  } catch (_error) {
+    return false;
+  }
+}
+
 function setInitialSource() {
-  editor.value = localStorage.getItem(sourceStorageKey) || STARTER_SOURCE;
+  const savedSource = localStorage.getItem(sourceStorageKey);
+  const canRestore = currentStudyPhase === "practice" || hasResumableFormalSession();
+  if (!canRestore && savedSource !== null) localStorage.removeItem(sourceStorageKey);
+  editor.value = canRestore ? (savedSource || STARTER_SOURCE) : STARTER_SOURCE;
   updateEditorChrome();
 }
 
@@ -792,7 +809,11 @@ async function executeSource(mode, trigger = "button") {
       check: result.check || null,
     });
     await flushEvents();
-    if (isSubmission && result.submission?.passed) showCompletion(result);
+    if (isSubmission && result.submission?.passed) {
+      const traceFinalized = await finishTelemetrySession();
+      showCompletion(result);
+      if (!traceFinalized) showToast("Submission accepted; the trace is still saving");
+    }
     if (isSubmission && result.submission && !result.submission.passed) showToast("Not accepted yet — review the failed tests");
   } catch (error) {
     showResult({ ok: false, error: { type: "ConnectionError", message: "Could not reach the compiler backend." } });
