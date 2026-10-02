@@ -101,6 +101,7 @@ function renderTrace() {
   $("#traceStepCount").textContent = trace.stepCount;
   $("#traceTask").textContent = trace.task;
   $("#dataNote").textContent = trace.dataNote;
+  $("#traceStatus").textContent = trace.status || "Passed";
 }
 
 function renderLegend() {
@@ -379,14 +380,16 @@ async function loadDataset() {
   try {
     const payload = await api("/api/admin/annotation-dataset/s4");
     state.dataset = payload.dataset;
-    if (new URLSearchParams(location.search).get("trace") === "67aa5") {
-      const review = await api("/api/admin/annotation-review/67aa5");
+    const traceName = new URLSearchParams(location.search).get("trace");
+    if (["67aa5", "65fda"].includes(traceName)) {
+      const review = await api(`/api/admin/annotation-review/${traceName}`);
       const [detail, stream, initial] = await Promise.all([
         api(`/api/admin/sessions/${review.session}`),
         api(`/api/admin/sessions/${review.session}/events?limit=10000`),
         api(`/api/admin/sessions/${review.session}/file?path=code/source-initial.ks`),
       ]);
       state.dataset = buildSessionDataset(detail, stream.events, payload.dataset.codebook, initial.content || "", review.review);
+      if (review.outcome) state.dataset.trace.dataNote += ` ${review.outcome}`;
       document.querySelector('[aria-label="Search traces"]').value = review.participant;
     }
     state.codes = visibleCodebook().flatMap((group, groupIndex) => group.codes.map((code) => ({ ...code, group: group.group, groupIndex })));

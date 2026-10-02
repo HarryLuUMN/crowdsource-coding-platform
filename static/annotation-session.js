@@ -31,7 +31,7 @@ function buildSessionDataset(detail, events, codebook, initialSource = "", revie
   steps.forEach((step) => { const entry = review[step.sourceSteps[0]]; if (entry) annotations[step.index] = entry.codes; });
   const manifest = detail.manifest;
   return {
-    trace: { id: manifest.session_id, participant: manifest.participant_id, label: `Trace ${manifest.participant_id.slice(0, 5)}`, task: manifest.task_id, stepCount: steps.length,
+    trace: { id: manifest.session_id, participant: manifest.participant_id, label: `Trace ${manifest.participant_id.slice(0, 5)}`, task: manifest.task_id, stepCount: steps.length, status: manifest.status || "Unconfirmed",
       dataNote: "All raw events retained. Initial evidence-based annotations cover Programming patterns and General errors only; unmarked cells mean no supported label, not a confirmed absence." },
     codebook, steps, annotations,
   };
