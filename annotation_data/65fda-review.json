@@ -2,6 +2,7 @@
   "session": "053e926a-ff9f-4c4a-8868-14f331800b21",
   "participant": "65fda4aa45ba55e983e2a2d9",
   "ruleDecisions": {
+    "396:TRIAL_ERROR": "uncertain",
     "2:DOC_FIRST": "uncertain",
     "172:WRONG_TOKEN": "rejected",
     "172:INCOMPLETE_TOKEN": "rejected",
@@ -147,6 +148,7 @@
     "859:SYNTAX_SEMANTICS": "uncertain"
   },
   "ruleReviewNotes": {
+    "396:TRIAL_ERROR": "The numeric/string alias and capitalization attempts are observable, but recorded console exposure does not establish error reading for this interval.",
     "2:DOC_FIRST": "Tutorial text is exposed immediately before the first edit. Exposure alone cannot establish reading; retain uncertainty.",
     "172:WRONG_TOKEN": "Python-style API and missing KnitScript statement termination cause parse failure; this is a structure/cross-language problem.",
     "172:INCOMPLETE_TOKEN": "Python-style API and missing KnitScript statement termination cause parse failure; this is a structure/cross-language problem.",

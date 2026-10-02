@@ -1,0 +1,22 @@
+{
+  "ruleDecisions": {
+    "0:DOC_FIRST": "confirmed",
+    "5:LOCAL_REVISION": "rejected",
+    "7:LOCAL_REVISION": "confirmed",
+    "14:LOCAL_REVISION": "confirmed",
+    "21:LOCAL_REVISION": "rejected",
+    "23:LOCAL_REVISION": "rejected",
+    "25:LOCAL_REVISION": "rejected",
+    "35:LOCAL_REVISION": "rejected"
+  },
+  "ruleReviewNotes": {
+    "0:DOC_FIRST": "The curated trace records tutorial viewing before the first code construction.",
+    "5:LOCAL_REVISION": "The whole knitout program is replaced by a KnitScript program; this is not a sub-statement revision.",
+    "7:LOCAL_REVISION": "Only two missing statement terminators are inserted before reevaluation.",
+    "14:LOCAL_REVISION": "Block delimiters are inserted around existing direction scopes while the stitch statements remain; this is a sub-statement syntax repair.",
+    "21:LOCAL_REVISION": "A complete knit Loops statement is added; exceeds a sub-statement revision.",
+    "23:LOCAL_REVISION": "Multiple blocks and statements are rewritten and reformatted; the interval does not support a local revision label.",
+    "25:LOCAL_REVISION": "Only explanatory comments are removed; no code statement is revised.",
+    "35:LOCAL_REVISION": "The carrier scope and securing-row program are structurally rewritten; exceeds a sub-statement revision."
+  }
+}
