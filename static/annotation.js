@@ -54,12 +54,12 @@ function storageKey() {
 function loadAnnotations() {
   try {
     const stored = JSON.parse(localStorage.getItem(storageKey()) || "{}");
-    state.decisions = stored.ruleDecisions || {};
+    state.decisions = { ...(state.dataset.ruleDecisions || {}), ...(stored.ruleDecisions || {}) };
     state.annotations = stored.annotations && typeof stored.annotations === "object"
       ? { ...structuredClone(state.dataset.annotations || {}), ...stored.annotations }
       : structuredClone(state.dataset.annotations || {});
   } catch {
-    state.decisions = {};
+    state.decisions = { ...(state.dataset.ruleDecisions || {}) };
     state.annotations = structuredClone(state.dataset.annotations || {});
   }
 }
@@ -354,6 +354,8 @@ function renderRuleEvidence(stepIndex) {
     title.textContent = `${state.codes.find(c => c.id === d.code)?.label || d.code} · ${state.decisions[d.id] || d.status}`;
     const evidence = document.createElement("p"); evidence.textContent = `${d.reason} Events: ${d.evidence.events.join(", ")}`;
     card.append(title, evidence);
+    const reviewNote = state.dataset.ruleReviewNotes?.[d.id];
+    if (reviewNote) { const note = document.createElement("p"); note.textContent = `Review: ${reviewNote}`; card.append(note); }
     const details = document.createElement("details"), summary = document.createElement("summary"), raw = document.createElement("pre");
     summary.textContent = "Inspect source and diagnostic evidence";
     raw.textContent = JSON.stringify(d.evidence, null, 2);
@@ -393,6 +395,7 @@ function exportAnnotations() {
     annotations: state.dataset.steps.map((step) => ({ step: step.index, codes: selectedCodes(step.index) })),
     ruleDetections: state.rules,
     ruleDecisions: state.decisions,
+    ruleReviewNotes: state.dataset.ruleReviewNotes || {},
   };
   const anchor = document.createElement("a");
   anchor.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
@@ -473,6 +476,8 @@ async function loadDataset(traceName = new URLSearchParams(location.search).get(
         api(`/api/admin/sessions/${review.session}/file?path=code/source-initial.ks`),
       ]);
       dataset = buildSessionDataset(detail, stream.events, payload.dataset.codebook, initial.content || "", review.review);
+      dataset.ruleDecisions = review.ruleDecisions || {};
+      dataset.ruleReviewNotes = review.ruleReviewNotes || {};
       if (review.outcome) dataset.trace.dataNote += ` ${review.outcome}`;
     }
     state.dataset = dataset;
