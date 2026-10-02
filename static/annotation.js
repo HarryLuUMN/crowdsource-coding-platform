@@ -54,7 +54,9 @@ function storageKey() {
 function loadAnnotations() {
   try {
     const stored = JSON.parse(localStorage.getItem(storageKey()) || "{}");
-    state.annotations = stored.annotations && typeof stored.annotations === "object" ? stored.annotations : structuredClone(state.dataset.annotations || {});
+    state.annotations = stored.annotations && typeof stored.annotations === "object"
+      ? { ...structuredClone(state.dataset.annotations || {}), ...stored.annotations }
+      : structuredClone(state.dataset.annotations || {});
   } catch {
     state.annotations = structuredClone(state.dataset.annotations || {});
   }
