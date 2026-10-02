@@ -107,12 +107,13 @@ function detectAnnotationRules(dataset) {
           while (j < newStatements.length) { if (oldStatements[i] === newStatements[j]) { i++; j++; } else added.push(newStatements[j++]); }
           if (i === oldStatements.length && added.length === 1) add(step, "INCREMENTAL", "candidate", "Exactly one semicolon-delimited statement was added; confirm grammatical validity and behavior effect.", [previousEvaluation]);
         }
+        for (const detection of detections.filter(d => d.step === step.index)) detection.evidence.before = before;
       }
       previousEvaluation = step;
     } else {
       const error = `${p.error_type || ""} ${p.error_message || p.message || ""} ${p.stderr || ""}`;
       const syntax = /parsing|syntax|parse/i.test(error);
-      if (step.event === "run.failed") {
+      if (/^(run|submit)\.failed$/.test(step.event)) {
         if (/undefined|not defined|unknown (variable|identifier)|NameError/i.test(error)) add(step, "IDENTIFIER_ISSUE", "auto", "The compiler explicitly reports an undefined/unknown identifier.");
         if (/unexpected (end|eof)|unterminated|unclosed|missing.*(brace|parenthesis|delimiter)/i.test(error)) {
           add(step, "INCOMPLETE_STRUCTURE", "auto", "The diagnostic explicitly reports an unclosed or missing structural delimiter.");
@@ -127,7 +128,7 @@ function detectAnnotationRules(dataset) {
         }
       }
       const check = p.check;
-      if (step.event === "run.completed" || step.event === "submit.accepted") {
+      if (/^(run|submit)\.(completed|accepted)$/.test(step.event)) {
         const increment = detections.find(d => d.step === previousEvaluation?.index && d.code === "INCREMENTAL");
         if (increment) {
           const oldStatements = annotationStatements(increment.evidence.before) || [], newStatements = annotationStatements(increment.evidence.after) || [];

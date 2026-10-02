@@ -142,4 +142,6 @@ button { color: inherit; }
  .detection-card { padding: 10px 0; border-bottom: 1px solid var(--line); }
  .detection-card strong { font-size: 12px; }
  .detection-card button { margin-right: 6px; }
- .cell-button.candidate { border-color: #ffcc66; background: #ffcc6630; }
+ .cell-button.candidate::after { border: 1px dashed #ffcc66; background: #ffcc6630; }
+ .detection-card pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; }
+ .detection-card summary { margin: 8px 0; font-size: 12px; cursor: pointer; }

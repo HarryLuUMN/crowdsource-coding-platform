@@ -48,4 +48,10 @@ detections = run([{event:'run.failed',source:'unknown;',payload:{error_type:'Nam
 assert(detections.some(d=>d.code==='IDENTIFIER_ISSUE' && d.status==='auto'));
 assert(detections.every(d=>d.code!=='INCORRECT_BINDING' || d.status==='candidate'));
 assert(detections.every(d=>d.evidence.events.length && d.ruleVersion));
+assert.equal(ANNOTATION_RULES.length, 22);
+assert(run([{event:'submit.completed',source:'knit n;',payload:{check:{passed_count:2,total_count:5}}}]).some(d=>d.code==='VALID_WRONG_OUTPUT'));
+assert(run([
+  {event:'run.requested',source:'knit n;'}, {event:'run.completed',source:'knit n;'},
+  {event:'run.requested',source:'knit n; drop n;'}, {event:'run.completed',source:'knit n; drop n;'},
+]).some(d=>d.code==='INCREMENTAL' && d.status==='auto'));
 console.log('Annotation rule evidence and false-positive tests passed');

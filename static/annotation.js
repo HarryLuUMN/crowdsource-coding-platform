@@ -354,6 +354,10 @@ function renderRuleEvidence(stepIndex) {
     title.textContent = `${state.codes.find(c => c.id === d.code)?.label || d.code} · ${state.decisions[d.id] || d.status}`;
     const evidence = document.createElement("p"); evidence.textContent = `${d.reason} Events: ${d.evidence.events.join(", ")}`;
     card.append(title, evidence);
+    const details = document.createElement("details"), summary = document.createElement("summary"), raw = document.createElement("pre");
+    summary.textContent = "Inspect source and diagnostic evidence";
+    raw.textContent = JSON.stringify(d.evidence, null, 2);
+    details.append(summary, raw); card.append(details);
     for (const [label, decision] of [["Confirm", "confirmed"], ["Reject", "rejected"]]) {
       const button = document.createElement("button"); button.type = "button"; button.textContent = label;
       button.addEventListener("click", () => {
