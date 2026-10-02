@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Trace Annotation Studio</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/annotation.css?v=1" />
+  </head>
+  <body>
+    <main class="login" id="loginView" hidden>
+      <form class="login-card" id="loginForm">
+        <span class="eyebrow">Private research workspace</span>
+        <h1>Trace Annotation Studio</h1>
+        <p>Enter the administrator key to annotate participant traces.</p>
+        <label for="adminToken">Administrator key</label>
+        <div><input id="adminToken" type="password" required /><button type="submit">Open studio</button></div>
+        <p id="loginMessage" role="alert"></p>
+      </form>
+    </main>
+
+    <div class="app" id="appView" hidden>
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">Human programming traces</span>
+          <h1>Annotation Studio</h1>
+        </div>
+        <div class="annotation-progress"><span id="progressText">0 / 0 steps annotated</span><div><i id="progressBar"></i></div></div>
+        <button class="secondary" id="importButton" type="button">Import</button>
+        <button class="secondary" id="exportButton" type="button">Export JSON</button>
+        <button class="secondary" id="logoutButton" type="button">Log out</button>
+        <input id="importFile" type="file" accept="application/json" hidden />
+      </header>
+
+      <main class="workspace">
+        <aside class="trace-panel panel">
+          <div class="panel-heading"><span class="eyebrow">Dataset</span><h2>Trace browser</h2></div>
+          <label class="search"><span>Search traces</span><input value="6638e" aria-label="Search traces" /></label>
+          <button class="trace-card active" type="button">
+            <span class="status-dot"></span>
+            <strong id="traceLabel">Trace 6638e</strong>
+            <small id="participantId">Loading…</small>
+            <span class="trace-stats"><b id="traceStepCount">—</b> semantic steps</span>
+          </button>
+          <div class="trace-meta">
+            <span>Task</span><strong id="traceTask">—</strong>
+            <span>Status</span><strong class="passed">Passed</strong>
+          </div>
+          <p class="data-note" id="dataNote"></p>
+          <div class="legend-block">
+            <span class="eyebrow">Annotation key</span>
+            <p><i class="swatch selected"></i>Applied code</p>
+            <p><i class="swatch empty"></i>Not applied</p>
+            <p><i class="swatch current"></i>Selected step</p>
+          </div>
+        </aside>
+
+        <section class="grid-panel panel">
+          <div class="grid-toolbar">
+            <div><span class="eyebrow">Codebook matrix</span><h2>Step-by-step annotations</h2></div>
+            <label class="filter"><span>Filter steps</span><input id="stepFilter" type="search" placeholder="Event, note, step…" /></label>
+            <button class="secondary" id="clearStepButton" type="button">Clear selected step</button>
+          </div>
+          <div class="codebook-legend" id="codebookLegend"></div>
+          <div class="matrix-shell" id="matrixShell">
+            <table class="matrix" id="annotationMatrix">
+              <thead id="matrixHead"></thead>
+              <tbody id="matrixBody"></tbody>
+            </table>
+          </div>
+          <footer class="grid-footer"><span>Click a row to inspect it. Click cells to apply multiple codes.</span><span id="saveState">Saved locally</span></footer>
+        </section>
+
+        <aside class="detail-panel panel">
+          <div class="detail-heading">
+            <div><span class="eyebrow">Selected step</span><h2 id="stepTitle">Step 1</h2></div>
+            <time id="stepTime">00:00</time>
+          </div>
+          <div class="step-summary">
+            <span class="event-chip" id="eventChip">—</span>
+            <p id="stepNote">Select a step to inspect its evidence.</p>
+          </div>
+          <nav class="detail-tabs" aria-label="Step evidence">
+            <button class="active" data-detail-tab="code" type="button">Code snapshot</button>
+            <button data-detail-tab="diff" type="button">Change</button>
+            <button data-detail-tab="reading" type="button">Reading</button>
+          </nav>
+          <section class="detail-view active" id="codeView"><pre id="codeSnapshot"><code></code></pre></section>
+          <section class="detail-view" id="diffView"><div class="diff" id="codeDiff"></div></section>
+          <section class="detail-view reading-view" id="readingView">
+            <div id="readingEvidence"></div>
+          </section>
+          <section class="applied-codes">
+            <span class="eyebrow">Applied codes</span>
+            <div id="appliedCodes"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+    <script src="/annotation.js?v=1" defer></script>
+  </body>
+</html>

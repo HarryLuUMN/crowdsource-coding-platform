@@ -125,6 +125,27 @@ class ServerApiTests(unittest.TestCase):
         self.assertIn('sandbox="allow-same-origin"', html)
         self.assertIn("Read-only replay", html)
 
+    def test_annotation_studio_is_available_and_dataset_requires_login(self) -> None:
+        status, html = self.get_text("/annotation")
+        dataset_status, payload = self.admin_request("/api/admin/annotation-dataset/s4")
+
+        self.assertEqual(200, status)
+        self.assertIn("Trace Annotation Studio", html)
+        self.assertIn('id="annotationMatrix"', html)
+        self.assertIn('id="codeSnapshot"', html)
+        self.assertIn('id="readingEvidence"', html)
+        self.assertEqual(401, dataset_status)
+        self.assertFalse(payload["ok"])
+
+        login_status, _login = self.admin_request("/api/admin/login", {"token": self.ADMIN_TOKEN})
+        dataset_status, dataset = self.admin_request("/api/admin/annotation-dataset/s4")
+
+        self.assertEqual(200, login_status)
+        self.assertEqual(200, dataset_status)
+        self.assertEqual("6638e8aa3d1f38846080806a", dataset["dataset"]["trace"]["participant"])
+        self.assertEqual(57, len(dataset["dataset"]["steps"]))
+        self.assertGreater(len(dataset["dataset"]["codebook"]), 0)
+
     def test_admin_can_login_and_browse_session_events_and_files(self) -> None:
         _status, session_result = self.post_json(
             "/api/sessions",

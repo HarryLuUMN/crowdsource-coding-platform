@@ -26,6 +26,7 @@ from trace_store import TraceStore, utc_now
 
 ROOT = Path(__file__).resolve().parent
 STATIC_DIR = ROOT / "static"
+ANNOTATION_DATA_DIR = ROOT / "annotation_data"
 WORKER = ROOT / "compiler_worker.py"
 MAX_REQUEST_BYTES = 1024 * 1024
 MAX_SOURCE_CHARS = 100_000
@@ -289,11 +290,19 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
             self.path = "/reading-dashboard.html"
             super().do_GET()
             return
+        if path == "/annotation" or path == "/annotation/":
+            self.path = "/annotation.html"
+            super().do_GET()
+            return
         if path.startswith("/api/admin/"):
             if not self._require_admin():
                 return
             try:
                 repository = get_admin_repository()
+                if path == "/api/admin/annotation-dataset/s4":
+                    dataset_path = ANNOTATION_DATA_DIR / "s4.json"
+                    self._send_json(HTTPStatus.OK, {"ok": True, "dataset": json.loads(dataset_path.read_text())})
+                    return
                 if path == "/api/admin/sessions":
                     self._send_json(HTTPStatus.OK, {"ok": True, **repository.list_sessions()})
                     return
