@@ -70,9 +70,14 @@ function selectedCodes(stepIndex) {
   return Array.isArray(state.annotations[stepIndex]) ? state.annotations[stepIndex] : [];
 }
 
+function visibleCodebook() {
+  return state.dataset.codebook.filter((group) => group.group !== "KnitScript challenges");
+}
+
 function updateProgress() {
   const total = state.dataset.steps.length;
-  const complete = Object.values(state.annotations).filter((codes) => Array.isArray(codes) && codes.length).length;
+  const visibleIds = new Set(state.codes.map((code) => code.id));
+  const complete = Object.values(state.annotations).filter((codes) => Array.isArray(codes) && codes.some((id) => visibleIds.has(id))).length;
   $("#progressText").textContent = `${complete} / ${total} steps annotated`;
   $("#progressBar").style.width = `${total ? (complete / total) * 100 : 0}%`;
 }
@@ -102,7 +107,7 @@ function renderLegend() {
   const colors = ["#79b8ff", "#ffcc66", "#bf8cff"];
   const legend = $("#codebookLegend");
   legend.replaceChildren();
-  state.dataset.codebook.forEach((group, index) => {
+  visibleCodebook().forEach((group, index) => {
     const item = document.createElement("span");
     item.style.setProperty("--group-color", colors[index]);
     item.textContent = `${group.group} · ${group.codes.length}`;
@@ -262,7 +267,7 @@ function renderReading(step) {
 function renderAppliedCodes(stepIndex) {
   const container = $("#appliedCodes");
   container.replaceChildren();
-  const ids = selectedCodes(stepIndex);
+  const ids = selectedCodes(stepIndex).filter((id) => state.codes.some((code) => code.id === id));
   if (!ids.length) {
     const empty = document.createElement("span");
     empty.className = "code-pill empty";
@@ -324,7 +329,7 @@ function exportAnnotations() {
 async function importAnnotations(file) {
   const payload = JSON.parse(await file.text());
   if (payload.trace?.id !== state.dataset.trace.id || !Array.isArray(payload.annotations)) throw new Error("This file does not contain annotations for the selected trace.");
-  const validCodes = new Set(state.codes.map((code) => code.id));
+  const validCodes = new Set(state.dataset.codebook.flatMap((group) => group.codes.map((code) => code.id)));
   state.annotations = {};
   payload.annotations.forEach((entry) => {
     if (!Number.isInteger(entry.step) || !Array.isArray(entry.codes)) return;
@@ -374,7 +379,7 @@ async function loadDataset() {
   try {
     const payload = await api("/api/admin/annotation-dataset/s4");
     state.dataset = payload.dataset;
-    state.codes = state.dataset.codebook.flatMap((group, groupIndex) => group.codes.map((code) => ({ ...code, group: group.group, groupIndex })));
+    state.codes = visibleCodebook().flatMap((group, groupIndex) => group.codes.map((code) => ({ ...code, group: group.group, groupIndex })));
     loadAnnotations();
     renderTrace(); renderLegend(); renderMatrix(); renderDetail(); updateProgress();
     $("#loginView").hidden = true;
