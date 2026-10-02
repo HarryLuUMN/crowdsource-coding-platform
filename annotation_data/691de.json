@@ -1,0 +1,1253 @@
+{
+  "schemaVersion": 1,
+  "trace": {
+    "id": "043522f2-206f-432a-9a35-1d8a83d8e585",
+    "participant": "691de59e3f1a40f37d2864af",
+    "label": "Trace 691de",
+    "task": "stockinette-swatch-v1",
+    "stepCount": 52,
+    "status": "passed",
+    "dataNote": "52 curated semantic steps from saved checkpoints. Missing keystrokes were not inferred; legacy reading has no viewport coordinates."
+  },
+  "codebook": [
+    {
+      "group": "Programming patterns",
+      "codes": [
+        {
+          "id": "DOC_FIRST",
+          "short": "Doc first",
+          "label": "Document reading first",
+          "description": "The participant reads the tutorial before any code-writing step."
+        },
+        {
+          "id": "INCREMENTAL",
+          "short": "Incremental",
+          "label": "Incremental construction",
+          "description": "The participant evaluates after adding one behavior-affecting statement since the previous evaluation."
+        },
+        {
+          "id": "LOCAL_REVISION",
+          "short": "Local revision",
+          "label": "Local revision",
+          "description": "After evaluating, the participant changes less than a full statement and evaluates again."
+        },
+        {
+          "id": "LOCAL_AFTER_SYNTAX",
+          "short": "Local: syntax",
+          "label": "Local revision after a syntax error",
+          "description": "A sub-statement revision follows an evaluation with a syntax error."
+        },
+        {
+          "id": "LOCAL_AFTER_OUTPUT",
+          "short": "Local: output",
+          "label": "Local revision after wrong output",
+          "description": "A sub-statement revision follows an evaluation with obviously wrong output."
+        },
+        {
+          "id": "TRIAL_ERROR",
+          "short": "Trial & error",
+          "label": "Trial-and-error testing",
+          "description": "After reading an error, the participant attempts at least two revisions and evaluations."
+        },
+        {
+          "id": "SYNTAX_SEMANTICS",
+          "short": "Syntax \u2192 semantics",
+          "label": "Syntax-to-semantics progression",
+          "description": "A revision resolves a syntax error, after which the participant does not revise a behavioral problem."
+        },
+        {
+          "id": "PASTE_DOC",
+          "short": "Paste docs",
+          "label": "Pastes documentation example",
+          "description": "The participant pastes example code copied from documentation."
+        },
+        {
+          "id": "PASTE_FIRST",
+          "short": "Paste first",
+          "label": "Paste is first edit",
+          "description": "The first code-editing step is a paste."
+        },
+        {
+          "id": "DELETE_REPASTE",
+          "short": "Delete & repaste",
+          "label": "Deletes paste before repasting",
+          "description": "The participant deletes a paste before editing it and then pastes another piece of code."
+        }
+      ]
+    },
+    {
+      "group": "General errors",
+      "codes": [
+        {
+          "id": "INCOMPLETE_TOKEN",
+          "short": "Incomplete token",
+          "label": "Incomplete token",
+          "description": "An evaluated program contains an appropriate lexical element that is incomplete."
+        },
+        {
+          "id": "WRONG_TOKEN",
+          "short": "Wrong token",
+          "label": "Wrong token",
+          "description": "An evaluated program contains a token that is invalid or inappropriate at its location."
+        },
+        {
+          "id": "OTHER_LANGUAGE",
+          "short": "Other language",
+          "label": "Token from another language",
+          "description": "The problematic token or form comes from another familiar programming language."
+        },
+        {
+          "id": "NON_LANGUAGE",
+          "short": "Not language",
+          "label": "Token not from the language",
+          "description": "The problematic token or form is not part of this language."
+        },
+        {
+          "id": "INCORRECT_VALUE",
+          "short": "Wrong value",
+          "label": "Incorrect value",
+          "description": "A value is syntactically usable but incorrect for the intended behavior."
+        },
+        {
+          "id": "IDENTIFIER_ISSUE",
+          "short": "Identifier",
+          "label": "Variable, identifier, or field issue",
+          "description": "The evaluation fails because a variable, identifier, or field is incomplete or incorrect."
+        },
+        {
+          "id": "INCORRECT_BINDING",
+          "short": "Binding",
+          "label": "Incorrect binding",
+          "description": "A name or resource is bound incorrectly."
+        },
+        {
+          "id": "INCORRECT_DECLARATION",
+          "short": "Declaration",
+          "label": "Incorrect declaration",
+          "description": "A declaration is incomplete or incorrect."
+        },
+        {
+          "id": "INCORRECT_REFERENCE",
+          "short": "Reference",
+          "label": "Incorrect reference",
+          "description": "A program refers to a value, object, or resource incorrectly."
+        },
+        {
+          "id": "INCOMPLETE_STRUCTURE",
+          "short": "Incomplete structure",
+          "label": "Incomplete structure",
+          "description": "An evaluated program is missing a token or formatting required to complete a program structure."
+        },
+        {
+          "id": "INCORRECT_ARRANGEMENT",
+          "short": "Arrangement",
+          "label": "Incorrect arrangement",
+          "description": "Required components exist but are nested, ordered, organized, or scoped incorrectly."
+        },
+        {
+          "id": "VALID_WRONG_OUTPUT",
+          "short": "Wrong output",
+          "label": "Valid syntax but incorrect output",
+          "description": "The program executes successfully but its output does not satisfy the task."
+        }
+      ]
+    },
+    {
+      "group": "KnitScript challenges",
+      "codes": [
+        {
+          "id": "TRANSLATE_REQUIREMENTS",
+          "short": "Translate task",
+          "label": "Translating task requirements",
+          "description": "Difficulty converting width, cast-on, securing rows, releasehook, and body rows into a complete structure."
+        },
+        {
+          "id": "REPAIR_STRUCTURE",
+          "short": "Repair syntax",
+          "label": "Repairing structure and syntax",
+          "description": "Repeated revision of block boundaries, direction scopes, statements, or loop nesting before compilation."
+        },
+        {
+          "id": "VALID_CAST_ON",
+          "short": "Cast-on",
+          "label": "Constructing a valid cast-on",
+          "description": "Difficulty choosing stitch operation, needle pattern, carriage direction, and securing-row structure."
+        },
+        {
+          "id": "CARRIER_BINDING",
+          "short": "Carrier",
+          "label": "Binding and using the carrier",
+          "description": "Revision of carrier identifiers, declarations, or scope to obtain consistent carrier use."
+        },
+        {
+          "id": "RELEASEHOOK_ROWS",
+          "short": "Releasehook",
+          "label": "Coordinating releasehook and rows",
+          "description": "Difficulty positioning releasehook relative to securing and body rows."
+        },
+        {
+          "id": "INITIAL_STRUCTURE",
+          "short": "Initial scaffold",
+          "label": "Choosing an initial program structure",
+          "description": "Difficulty turning an initial needle idea into a workable width, carrier, direction, and cast-on scaffold."
+        },
+        {
+          "id": "KNITSCRIPT_VS_PYTHON",
+          "short": "KS vs Python",
+          "label": "Distinguishing KnitScript from Python",
+          "description": "Python imports, calls, arguments, or print debugging appear before returning to KnitScript."
+        },
+        {
+          "id": "KNITOUT_VS_SOURCE",
+          "short": "Knitout vs source",
+          "label": "Distinguishing knitout from KnitScript",
+          "description": "Generated knitout is pasted into the editor, tested, cleared, and replaced by KnitScript."
+        },
+        {
+          "id": "WIDTH_ROW_STRUCTURE",
+          "short": "Width & rows",
+          "label": "Matching width and row structure",
+          "description": "Difficulty aligning pattern dimensions and repeated rows with task requirements."
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "index": 0,
+      "event": "guide.tutorial_viewed",
+      "elapsedMs": 0,
+      "note": "Captured from guide.tutorial_viewed; domain-specific intent can be annotated offline.",
+      "sourceSteps": [
+        0
+      ],
+      "source": "",
+      "previousSource": "",
+      "changed": false,
+      "legacyLabels": [
+        "READ_DOC"
+      ],
+      "reading": {
+        "title": "KnitScript tutorial",
+        "location": "Tutorial opened before coding",
+        "excerpt": "Build a pattern from machine-aware blocks. Select needles, activate yarn, set a pass, work held loops, then repeat and release.",
+        "precision": "The legacy trace recorded the tutorial visit but not viewport coordinates."
+      }
+    },
+    {
+      "index": 1,
+      "event": "guide.documentation_opened",
+      "elapsedMs": 14704,
+      "note": "Captured from guide.documentation_opened; domain-specific intent can be annotated offline.",
+      "sourceSteps": [
+        1
+      ],
+      "source": "",
+      "previousSource": "",
+      "changed": false,
+      "legacyLabels": [
+        "READ_DOC"
+      ],
+      "reading": {
+        "title": "KnitScript tutorial",
+        "location": "Tutorial opened before coding",
+        "excerpt": "Build a pattern from machine-aware blocks. Select needles, activate yarn, set a pass, work held loops, then repeat and release.",
+        "precision": "The legacy trace recorded the tutorial visit but not viewport coordinates."
+      }
+    },
+    {
+      "index": 2,
+      "event": "editor.edit_group",
+      "elapsedMs": 770495,
+      "note": "Introduces a variable intended to represent the needle selection.",
+      "sourceSteps": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "source": "front_needles ",
+      "previousSource": "",
+      "changed": true,
+      "legacyLabels": [
+        "ADD_NEEDLE_VARIABLE"
+      ],
+      "reading": null
+    },
+    {
+      "index": 3,
+      "event": "editor.edit_group",
+      "elapsedMs": 773632,
+      "note": "Revises the initial needle-selection variable into a usable pattern dimension.",
+      "sourceSteps": [
+        16
+      ],
+      "source": "front_needles =",
+      "previousSource": "front_needles ",
+      "changed": true,
+      "legacyLabels": [
+        "EDIT_NEEDLE_VARIABLE"
+      ],
+      "reading": null
+    },
+    {
+      "index": 4,
+      "event": "editor.edit_group",
+      "elapsedMs": 780695,
+      "note": "Introduces or revises the pattern width and height variables.",
+      "sourceSteps": [
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "source": "width = 0",
+      "previousSource": "front_needles =",
+      "changed": true,
+      "legacyLabels": [
+        "ADD_PATTERN_DIMENSIONS",
+        "EDIT_NEEDLE_VARIABLE"
+      ],
+      "reading": null
+    },
+    {
+      "index": 5,
+      "event": "editor.edit_group",
+      "elapsedMs": 804263,
+      "note": "Adds the carrier scope used to produce the fabric.",
+      "sourceSteps": [
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58
+      ],
+      "source": "width = 0;\n\nwith Carrier as c: {\n  \n}",
+      "previousSource": "width = 0",
+      "changed": true,
+      "legacyLabels": [
+        "ADD_CARRIER_BLOCK"
+      ],
+      "reading": null
+    },
+    {
+      "index": 6,
+      "event": "editor.edit_group",
+      "elapsedMs": 819318,
+      "note": "Adds a carriage-direction scope.",
+      "sourceSteps": [
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89
+      ],
+      "source": "width = 0;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    \n  }\n}",
+      "previousSource": "width = 0;\n\nwith Carrier as c: {\n  \n}",
+      "changed": true,
+      "legacyLabels": [
+        "ADD_DIRECTION_BLOCK"
+      ],
+      "reading": null
+    },
+    {
+      "index": 7,
+      "event": "editor.edit_group",
+      "elapsedMs": 823518,
+      "note": "Begins typing a tuck operation before completing its target and block.",
+      "sourceSteps": [
+        90,
+        91,
+        92
+      ],
+      "source": "width = 0;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuc\n  }\n}",
+      "previousSource": "width = 0;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    \n  }\n}",
+      "changed": true,
+      "legacyLabels": [
+        "ADD_CAST_ON_SCAFFOLD"
+      ],
+      "reading": null
+    },
+    {
+      "index": 8,
+      "event": "editor.edit_group",
+      "elapsedMs": 869654,
+      "note": "Adds a carriage-direction scope.",
+      "sourceSteps": [
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168
+      ],
+      "source": "width = 0;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles\n  }\n}",
+      "previousSource": "width = 0;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuc\n  }\n}",
+      "changed": true,
+      "legacyLabels": [
+        "ADD_DIRECTION_BLOCK",
+        "ADD_TUCK_CAST_ON"
+      ],
+      "reading": null
+    },
+    {
+      "index": 9,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 910479,
+      "note": "Replaces a substantial part of the current stockinette implementation.",
+      "sourceSteps": [
+        169
+      ],
+      "source": "width = 0;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "previousSource": "width = 0;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles\n  }\n}",
+      "changed": true,
+      "legacyLabels": [
+        "REWRITE_STOCKINETTE_ATTEMPT",
+        "ADD_DIRECTION_BLOCK",
+        "REFINE_CAST_ON",
+        "EDIT_NEEDLE_SELECTION",
+        "ADD_KNIT_ROWS",
+        "ADD_ROW_LOOP",
+        "ADD_RELEASEHOOK",
+        "ADD_CARRIER_CUT"
+      ],
+      "reading": null
+    },
+    {
+      "index": 10,
+      "event": "compiler.execution",
+      "elapsedMs": 910479,
+      "note": "Runs the current source; it produces a compiler error.",
+      "sourceSteps": [
+        169
+      ],
+      "source": "width = 0;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "previousSource": "width = 0;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 11,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1101378,
+      "note": "Temporarily introduces Python compiler API code into the KnitScript editor.",
+      "sourceSteps": [
+        170
+      ],
+      "source": "from knit_script.interpret_knit_script import knit_script_to_knitout\n\nwidth = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;\n\nknit_graph, machine = knit_script_to_knitout(\n  pattern=\"swatch.ks\"\n  out_file_name\n)",
+      "previousSource": "width = 0;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "changed": true,
+      "legacyLabels": [
+        "TRY_PYTHON_COMPILER_CALL",
+        "EDIT_PATTERN_DIMENSIONS",
+        "EDIT_KNIT_TARGET"
+      ],
+      "reading": null
+    },
+    {
+      "index": 12,
+      "event": "compiler.execution",
+      "elapsedMs": 1101378,
+      "note": "Runs the current source; it produces a compiler error.",
+      "sourceSteps": [
+        170
+      ],
+      "source": "from knit_script.interpret_knit_script import knit_script_to_knitout\n\nwidth = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;\n\nknit_graph, machine = knit_script_to_knitout(\n  pattern=\"swatch.ks\"\n  out_file_name\n)",
+      "previousSource": "from knit_script.interpret_knit_script import knit_script_to_knitout\n\nwidth = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;\n\nknit_graph, machine = knit_script_to_knitout(\n  pattern=\"swatch.ks\"\n  out_file_name\n)",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 13,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1231058,
+      "note": "Removes the Python compiler API experiment from the KnitScript source.",
+      "sourceSteps": [
+        171
+      ],
+      "source": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\nprint(c)\n\ncut c;",
+      "previousSource": "from knit_script.interpret_knit_script import knit_script_to_knitout\n\nwidth = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;\n\nknit_graph, machine = knit_script_to_knitout(\n  pattern=\"swatch.ks\"\n  out_file_name\n)",
+      "changed": true,
+      "legacyLabels": [
+        "REMOVE_PYTHON_COMPILER_CALL",
+        "TRY_PYTHON_DEBUGGING",
+        "EDIT_KNIT_TARGET"
+      ],
+      "reading": null
+    },
+    {
+      "index": 14,
+      "event": "compiler.execution",
+      "elapsedMs": 1231058,
+      "note": "Runs the current source; it produces a compiler error.",
+      "sourceSteps": [
+        171
+      ],
+      "source": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\nprint(c)\n\ncut c;",
+      "previousSource": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\nprint(c)\n\ncut c;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 15,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1268392,
+      "note": "Removes the Python debugging call after it fails in the DSL editor.",
+      "sourceSteps": [
+        172
+      ],
+      "source": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "previousSource": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\nprint(c)\n\ncut c;",
+      "changed": true,
+      "legacyLabels": [
+        "REMOVE_PYTHON_DEBUGGING"
+      ],
+      "reading": null
+    },
+    {
+      "index": 16,
+      "event": "compiler.execution",
+      "elapsedMs": 1268392,
+      "note": "Runs the current source; it produces a compiler error.",
+      "sourceSteps": [
+        172
+      ],
+      "source": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "previousSource": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 17,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1314314,
+      "note": "Temporarily adds a Python print call while investigating the carrier value.",
+      "sourceSteps": [
+        173
+      ],
+      "source": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    print(f\"tucking needle\")\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "previousSource": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "changed": true,
+      "legacyLabels": [
+        "TRY_PYTHON_DEBUGGING",
+        "REFINE_CAST_ON"
+      ],
+      "reading": null
+    },
+    {
+      "index": 18,
+      "event": "compiler.execution",
+      "elapsedMs": 1314314,
+      "note": "Runs the current source; it produces a compiler error.",
+      "sourceSteps": [
+        173
+      ],
+      "source": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    print(f\"tucking needle\")\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "previousSource": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    print(f\"tucking needle\")\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 19,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1375363,
+      "note": "Removes the Python debugging call after it fails in the DSL editor.",
+      "sourceSteps": [
+        174
+      ],
+      "source": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "previousSource": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    print(f\"tucking needle\")\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(10): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "changed": true,
+      "legacyLabels": [
+        "REMOVE_PYTHON_DEBUGGING",
+        "REFINE_CAST_ON",
+        "EDIT_ROW_LOOP"
+      ],
+      "reading": null
+    },
+    {
+      "index": 20,
+      "event": "compiler.execution",
+      "elapsedMs": 1375363,
+      "note": "Runs the current source; it produces a compiler error.",
+      "sourceSteps": [
+        174
+      ],
+      "source": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "previousSource": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 21,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1396958,
+      "note": "Revises the carrier declaration or its bound identifier.",
+      "sourceSteps": [
+        175
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c;",
+      "changed": true,
+      "legacyLabels": [
+        "FIX_CARRIER_BINDING"
+      ],
+      "reading": null
+    },
+    {
+      "index": 22,
+      "event": "compiler.execution",
+      "elapsedMs": 1396958,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        175
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 23,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1461851,
+      "note": "Revises a row loop, its nesting, or its iteration count.",
+      "sourceSteps": [
+        176
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for _ in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": true,
+      "legacyLabels": [
+        "EDIT_ROW_LOOP"
+      ],
+      "reading": null
+    },
+    {
+      "index": 24,
+      "event": "compiler.execution",
+      "elapsedMs": 1461851,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        176
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 25,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1479830,
+      "note": "Revises carriage-direction syntax or direction choice.",
+      "sourceSteps": [
+        177
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in Leftward direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": true,
+      "legacyLabels": [
+        "EDIT_DIRECTION_SYNTAX"
+      ],
+      "reading": null
+    },
+    {
+      "index": 26,
+      "event": "compiler.execution",
+      "elapsedMs": 1479830,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        177
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in Leftward direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in Leftward direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 27,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1493124,
+      "note": "Revises carriage-direction syntax or direction choice.",
+      "sourceSteps": [
+        178
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in Leftward direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": true,
+      "legacyLabels": [
+        "EDIT_DIRECTION_SYNTAX"
+      ],
+      "reading": null
+    },
+    {
+      "index": 28,
+      "event": "compiler.execution",
+      "elapsedMs": 1493124,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        178
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 29,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1523251,
+      "note": "Revises carriage-direction syntax or direction choice.",
+      "sourceSteps": [
+        179
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  \n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": true,
+      "legacyLabels": [
+        "EDIT_DIRECTION_SYNTAX",
+        "REFINE_CAST_ON",
+        "EDIT_KNIT_TARGET"
+      ],
+      "reading": null
+    },
+    {
+      "index": 30,
+      "event": "compiler.execution",
+      "elapsedMs": 1523251,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        179
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  \n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  \n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 31,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1558214,
+      "note": "Adds a carriage-direction scope.",
+      "sourceSteps": [
+        180
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  \n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": true,
+      "legacyLabels": [
+        "ADD_DIRECTION_BLOCK",
+        "ADD_TUCK_CAST_ON",
+        "EDIT_KNIT_TARGET"
+      ],
+      "reading": null
+    },
+    {
+      "index": 32,
+      "event": "compiler.execution",
+      "elapsedMs": 1558214,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        180
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 33,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1625784,
+      "note": "Revises carriage-direction syntax or direction choice.",
+      "sourceSteps": [
+        181
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  for n in range(2): {\n      in Leftward direction: {\n        tuck Front_Needles[1:width:2];\n      }\n      in reverse direction: {\n        tuck Front_Needles[0:width:2];\n      }\n  }\n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  in Leftward direction: {\n    tuck Front_Needles[1:width:2];\n  }\n  in reverse direction: {\n    tuck Front_Needles[0:width:2];\n  }\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": true,
+      "legacyLabels": [
+        "EDIT_DIRECTION_SYNTAX",
+        "REFINE_CAST_ON",
+        "EDIT_NEEDLE_SELECTION",
+        "EDIT_KNIT_TARGET",
+        "ADD_ROW_LOOP"
+      ],
+      "reading": null
+    },
+    {
+      "index": 34,
+      "event": "compiler.execution",
+      "elapsedMs": 1625784,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        181
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  for n in range(2): {\n      in Leftward direction: {\n        tuck Front_Needles[1:width:2];\n      }\n      in reverse direction: {\n        tuck Front_Needles[0:width:2];\n      }\n  }\n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  for n in range(2): {\n      in Leftward direction: {\n        tuck Front_Needles[1:width:2];\n      }\n      in reverse direction: {\n        tuck Front_Needles[0:width:2];\n      }\n  }\n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 35,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1672613,
+      "note": "Revises carriage-direction syntax or direction choice.",
+      "sourceSteps": [
+        182
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  for n in range(2): {\n      in Leftward direction: {\n        tuck Front_Needles[1:width:2];\n      }\n      in reverse direction: {\n        tuck Front_Needles[0:width:2];\n      }\n  }\n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": true,
+      "legacyLabels": [
+        "EDIT_DIRECTION_SYNTAX",
+        "REFINE_CAST_ON",
+        "EDIT_NEEDLE_SELECTION",
+        "EDIT_KNIT_TARGET",
+        "EDIT_ROW_LOOP"
+      ],
+      "reading": null
+    },
+    {
+      "index": 36,
+      "event": "compiler.execution",
+      "elapsedMs": 1672613,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        182
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 37,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1780179,
+      "note": "Adds a carriage-direction scope.",
+      "sourceSteps": [
+        183
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": true,
+      "legacyLabels": [
+        "ADD_DIRECTION_BLOCK",
+        "ADD_TUCK_CAST_ON",
+        "EDIT_KNIT_TARGET"
+      ],
+      "reading": null
+    },
+    {
+      "index": 38,
+      "event": "compiler.execution",
+      "elapsedMs": 1780179,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        183
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 39,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1787958,
+      "note": "Revises carriage-direction syntax or direction choice.",
+      "sourceSteps": [
+        184
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  \n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": true,
+      "legacyLabels": [
+        "EDIT_DIRECTION_SYNTAX",
+        "REFINE_CAST_ON",
+        "EDIT_KNIT_TARGET"
+      ],
+      "reading": null
+    },
+    {
+      "index": 40,
+      "event": "compiler.execution",
+      "elapsedMs": 1787958,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        184
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  \n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  \n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 41,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1820899,
+      "note": "Revises carriage-direction syntax or direction choice.",
+      "sourceSteps": [
+        185
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n     tuck Front_Needles[0:width:2];\n   }\n   \n\n  \n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  \n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": true,
+      "legacyLabels": [
+        "EDIT_DIRECTION_SYNTAX"
+      ],
+      "reading": null
+    },
+    {
+      "index": 42,
+      "event": "compiler.execution",
+      "elapsedMs": 1820899,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        185
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n     tuck Front_Needles[0:width:2];\n   }\n   \n\n  \n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n     tuck Front_Needles[0:width:2];\n   }\n   \n\n  \n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 43,
+      "event": "compiler.execution",
+      "elapsedMs": 1826087,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        186
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n     tuck Front_Needles[0:width:2];\n   }\n   \n\n  \n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n     tuck Front_Needles[0:width:2];\n   }\n   \n\n  \n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 44,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1886912,
+      "note": "Adds a carriage-direction scope.",
+      "sourceSteps": [
+        187
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\nreleasehook;\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n     tuck Front_Needles[0:width:2];\n   }\n   \n\n  \n\n\n  releasehook;\n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": true,
+      "legacyLabels": [
+        "ADD_DIRECTION_BLOCK",
+        "MOVE_RELEASEHOOK"
+      ],
+      "reading": null
+    },
+    {
+      "index": 45,
+      "event": "compiler.execution",
+      "elapsedMs": 1886912,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        187
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\nreleasehook;\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\nreleasehook;\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 46,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 1940348,
+      "note": "Moves the releasehook operation relative to the row construction.",
+      "sourceSteps": [
+        188
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  releasehook;\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\nreleasehook;\n\ncut c1;",
+      "changed": true,
+      "legacyLabels": [
+        "MOVE_RELEASEHOOK"
+      ],
+      "reading": null
+    },
+    {
+      "index": 47,
+      "event": "compiler.execution",
+      "elapsedMs": 1940348,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        188
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  releasehook;\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  releasehook;\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 48,
+      "event": "compiler.execution",
+      "elapsedMs": 2074548,
+      "note": "Runs the current source; it reaches the compiler but does not pass all task checks.",
+      "sourceSteps": [
+        189
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  releasehook;\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  releasehook;\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 49,
+      "event": "compiler.source_snapshot",
+      "elapsedMs": 2316079,
+      "note": "Adds a carriage-direction scope.",
+      "sourceSteps": [
+        190
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  in Leftward direction: {\n    knit Loops;\n  }\n\n  in reverse direction: {\n    knit Loops;\n  }\n\n  releasehook;\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  releasehook;\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": true,
+      "legacyLabels": [
+        "ADD_DIRECTION_BLOCK",
+        "ADD_KNIT_ROWS"
+      ],
+      "reading": null
+    },
+    {
+      "index": 50,
+      "event": "compiler.execution",
+      "elapsedMs": 2316079,
+      "note": "Runs the current source; it passes all task checks.",
+      "sourceSteps": [
+        190
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  in Leftward direction: {\n    knit Loops;\n  }\n\n  in reverse direction: {\n    knit Loops;\n  }\n\n  releasehook;\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  in Leftward direction: {\n    knit Loops;\n  }\n\n  in reverse direction: {\n    knit Loops;\n  }\n\n  releasehook;\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    },
+    {
+      "index": 51,
+      "event": "compiler.execution",
+      "elapsedMs": 2324805,
+      "note": "Runs the current source; it passes all task checks.",
+      "sourceSteps": [
+        191
+      ],
+      "source": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  in Leftward direction: {\n    knit Loops;\n  }\n\n  in reverse direction: {\n    knit Loops;\n  }\n\n  releasehook;\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "previousSource": "width = 10;\n\nwith Carrier as c1: {\n  \n   in Leftward direction: {\n     tuck Front_Needles[1:width:2];\n      \n   }\n   in reverse direction: {\n     tuck Front_Needles[0:width:2];\n   }\n\n  in Leftward direction: {\n    knit Loops;\n  }\n\n  in reverse direction: {\n    knit Loops;\n  }\n\n  releasehook;\n  \n  for row in range(6): {\n    in reverse direction: {\n      knit Loops;\n    }\n  }\n}\n\ncut c1;",
+      "changed": false,
+      "legacyLabels": [
+        "BROWSER_TEST"
+      ],
+      "reading": null
+    }
+  ]
+}

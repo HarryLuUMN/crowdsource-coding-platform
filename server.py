@@ -299,6 +299,18 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                 return
             try:
                 repository = get_admin_repository()
+                if path in {f"/api/admin/annotation-dataset/{name}" for name in ("5f427", "691de")}:
+                    name = path.rsplit("/", 1)[1]
+                    dataset = json.loads((ANNOTATION_DATA_DIR / f"{name}.json").read_text())
+                    review = json.loads((ANNOTATION_DATA_DIR / f"{name}-review.json").read_text())
+                    dataset.update(annotations=review["annotations"], ruleDecisions=review["ruleDecisions"], ruleReviewNotes=review["ruleReviewNotes"])
+                    dataset["trace"]["dataNote"] += " " + review["limitations"]
+                    for step in dataset["steps"]:
+                        reason = review["reasons"].get(str(step["index"]))
+                        if reason:
+                            step["note"] += " Annotation evidence: " + reason
+                    self._send_json(HTTPStatus.OK, {"ok": True, "dataset": dataset})
+                    return
                 if path in {f"/api/admin/annotation-review/{name}" for name in ("67aa5", "65fda", "5f427", "691de")}:
                     review_name = path.rsplit("/", 1)[1]
                     self._send_json(HTTPStatus.OK, json.loads((ANNOTATION_DATA_DIR / f"{review_name}-review.json").read_text()))
