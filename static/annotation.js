@@ -201,8 +201,9 @@ function renderMatrix() {
       button.type = "button";
       button.className = "cell-button";
       button.dataset.code = code.id;
-      button.title = `${code.label}: ${code.description}`;
+      button.title = `${code.label} (${code.id})\n\n${code.description}`;
       button.setAttribute("aria-label", `${code.label} for step ${step.index + 1}`);
+      button.setAttribute("aria-description", code.description);
       button.addEventListener("click", (event) => {
         event.stopPropagation();
         toggleCode(step.index, code.id);
@@ -227,7 +228,9 @@ function refreshMatrix() {
       const detection = state.rules?.detections.find(d => d.step === stepIndex && d.code === button.dataset.code);
       const pending = detection?.status === "candidate" && !state.decisions[detection.id] && !selected;
       button.classList.toggle("candidate", !!pending);
-      if (detection) button.title = `${detection.status === "auto" ? "Detected" : "Candidate"}: ${detection.reason}`;
+      const code = state.codes.find(item => item.id === button.dataset.code);
+      button.title = `${code.label} (${code.id})\n\n${code.description}`;
+      if (detection) button.title += `\n\n${detection.status === "auto" ? "Detected" : "Candidate"}: ${detection.reason}`;
       button.setAttribute("aria-pressed", String(selected));
     });
   });
