@@ -3,25 +3,27 @@
   "participant": "67aa54c162dc637de018fe18",
   "ruleDecisions": {
     "8:DOC_FIRST": "confirmed",
-    "463:PASTE_DOC": "rejected",
+    "463:PASTE_DOC": "confirmed",
     "536:INCORRECT_VALUE": "confirmed",
     "536:INCORRECT_BINDING": "rejected",
     "536:INCORRECT_DECLARATION": "rejected",
     "536:INCORRECT_REFERENCE": "rejected",
     "536:INCORRECT_ARRANGEMENT": "rejected",
     "548:LOCAL_REVISION": "confirmed",
-    "582:PASTE_DOC": "rejected",
+    "582:PASTE_DOC": "confirmed",
     "633:LOCAL_REVISION": "rejected"
   },
   "ruleReviewNotes": {
     "8:DOC_FIRST": "Tutorial selection and scrolling occur before first edit #252; the extended reading phase supports the codebook's document-first behavior.",
-    "463:PASTE_DOC": "The pasted fragment repairs a for-loop header. Its provenance as a documentation example is not established.",
+    "463:PASTE_DOC": "Documentation origin is assumed under the researcher-specified study restriction against external resources. The paste repairs a for-loop header; clipboard provenance was not directly logged.",
     "536:INCORRECT_VALUE": "After the machine-state failure, #545–548 swap slice-start values 0/1 to 1/0; the next execution succeeds. Carrier declarations, references, and block structure are unchanged, so those candidate error labels are unsupported.",
     "548:LOCAL_REVISION": "Two numeric slice starts change inside existing statements before reevaluation. The change is below the full-statement level.",
-    "582:PASTE_DOC": "The pasted fragment is for _ in range(2):{. No recorded documentation-source match establishes example provenance.",
+    "582:PASTE_DOC": "Documentation origin is assumed under the researcher-specified study restriction against external resources. The pasted fragment is for _ in range(2):{; clipboard provenance was not directly logged.",
     "633:LOCAL_REVISION": "The repair adds a loop, a direction scope and a knit statement. This exceeds a sub-statement revision."
   },
   "review": {
+    "464": {"codes": ["PASTE_DOC"], "reason": "Researcher-directed assumption: pasted loop header is treated as a documentation example because external resources are prohibited. This is assumed provenance, not direct clipboard evidence."},
+    "583": {"codes": ["PASTE_DOC"], "reason": "Researcher-directed assumption: pasted for _ in range(2):{ is treated as a documentation example because external resources are prohibited. This is assumed provenance, not direct clipboard evidence."},
     "13": {"codes": ["DOC_FIRST"], "reason": "Tutorial scrolling occurs before the first code edit (event 252)."},
     "537": {"codes": ["INCORRECT_VALUE"], "reason": "Evaluation fails with Blocked_by_Yarn_Inserting_Hook_Error on tuck + f9. Changing the cast-on slice starts from 0/1 to 1/0 resolves this runtime failure; this is not a syntax error."},
     "549": {"codes": ["LOCAL_REVISION"], "reason": "After the failed evaluation, events 545–548 change only two numeric slice-start values within existing statements, then evaluate again."},
