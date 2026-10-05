@@ -235,6 +235,22 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
             return False
         return True
 
+    def _annotation_local(self) -> bool:
+        return self.server.server_address[0] in {"127.0.0.1", "::1"} and self.client_address[0] in {"127.0.0.1", "::1"} and not self.headers.get("X-Forwarded-For")
+
+    def _annotation_read_path(self, path: str, query: str) -> bool:
+        names = {"s4", "5f427", "691de", "67aa5", "65fda", "67658"}
+        if path in {f"/api/admin/annotation-{kind}/{name}" for kind in ("dataset", "review") for name in names}:
+            return True
+        for name in names - {"s4"}:
+            review = json.loads((ANNOTATION_DATA_DIR / f"{name}-review.json").read_text())
+            prefix = f"/api/admin/sessions/{review['session']}"
+            if path in {prefix, prefix + "/events"}:
+                return True
+            if path == prefix + "/file" and parse_qs(query).get("path") == ["code/source-initial.ks"]:
+                return True
+        return False
+
     def _admin_cookie_header(self, value: str, max_age: int) -> str:
         host = self.headers.get("Host", "").split(":", 1)[0].lower()
         forwarded_https = self.headers.get("X-Forwarded-Proto", "").split(",", 1)[0].strip() == "https"
@@ -310,7 +326,10 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
             super().do_GET()
             return
         if path.startswith("/api/admin/"):
-            if not self._require_admin():
+            if path == "/api/admin/annotation-config":
+                self._send_json(HTTPStatus.OK, {"ok": True, "readOnly": not self._annotation_local()})
+                return
+            if not self._annotation_read_path(path, parsed.query) and not self._require_admin():
                 return
             try:
                 repository = get_admin_repository()

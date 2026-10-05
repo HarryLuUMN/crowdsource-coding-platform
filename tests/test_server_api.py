@@ -125,7 +125,7 @@ class ServerApiTests(unittest.TestCase):
         self.assertIn('sandbox="allow-same-origin"', html)
         self.assertIn("Read-only replay", html)
 
-    def test_annotation_studio_is_available_and_dataset_requires_login(self) -> None:
+    def test_annotation_studio_is_available_without_login(self) -> None:
         status, html = self.get_text("/annotation")
         dataset_status, payload = self.admin_request("/api/admin/annotation-dataset/s4")
 
@@ -134,8 +134,13 @@ class ServerApiTests(unittest.TestCase):
         self.assertIn('id="annotationMatrix"', html)
         self.assertIn('id="codeSnapshot"', html)
         self.assertIn('id="readingEvidence"', html)
-        self.assertEqual(401, dataset_status)
-        self.assertFalse(payload["ok"])
+        self.assertEqual(200, dataset_status)
+        self.assertTrue(payload["ok"])
+        _, config = self.admin_request("/api/admin/annotation-config")
+        self.assertFalse(config["readOnly"])
+        request = Request(f"{self.base_url}/api/admin/annotation-config", headers={"X-Forwarded-For": "203.0.113.1"})
+        with urlopen(request) as response:
+            self.assertTrue(json.loads(response.read())["readOnly"])
 
         login_status, _login = self.admin_request("/api/admin/login", {"token": self.ADMIN_TOKEN})
         dataset_status, dataset = self.admin_request("/api/admin/annotation-dataset/s4")

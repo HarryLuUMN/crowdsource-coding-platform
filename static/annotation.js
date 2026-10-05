@@ -3,6 +3,7 @@
 const $ = (selector) => document.querySelector(selector);
 const state = { dataset: null, codes: [], selectedStep: 0, annotations: {}, decisions: {}, rules: null, activeTab: "code" };
 const STORAGE_PREFIX = "trace-annotations:";
+let annotationReadOnly = true;
 const TRACE_CATALOG = [
   { key: "67658", id: "9da1b0a5-2c84-4720-abac-c8b3a7fa78aa", participant: "6765829a949d1203926e1ade", steps: 528, unit: "events" },
   { key: "5f427", id: "74e1401c-cbf1-46f1-911d-84986fd65515", participant: "5f4275b5981d7745acd1f912", steps: 78, unit: "semantic steps" },
@@ -55,6 +56,11 @@ function storageKey() {
 }
 
 function loadAnnotations() {
+  if (annotationReadOnly) {
+    state.annotations = structuredClone(state.dataset.annotations || {});
+    state.decisions = { ...(state.dataset.ruleDecisions || {}) };
+    return;
+  }
   try {
     const current = localStorage.getItem(storageKey());
     const stored = JSON.parse(current || localStorage.getItem(`${STORAGE_PREFIX}${state.dataset.trace.id}`) || "{}");
@@ -71,6 +77,7 @@ function loadAnnotations() {
 }
 
 function saveAnnotations() {
+  if (annotationReadOnly) return;
   localStorage.setItem(storageKey(), JSON.stringify({
     schemaVersion: 1,
     granularity: state.dataset.granularity,
@@ -208,6 +215,7 @@ function renderMatrix() {
       button.dataset.code = code.id;
       button.title = `${code.label} (${code.id})\n\n${code.description}`;
       button.setAttribute("aria-label", `${code.label} for step ${step.index + 1}`);
+      button.disabled = annotationReadOnly;
       button.setAttribute("aria-description", code.description);
       button.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -242,6 +250,7 @@ function refreshMatrix() {
 }
 
 function toggleCode(stepIndex, codeId) {
+  if (annotationReadOnly) return;
   const selected = new Set(selectedCodes(stepIndex));
   if (selected.has(codeId)) selected.delete(codeId);
   else selected.add(codeId);
@@ -375,7 +384,9 @@ function renderRuleEvidence(stepIndex) {
     details.append(summary, raw); card.append(details);
     for (const [label, decision] of [["Confirm", "confirmed"], ["Reject", "rejected"], ["Uncertain", "uncertain"]]) {
       const button = document.createElement("button"); button.type = "button"; button.textContent = label;
+      button.disabled = annotationReadOnly;
       button.addEventListener("click", () => {
+        if (annotationReadOnly) return;
         state.decisions[d.id] = decision;
         if (decision === "rejected") state.annotations[stepIndex] = (state.annotations[stepIndex] || []).filter(id => id !== d.code);
         saveAnnotations(); refreshMatrix(); renderDetail();
@@ -423,6 +434,7 @@ function exportAnnotations() {
 }
 
 async function importAnnotations(file) {
+  if (annotationReadOnly) return;
   const payload = JSON.parse(await file.text());
   if (payload.trace?.id !== state.dataset.trace.id || !Array.isArray(payload.annotations)) throw new Error("This file does not contain annotations for the selected trace.");
   const validCodes = new Set(state.dataset.codebook.flatMap((group) => group.codes.map((code) => code.id)));
@@ -488,6 +500,11 @@ async function loadDataset(traceName = new URLSearchParams(location.search).get(
   loadingTrace = true;
   if (state.dataset) { saveAnnotations(); renderTraceList(); }
   try {
+    annotationReadOnly = (await api("/api/admin/annotation-config")).readOnly;
+    $("#importButton").hidden = annotationReadOnly;
+    $("#clearStepButton").hidden = annotationReadOnly;
+    $("#logoutButton").hidden = true;
+    $("#saveState").textContent = annotationReadOnly ? "Read-only" : "Saved locally";
     const payload = await api("/api/admin/annotation-dataset/s4");
     let dataset = payload.dataset;
     if (["5f427", "691de"].includes(traceName)) dataset = (await api(`/api/admin/annotation-dataset/${traceName}`)).dataset;
