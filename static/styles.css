@@ -230,3 +230,24 @@ button { color: inherit; }
   .documentation-top-button { grid-column: 1 / -1; }
   .visualization-stats { grid-template-columns: repeat(2, minmax(100px, 1fr)); }
 }
+.task-selectors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.task-selectors label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.task-selectors select {
+  color: inherit;
+  background: #1c1e18;
+  border: 1px solid #45483a;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font: inherit;
+}

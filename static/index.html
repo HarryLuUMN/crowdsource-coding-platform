@@ -21,6 +21,10 @@
           <div class="task-copy">
             <span class="task-phase-badge" id="taskPhaseBadge" hidden>Practice · not part of the study</span>
             <h1>Task Description</h1>
+            <div class="task-selectors">
+              <label>Language <select id="languageSelect" disabled><option value="practice">Python</option><option value="formal">KnitScript</option></select></label>
+              <label>Task <select id="taskSelect" disabled><option value="practice">Platform practice</option><option value="formal">Stockinette swatch</option></select></label>
+            </div>
             <p id="taskDescription">Write a KnitScript program that produces a 10-stitch-wide stockinette swatch on the front bed. The swatch should begin with a secure cast-on, transition cleanly into the main fabric, and contain six complete stockinette rows. Keep the fabric within the intended width and avoid operations that alter its basic structure. Run your code to evaluate the result, then submit when all tests pass.</p>
             <p class="independent-work-warning" role="note"><strong>Independent work only.</strong> Do not use AI assistants, search engines, external documentation, code-generation tools, or help from other people. You may use only the Documentation and Tutorial provided in this platform.</p>
           </div>
@@ -159,6 +163,6 @@
     <script src="/documentation-reading.js?v=2" defer></script>
     <script src="/knitout-visualizer.js?v=1" defer></script>
     <script src="/practice-task.js?v=1" defer></script>
-    <script src="/app.js?v=22" defer></script>
+    <script src="/app.js?v=23" defer></script>
   </body>
 </html>

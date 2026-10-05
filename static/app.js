@@ -1,4 +1,6 @@
 const TASK_ID = "stockinette-swatch-v1";
+const languageSelect = document.querySelector("#languageSelect");
+const taskSelect = document.querySelector("#taskSelect");
 const queryParameters = new URLSearchParams(window.location.search);
 const prolificRecruitment = {
   source: "prolific",
@@ -567,6 +569,8 @@ function clearResult() {
 function setStudyPhase(phase, sourceStorageScope) {
   currentStudyPhase = phase;
   const practice = phase === "practice";
+  languageSelect.value = phase;
+  taskSelect.value = phase;
   sourceStorageKey = practice
     ? `coding-platform-practice-source:v1:${sourceStorageScope}`
     : `knitscript-studio-source:${TASK_ID}:from-scratch-v1:${sourceStorageScope}`;
@@ -920,6 +924,8 @@ fetch("/api/health")
   });
 
 function setStudyControlsEnabled(enabled) {
+  languageSelect.disabled = !enabled;
+  taskSelect.disabled = !enabled;
   editor.disabled = !enabled;
   runButton.disabled = !enabled;
   submitButton.disabled = !enabled;
@@ -935,7 +941,9 @@ function startStudy(identityMethod) {
   studyStarted = true;
   setStudyControlsEnabled(true);
   studyState.textContent = hasProlificParticipant ? "Prolific session" : "Preview mode";
-  setStudyPhase(localStorage.getItem(practiceCompletionKey) === "completed" ? "formal" : "practice", sourceStorageScope);
+  const practiceCompleted = localStorage.getItem(practiceCompletionKey) === "completed";
+  const requestedPhase = queryParameters.get("task");
+  setStudyPhase(practiceCompleted && requestedPhase !== "practice" ? "formal" : "practice", sourceStorageScope);
   if (currentStudyPhase === "formal") {
     sessionReady = initializeTelemetrySession();
     sessionReady.then(() => {
@@ -944,6 +952,38 @@ function startStudy(identityMethod) {
     });
   }
 }
+
+async function switchTask(event) {
+  const phase = event.target.value;
+  if (phase === currentStudyPhase) return;
+  if (runButton.disabled || submitButton.disabled) {
+    languageSelect.value = currentStudyPhase;
+    taskSelect.value = currentStudyPhase;
+    showToast("Wait for the current execution to finish before switching tasks");
+    return;
+  }
+  if (phase === "formal" && localStorage.getItem(practiceCompletionKey) !== "completed") {
+    languageSelect.value = currentStudyPhase;
+    taskSelect.value = currentStudyPhase;
+    showToast("Complete and submit the practice task before starting the formal task");
+    return;
+  }
+  setStudyControlsEnabled(false);
+  clearTimeout(saveTimer);
+  persistSource();
+  try {
+    await sessionReady;
+    await flushEvents();
+  } catch (error) {
+    showToast("Pending logging will retry when the formal task is reopened");
+  }
+  const destination = new URL(window.location.href);
+  destination.searchParams.set("task", phase);
+  window.location.assign(destination.href);
+}
+
+languageSelect.addEventListener("change", switchTask);
+taskSelect.addEventListener("change", switchTask);
 
 participantForm.addEventListener("submit", (event) => {
   event.preventDefault();
