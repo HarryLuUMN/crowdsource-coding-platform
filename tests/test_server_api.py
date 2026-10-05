@@ -171,7 +171,7 @@ class ServerApiTests(unittest.TestCase):
                 status, payload = self.admin_request(f"/api/admin/annotation-dataset/{name}")
                 self.assertEqual(200, status)
                 dataset = payload["dataset"]
-                self.assertEqual("syntactic-unit-v1", dataset["granularity"])
+                self.assertEqual("syntactic-unit-v2", dataset["granularity"])
                 self.assertEqual(count, len(dataset["rawSteps"]))
                 self.assertEqual(count, len({i for step in dataset["steps"] for i in step["rawStepIndices"]}))
                 self.assertEqual(dataset["rawSteps"][-1]["source"], dataset["steps"][-1]["source"])

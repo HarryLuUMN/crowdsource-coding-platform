@@ -63,8 +63,24 @@ function loadAnnotations() {
   }
   try {
     const current = localStorage.getItem(storageKey());
-    const stored = JSON.parse(current || localStorage.getItem(`${STORAGE_PREFIX}${state.dataset.trace.id}`) || "{}");
-    const imported = !current && state.dataset.rawSteps ? mapRawAnnotations(state.dataset, stored.annotations || {}) : stored.annotations;
+    const previousUnits = !current && state.dataset.granularity === "syntactic-unit-v2"
+      ? localStorage.getItem(`${STORAGE_PREFIX}${state.dataset.trace.id}:syntactic-unit-v1`) : null;
+    const stored = JSON.parse(current || previousUnits || localStorage.getItem(`${STORAGE_PREFIX}${state.dataset.trace.id}`) || "{}");
+    let imported = stored.annotations;
+    if (previousUnits) {
+      const oldDataset = buildUnitDataset({ ...state.dataset, steps: state.dataset.rawSteps, annotations: state.dataset.rawAnnotations }, { mergeReading: false });
+      const rawAnnotations = {};
+      oldDataset.steps.forEach(step => {
+        if (Object.hasOwn(stored.annotations || {}, step.index)) step.rawStepIndices.forEach(index => {
+          rawAnnotations[index] = [...new Set([...(rawAnnotations[index] || []), ...stored.annotations[step.index]])];
+        });
+      });
+      imported = mapRawAnnotations(state.dataset, rawAnnotations);
+      state.dataset.steps.forEach(step => {
+        if (step.rawStepIndices.some(index => Object.hasOwn(rawAnnotations, index)) && !imported[step.index]) imported[step.index] = [];
+      });
+      state.dataset.previousUnitAnnotations = stored;
+    } else if (!current && state.dataset.rawSteps) imported = mapRawAnnotations(state.dataset, stored.annotations || {});
     state.dataset.legacyStoredAnnotations = !current ? stored : JSON.parse(localStorage.getItem(`${STORAGE_PREFIX}${state.dataset.trace.id}`) || "{}");
     state.decisions = { ...(state.dataset.ruleDecisions || {}), ...(stored.ruleDecisions || {}) };
     state.annotations = imported && typeof imported === "object"
