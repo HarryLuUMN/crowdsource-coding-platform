@@ -85,6 +85,7 @@ function fitAllSteps() {
 
 async function api(path, options = {}) {
   const response = await fetch(path, {
+    cache: "no-store",
     credentials: "same-origin",
     ...options,
     headers: { ...(options.body ? { "Content-Type": "application/json" } : {}), ...(options.headers || {}) },
@@ -110,6 +111,21 @@ function loadAnnotations() {
   }
   try {
     const current = localStorage.getItem(storageKey());
+    if (current && state.dataset.annotationRevision) {
+      const stored = JSON.parse(current);
+      const base = stored.datasetBaseline;
+      if (!base) {
+        state.dataset.legacyStoredAnnotations = stored;
+        localStorage.setItem(`${storageKey()}:before-dataset-sync`, current);
+      }
+      state.annotations = mergeDatasetLabels(state.dataset.annotations || {}, stored.annotations || {}, base?.annotations);
+      state.decisions = { ...(state.dataset.ruleDecisions || {}) };
+      if (base) for (const [id, decision] of Object.entries(stored.ruleDecisions || {})) {
+        if (decision !== base.ruleDecisions?.[id]) state.decisions[id] = decision;
+      }
+      state.dataset.rawEventAnnotations = mergeDatasetLabels(state.dataset.rawEventAnnotations || {}, stored.rawEventAnnotations || {}, base?.rawEventAnnotations);
+      return;
+    }
     if (!current && state.dataset.granularity === "curated-semantic-v1") {
       const id = `${STORAGE_PREFIX}${state.dataset.trace.id}`;
       const old = localStorage.getItem(`${id}:syntactic-unit-v2`) || localStorage.getItem(`${id}:syntactic-unit-v1`);
@@ -159,6 +175,20 @@ function loadAnnotations() {
   }
 }
 
+function mergeDatasetLabels(serverLabels, localLabels, baseline) {
+  const merged = structuredClone(serverLabels);
+  if (!baseline) return merged;
+  for (const index of new Set([...Object.keys(localLabels), ...Object.keys(baseline)])) {
+    const original = new Set(baseline[index] || []);
+    const local = new Set(localLabels[index] || []);
+    const result = new Set(merged[index] || []);
+    for (const code of original) if (!local.has(code)) result.delete(code);
+    for (const code of local) if (!original.has(code)) result.add(code);
+    if ([...original].some(code => !local.has(code)) || [...local].some(code => !original.has(code))) merged[index] = [...result];
+  }
+  return merged;
+}
+
 function saveAnnotations() {
   if (annotationReadOnly) return;
   if (traceView === "semantic") semanticAnnotations = state.annotations;
@@ -184,6 +214,8 @@ function saveAnnotations() {
     traceId: state.dataset.trace.id,
     participant: state.dataset.trace.participant,
     updatedAt: new Date().toISOString(),
+    datasetRevision: semanticDataset?.annotationRevision,
+    datasetBaseline: semanticDataset ? { annotations: semanticDataset.annotations || {}, ruleDecisions: semanticDataset.ruleDecisions || {}, rawEventAnnotations: semanticDataset.persistedRawEventAnnotations || {} } : undefined,
     annotations: traceView === "raw" ? semanticAnnotations : state.annotations,
     rawEventAnnotations: semanticDataset?.rawEventAnnotations || {},
     ruleDecisions: state.decisions,
@@ -640,6 +672,10 @@ function bindInteractions() {
         traceId: semanticDataset.trace.id, granularity: semanticDataset.granularity,
         annotations: semanticAnnotations, rawEventAnnotations: semanticDataset.rawEventAnnotations || {}, ruleDecisions: state.decisions,
       }) });
+      semanticDataset.annotations = structuredClone(semanticAnnotations);
+      semanticDataset.ruleDecisions = { ...state.decisions };
+      semanticDataset.persistedRawEventAnnotations = structuredClone(semanticDataset.rawEventAnnotations || {});
+      saveAnnotations();
       $("#saveState").textContent = `Saved to ${result.saved}`;
     } catch (error) {
       $("#saveState").textContent = `Save failed: ${error.message}. Browser labels are retained.`;
@@ -713,6 +749,7 @@ async function loadDataset(traceName = new URLSearchParams(location.search).get(
       state.rules.detections = state.rules.detections.flatMap(d => dataset.steps.filter(s => s.rawStepIndices.includes(d.step)).map(s => ({ ...d, step: s.index })));
     }
     state.dataset = dataset;
+    dataset.persistedRawEventAnnotations = structuredClone(dataset.rawEventAnnotations || {});
     traceView = "semantic";
     semanticDataset = dataset;
     semanticRules = state.rules;
@@ -723,6 +760,7 @@ async function loadDataset(traceName = new URLSearchParams(location.search).get(
     state.codes = visibleCodebook().flatMap((group, groupIndex) => group.codes.map((code) => ({ ...code, group: group.group, groupIndex })));
     loadAnnotations();
     semanticAnnotations = state.annotations;
+    if (!annotationReadOnly) saveAnnotations();
     renderTrace(); renderLegend(); renderMatrix(); renderDetail(); updateProgress();
     $("#loginView").hidden = true;
     $("#appView").hidden = false;

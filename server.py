@@ -338,6 +338,7 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                 if path in {f"/api/admin/annotation-dataset/{name}" for name in ("67658", "67aa5", "65fda", "s4", "5f427", "691de")}:
                     name = path.rsplit("/", 1)[1]
                     dataset = json.loads((ANNOTATION_DATA_DIR / f"{name}-units.json").read_text())
+                    dataset["annotationRevision"] = hashlib.sha256(json.dumps({key: dataset.get(key, {}) for key in ("annotations", "ruleDecisions", "rawEventAnnotations")}, sort_keys=True).encode()).hexdigest()
                     self._send_json(HTTPStatus.OK, {"ok": True, "dataset": dataset})
                     return
                 if path in {f"/api/admin/annotation-dataset/{name}" for name in ("5f427", "691de")}:
