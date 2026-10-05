@@ -1,6 +1,8 @@
 const TASK_ID = "stockinette-swatch-v1";
 const languageSelect = document.querySelector("#languageSelect");
 const taskSelect = document.querySelector("#taskSelect");
+const localTaskSelection = ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname)
+  || window.location.protocol === "file:";
 const queryParameters = new URLSearchParams(window.location.search);
 const prolificRecruitment = {
   source: "prolific",
@@ -923,8 +925,8 @@ fetch("/api/health")
   });
 
 function setStudyControlsEnabled(enabled) {
-  languageSelect.disabled = !enabled;
-  taskSelect.disabled = !enabled;
+  languageSelect.disabled = !enabled || !localTaskSelection;
+  taskSelect.disabled = !enabled || !localTaskSelection;
   editor.disabled = !enabled;
   runButton.disabled = !enabled;
   submitButton.disabled = !enabled;

@@ -254,3 +254,9 @@ button { color: inherit; }
 .task-selectors[hidden] {
   display: none;
 }
+.task-selectors select:disabled {
+  opacity: 1;
+  color: var(--ink);
+  -webkit-text-fill-color: var(--ink);
+  cursor: not-allowed;
+}
