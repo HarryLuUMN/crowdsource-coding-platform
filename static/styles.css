@@ -251,3 +251,6 @@ button { color: inherit; }
   padding: 6px 10px;
   font: inherit;
 }
+.task-selectors[hidden] {
+  display: none;
+}
