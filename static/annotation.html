@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex, nofollow" />
     <title>Trace Annotation Studio</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/annotation.css?v=6" />
+    <link rel="stylesheet" href="/annotation.css?v=7" />
   </head>
   <body>
     <main class="login" id="loginView" hidden>
@@ -112,12 +112,16 @@
             <button id="nextCandidate" type="button">Next pending candidate</button>
             <div id="ruleEvidence"></div>
           </details>
+          <details class="run-results rule-review" id="runResults" hidden>
+            <summary class="eyebrow">Run results</summary>
+            <div id="runResultsContent"></div>
+          </details>
         </aside>
       </main>
     </div>
     <script src="/annotation-session.js?v=1" defer></script>
     <script src="/annotation-units.js?v=3" defer></script>
     <script src="/annotation-rules.js?v=1" defer></script>
-    <script src="/annotation.js?v=14" defer></script>
+    <script src="/annotation.js?v=15" defer></script>
   </body>
 </html>

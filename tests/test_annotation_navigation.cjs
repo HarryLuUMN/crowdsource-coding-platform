@@ -12,7 +12,7 @@ const context = vm.createContext({
     return elements.get(selector);
   },
   elapsed: String, eventName: String,
-  renderDiff() {}, renderCodeSnapshot() {}, renderReading() {}, renderAppliedCodes() {}, renderRuleEvidence() {},
+  renderDiff() {}, renderCodeSnapshot() {}, renderReading() {}, renderAppliedCodes() {}, renderRuleEvidence() {}, renderRunResults() {},
   refreshMatrix() { refreshed++; },
 });
 elements.set('#matrixBody', { rows: [0, 1, 2].map(index => ({ scrollIntoView() { scrolled = index; } })) });

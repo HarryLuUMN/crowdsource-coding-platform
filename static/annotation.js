@@ -475,6 +475,46 @@ function renderAppliedCodes(stepIndex) {
   });
 }
 
+function runResultsForStep(step) {
+  const events = step.rawSteps?.length ? step.rawSteps : [step];
+  return events.filter(event => /^(run|submit)\.(completed|failed)$/.test(event.event) || event.event === "compiler.execution");
+}
+
+function renderRunResults(step) {
+  const results = runResultsForStep(step);
+  const panel = $("#runResults");
+  const container = $("#runResultsContent");
+  panel.hidden = results.length === 0;
+  container.replaceChildren();
+  results.forEach(result => {
+    const payload = result.payload || {};
+    const card = document.createElement("article");
+    const status = document.createElement("p");
+    status.textContent = result.event === "compiler.execution" ? result.note
+      : `${result.event.endsWith("failed") ? "Execution failed" : "Execution completed"}${payload.duration_ms != null ? ` · ${payload.duration_ms} ms` : ""}`;
+    card.append(status);
+    if (payload.error_type) {
+      const error = document.createElement("p"); error.textContent = `Error: ${payload.error_type}`; card.append(error);
+    }
+    const check = payload.check;
+    if (check) {
+      const summary = document.createElement("p"); summary.textContent = `Task checks: ${check.passed_count}/${check.total_count} passed`; card.append(summary);
+      for (const test of check.tests || []) {
+        const item = document.createElement("p"); item.textContent = `${test.passed ? "PASS" : "FAIL"} · ${test.label || test.id}${test.message ? ` — ${test.message}` : ""}`; card.append(item);
+      }
+    }
+    if (Object.keys(payload).length) {
+      const details = document.createElement("details"), label = document.createElement("summary"), evidence = document.createElement("pre");
+      label.textContent = "Recorded result data";
+      evidence.textContent = JSON.stringify(payload, null, 2);
+      details.append(label, evidence); card.append(details);
+    } else {
+      const limitation = document.createElement("p"); limitation.textContent = "Only the saved execution summary is available; detailed output was not recorded in this dataset."; card.append(limitation);
+    }
+    container.append(card);
+  });
+}
+
 function renderDetail() {
   const step = state.dataset.steps[state.selectedStep];
   $("#stepTitle").textContent = `Step ${step.index + 1} of ${state.dataset.steps.length}`;
@@ -488,6 +528,7 @@ function renderDetail() {
   renderReading(step);
   renderAppliedCodes(step.index);
   renderRuleEvidence(step.index);
+  renderRunResults(step);
   $("#rawEvidence").textContent = JSON.stringify({ sourceSteps: step.sourceSteps, synthetic: step.synthetic || false,
     annotationProvenance: step.annotationProvenance || [], originalSteps: step.rawSteps || [step] }, null, 2);
 }
