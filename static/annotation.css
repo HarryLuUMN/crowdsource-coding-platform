@@ -130,7 +130,7 @@ button { color: inherit; }
 .precision-note { margin: 12px 14px 14px; color: var(--amber); font-size: 11px; line-height: 1.45; }
 .no-reading { display: grid; place-items: center; min-height: 220px; color: var(--muted); text-align: center; }
 .no-reading strong { display: block; margin-bottom: 8px; color: #c8ccc2; }
-.applied-codes { min-height: 104px; max-height: 160px; padding: 13px 16px; overflow: auto; border-top: 1px solid var(--line); }
+.applied-codes { min-height: 0; max-height: 90px; padding: 8px 16px; overflow: auto; border-top: 1px solid var(--line); }
 #appliedCodes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
 .code-pill { padding: 5px 7px; border: 1px solid #566236; border-radius: 5px; color: var(--lime); background: var(--lime-soft); font-size: 10px; }
 .code-pill.empty { border-color: var(--line); color: var(--muted); background: transparent; }
@@ -148,7 +148,8 @@ button { color: inherit; }
   .grid-toolbar { grid-template-columns: 1fr 180px; }
   #clearStepButton { display: none; }
 }
- .rule-review { padding: 16px; max-height: 32vh; overflow-y: auto; border-top: 1px solid var(--line); }
+ .rule-review { padding: 10px 16px; max-height: 24vh; overflow-y: auto; border-top: 1px solid var(--line); }
+ .rule-review > summary { cursor: pointer; }
  .rule-review p { font-size: 12px; color: var(--muted); line-height: 1.5; }
  .detection-card { padding: 10px 0; border-bottom: 1px solid var(--line); }
  .detection-card strong { font-size: 12px; }

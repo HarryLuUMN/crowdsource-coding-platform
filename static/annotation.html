@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex, nofollow" />
     <title>Trace Annotation Studio</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/annotation.css?v=4" />
+    <link rel="stylesheet" href="/annotation.css?v=5" />
   </head>
   <body>
     <main class="login" id="loginView" hidden>
@@ -106,12 +106,12 @@
             <span class="eyebrow">Applied codes</span>
             <div id="appliedCodes"></div>
           </section>
-          <section class="rule-review" aria-label="Rule detections">
-            <span class="eyebrow">Rule detections</span>
+          <details class="rule-review" aria-label="Rule detections">
+            <summary class="eyebrow">Rule detections</summary>
             <p id="ruleSummary"></p>
             <button id="nextCandidate" type="button">Next pending candidate</button>
             <div id="ruleEvidence"></div>
-          </section>
+          </details>
         </aside>
       </main>
     </div>
