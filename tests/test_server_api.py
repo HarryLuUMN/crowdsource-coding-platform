@@ -75,12 +75,12 @@ class ServerApiTests(unittest.TestCase):
         status, html = self.get_text("/")
 
         self.assertEqual(200, status)
-        self.assertIn('id="tutorialGuide"', html)
-        self.assertIn('data-guide-tab="tutorial"', html)
+        self.assertIn('id="tutorialFrame"', html)
+        self.assertIn('data-documentation-view="tutorial"', html)
         self.assertIn('id="documentationPanel"', html)
         self.assertIn('src="/documentation/"', html)
         self.assertIn('sandbox="allow-same-origin"', html)
-        self.assertIn("View documentation", html)
+        self.assertIn('data-documentation-view="documentation"', html)
 
     def test_studio_starts_with_an_empty_editor(self) -> None:
         html_status, html = self.get_text("/")
@@ -88,7 +88,7 @@ class ServerApiTests(unittest.TestCase):
 
         self.assertEqual(200, html_status)
         self.assertEqual(200, script_status)
-        self.assertIn("Write your KnitScript program from scratch", html)
+        self.assertIn("Write a KnitScript program", html)
         self.assertIn("Clear editor", html)
         self.assertIn('const STARTER_SOURCE = "";', script)
         self.assertNotIn("TODO: cast on", script)

@@ -14,6 +14,8 @@ python3.12 -m venv .venv
 
 Open [http://127.0.0.1:8000/?preview=1](http://127.0.0.1:8000/?preview=1), write a program from scratch, and press **Run** or <kbd>Cmd/Ctrl</kbd> + <kbd>Enter</kbd>.
 
+Vega-Lite sales task: [local preview](http://127.0.0.1:8000/?preview=1&task=vega-lite-sales-v1). Node.js is required in addition to Python for this task (included in the Docker image). Local formal-task language selectors can switch between tasks; production selectors stay locked. To assign Vega-Lite, use `?task=vega-lite-sales-v1` on the study URL and retain the Prolific ID parameters. Each task has a separate draft and telemetry outbox. The task supports single-view specifications referencing `/sales-data.json`, without data transformations, aggregation, binning, or time-unit conversion. Checks validate task structure and execute the compiled chart with the pinned official runtime; they do not assess the aesthetic quality of titles or prove that the participant interacted with every mark.
+
 ## Trace storage
 
 No database is required for the MVP. Each browser visit creates one directory under `data/traces/`:

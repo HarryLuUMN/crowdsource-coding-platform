@@ -20,6 +20,7 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from answer_checker import TASK_ID, check_stockinette_answer
+from vega_task import TASK_ID as VEGA_TASK_ID, SALES_DATA, evaluate_vega
 from documentation import render_documentation
 from trace_admin import TraceAdminRepository
 from trace_store import TraceStore, utc_now
@@ -137,7 +138,18 @@ def compile_source(source: str) -> tuple[int, dict[str, Any]]:
     return HTTPStatus.OK, payload
 
 
-def evaluate_source(source: str) -> tuple[int, dict[str, Any]]:
+def evaluate_source(source: str, task_id: str = TASK_ID) -> tuple[int, dict[str, Any]]:
+    if task_id == VEGA_TASK_ID:
+        if not isinstance(source, str) or len(source) > MAX_SOURCE_CHARS:
+            return HTTPStatus.BAD_REQUEST, {"ok": False, "error": {"message": "Invalid source or source too large."}, "check": {"passed": False}}
+        if not _compile_slots.acquire(blocking=False):
+            return HTTPStatus.TOO_MANY_REQUESTS, {"ok": False, "error": {"message": "Compiler busy; try again."}, "check": {"passed": False}}
+        try:
+            return HTTPStatus.OK, evaluate_vega(source)
+        finally:
+            _compile_slots.release()
+    if task_id != TASK_ID:
+        return HTTPStatus.BAD_REQUEST, {"ok": False, "error": {"message": "Unknown task."}, "check": {"passed": False}}
     status, result = compile_source(source)
     result["check"] = check_stockinette_answer(result)
     return status, result
@@ -170,12 +182,12 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
 
     def end_headers(self) -> None:
         path = urlparse(self.path).path
-        is_embeddable_guide = path.startswith("/documentation/") or path == "/tutorial.html"
+        is_embeddable_guide = path.startswith("/documentation/") or path in {"/tutorial.html", "/vega-guide.html", "/vega-preview.html"}
         self.send_header(
             "Content-Security-Policy",
-            "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
-            "connect-src 'self'; object-src 'none'; base-uri 'none'; "
-            + ("frame-ancestors 'self'; form-action 'none'; sandbox allow-same-origin" if is_embeddable_guide else "frame-ancestors 'none'; form-action 'self'"),
+            ("default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; " if path == "/vega-preview.html" else "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; ")
+            + "connect-src 'self'; object-src 'none'; base-uri 'none'; "
+            + ("frame-ancestors 'self'; form-action 'none'; sandbox allow-same-origin allow-scripts" if path == "/vega-preview.html" else "frame-ancestors 'self'; form-action 'none'; sandbox allow-same-origin" if is_embeddable_guide else "frame-ancestors 'none'; form-action 'self'"),
         )
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("X-Frame-Options", "SAMEORIGIN" if is_embeddable_guide else "DENY")
@@ -263,6 +275,9 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         path = parsed.path
+        if path == "/sales-data.json":
+            self._send_json(HTTPStatus.OK, SALES_DATA)
+            return
         if path.startswith("/documentation/"):
             try:
                 body = render_documentation(path.removeprefix("/documentation/"))
@@ -486,7 +501,12 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                 return
             requested_at = utc_now()
             execution_id = str(uuid.uuid4())
-            status, result = evaluate_source(source)
+            task_id = request.get("task_id", TASK_ID)
+            if session_id:
+                manifest = get_trace_store()._read_manifest(session_id)
+                if manifest["task_id"] in {TASK_ID, VEGA_TASK_ID} and manifest["task_id"] != task_id:
+                    raise ValueError("Task does not match the study session")
+            status, result = evaluate_source(source, task_id) if task_id != TASK_ID else evaluate_source(source)
             stored = None
             if session_id and isinstance(source, str):
                 try:

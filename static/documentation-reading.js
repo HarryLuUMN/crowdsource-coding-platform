@@ -49,7 +49,7 @@ function attachDocumentationReading(frame, record) {
     cleanup();
     const view = frame.contentWindow;
     const doc = frame.contentDocument;
-    if (!doc || !(view.location.pathname.startsWith("/documentation/") || view.location.pathname === "/tutorial.html")) return;
+    if (!doc || !(view.location.pathname.startsWith("/documentation/") || ["/tutorial.html", "/vega-guide.html"].includes(view.location.pathname))) return;
     let timer;
     let lastScroll = 0;
     const emit = (type, extra = {}) => record(type, { ...documentationReadingSnapshot(frame), ...extra });
@@ -90,7 +90,7 @@ function attachDocumentationReading(frame, record) {
   frame.addEventListener("load", bind);
   if (frame.contentDocument?.readyState === "complete") bind();
   return () => {
-    if (frame.contentDocument && (frame.contentWindow.location.pathname.startsWith("/documentation/") || frame.contentWindow.location.pathname === "/tutorial.html")) {
+    if (frame.contentDocument && (frame.contentWindow.location.pathname.startsWith("/documentation/") || ["/tutorial.html", "/vega-guide.html"].includes(frame.contentWindow.location.pathname))) {
       record("guide.documentation_view_left", documentationReadingSnapshot(frame));
     }
   };

@@ -1,9 +1,10 @@
-const TASK_ID = "stockinette-swatch-v1";
+const queryParameters = new URLSearchParams(window.location.search);
+const TASK_ID = queryParameters.get("task") === "vega-lite-sales-v1" ? "vega-lite-sales-v1" : "stockinette-swatch-v1";
+const isVegaTask = TASK_ID === "vega-lite-sales-v1";
 const languageSelect = document.querySelector("#languageSelect");
 const taskSelect = document.querySelector("#taskSelect");
 const localTaskSelection = ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname)
   || window.location.protocol === "file:";
-const queryParameters = new URLSearchParams(window.location.search);
 const prolificRecruitment = {
   source: "prolific",
   prolific_pid: queryParameters.get("PROLIFIC_PID") || "",
@@ -374,6 +375,7 @@ async function createTelemetrySession(initialSource, eventType, eventPayload = {
         initial_source: initialSource,
         recruitment: hasProlificParticipant ? prolificRecruitment : { source: "direct" },
         client: {
+          programming_language: isVegaTask ? "vega-lite" : "knitscript",
           client_instance_id: clientInstanceId,
           locale: navigator.language,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -572,6 +574,8 @@ function setStudyPhase(phase, sourceStorageScope) {
   currentStudyPhase = phase;
   const practice = phase === "practice";
   document.querySelector(".task-selectors").hidden = practice;
+  languageSelect.value = isVegaTask ? "vega-lite" : "knitscript";
+  taskSelect.replaceChildren(new Option("Task 01", TASK_ID));
   sourceStorageKey = practice
     ? `coding-platform-practice-source:v1:${sourceStorageScope}`
     : `knitscript-studio-source:${TASK_ID}:from-scratch-v1:${sourceStorageScope}`;
@@ -584,6 +588,17 @@ function setStudyPhase(phase, sourceStorageScope) {
   editor.setAttribute("aria-label", practice ? "Python practice source code" : "KnitScript source code");
   knitoutTab.hidden = practice;
   visualizationTab.hidden = practice;
+  if (!practice && isVegaTask) {
+    taskDescription.textContent = "Write a Vega-Lite JSON specification from scratch for an interactive monthly sales trend chart. Use the supplied dataset at /sales-data.json, with fields month (date), category (product group), and sales (number). Show a separate colored line for each category, with month on the horizontal axis and sales on the vertical axis. On hover, show the month, category, and sales. Clicking a category in the legend should highlight it and fade the others. Include a clear chart title and explicit axis titles. Use a single-view chart and the original records without transforms, aggregation, binning, or time-unit conversion. Run to preview the chart and check the requirements; submit when all tests pass.";
+    fileName.textContent = "sales.vl.json";
+    editorLanguage.textContent = "Vega-Lite";
+    editor.setAttribute("aria-label", "Vega-Lite JSON specification");
+    documentationFrame.title = "Vega-Lite documentation";
+    tutorialFrame.title = "Visualization background tutorial";
+    documentationFrame.src = "/documentation/vega-lite/docs/";
+    tutorialFrame.src = "/vega-guide.html";
+  }
+  knitoutTab.textContent = !practice && isVegaTask ? "Specification" : "Knitout";
   emptyStateTitle.textContent = practice ? "Run your practice program" : "Run your code against the task";
   emptyStateMessage.textContent = practice
     ? "Use Run to check the output, then Submit when the practice test passes."
@@ -676,6 +691,24 @@ function showResult(result) {
   const checkPill = check
     ? `<span class="summary-pill ${check.passed ? "success" : "error"}">${check.passed_count}/${check.total_count} tests passed</span>`
     : "";
+
+  if (isVegaTask) {
+    runSummary.textContent = result.ok ? `${check?.passed_count || 0}/${check?.total_count || 0} checks passed` : "Vega-Lite evaluation failed";
+    consoleOutput.textContent = result.error?.message || result.stdout || "";
+    knitoutOutput.textContent = result.spec ? JSON.stringify(result.spec, null, 2) : "";
+    visualizationOutput.replaceChildren();
+    if (result.ok && result.spec) {
+      const frame = document.createElement("iframe");
+      frame.title = "Interactive Vega-Lite chart";
+      frame.src = "/vega-preview.html";
+      frame.setAttribute("sandbox", "allow-scripts allow-same-origin");
+      frame.addEventListener("load", () => frame.contentWindow.postMessage({ type: "vega.render", spec: result.spec }, window.location.origin));
+      visualizationOutput.append(frame);
+    }
+    renderCheck(check);
+    selectTab(result.ok ? "visualization" : "console");
+    return;
+  }
 
   if (result.ok) {
     const metrics = result.metrics || {};
@@ -798,7 +831,7 @@ async function executeSource(mode, trigger = "button") {
     const response = await fetch(isSubmission ? "/api/submit" : "/api/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source: editor.value, session_id: telemetrySessionId }),
+      body: JSON.stringify({ source: editor.value, session_id: telemetrySessionId, task_id: TASK_ID }),
     });
     const result = await response.json();
     showResult(result);
@@ -951,6 +984,36 @@ function startStudy(identityMethod) {
     });
   }
 }
+
+languageSelect.addEventListener("change", async () => {
+  if (!localTaskSelection) return;
+  if (runButton.disabled || submitButton.disabled) {
+    languageSelect.value = isVegaTask ? "vega-lite" : "knitscript";
+    return;
+  }
+  setStudyControlsEnabled(false);
+  clearTimeout(saveTimer);
+  localStorage.setItem(sourceStorageKey, editor.value);
+  try {
+    await sessionReady;
+    await flushEvents();
+  } finally {
+    const destination = new URL(window.location.href);
+    destination.searchParams.set("task", languageSelect.value === "vega-lite" ? "vega-lite-sales-v1" : "stockinette-swatch-v1");
+    window.location.assign(destination.href);
+  }
+});
+
+window.addEventListener("message", event => {
+  const frame = visualizationOutput.querySelector("iframe");
+  if (!frame || event.source !== frame.contentWindow || event.origin !== window.location.origin) return;
+  if (event.data?.type === "vega.interaction") recordEvent("output.visualization_interacted", { interaction: event.data.interaction });
+  if (event.data?.type === "vega.render_error") {
+    showToast("Chart preview failed — see Console");
+    consoleOutput.textContent = event.data.message;
+    recordEvent("output.visualization_failed", { message: event.data.message });
+  }
+});
 
 participantForm.addEventListener("submit", (event) => {
   event.preventDefault();

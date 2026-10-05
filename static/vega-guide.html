@@ -1,0 +1,8 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Vega-Lite learning guide</title><link rel="stylesheet" href="/documentation.css"></head><body>
+<h1>From a table to a visual story</h1>
+<p>Imagine a shop manager examining monthly sales. The table contains observations: each row describes a category in one month. A visualization maps those observations to visible shapes so the manager can compare trends.</p>
+<h2>Data and fields</h2><p>A field is a named column. Our fixed dataset has month (a date), category (a product group), and sales (a number). The dataset is available at <a href="/sales-data.json">/sales-data.json</a>. In this task, reference that URL without transforming the data.</p>
+<h2>Marks and encodings</h2><p>A mark is a graphical shape such as a point, bar, or line. Encodings map fields to positions, color, or other visual properties. Temporal fields represent time, quantitative fields represent numbers, and nominal fields distinguish unordered categories.</p>
+<h2>Reading and interacting</h2><p>Axis labels and a title explain the visual story. A tooltip reveals the observation under the pointer. A selection parameter remembers a user's choice; a conditional encoding changes how selected and unselected observations appear. A legend can serve both as a color key and a selection control.</p>
+<h2>Task scope</h2><p>Write one JSON object describing a single-view chart. Use the original monthly records, without transforms, aggregation, binning, or faceting. Consult the Documentation tab for Vega-Lite syntax. The Run action renders your specification and checks the task requirements.</p>
+</body></html>
