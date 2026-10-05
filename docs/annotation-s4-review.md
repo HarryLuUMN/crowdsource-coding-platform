@@ -34,3 +34,36 @@ Trial-and-error and Local revision are not exclusive. Trial is marked at the sec
 | 57 | Unchanged successful rerun, 5/5. No new pattern/error label. |
 
 New Trial labels: 15, 28, 30, 32, 38, 42, 53, 55. Existing Trial labels at 46 and 48 remain. Later inferred labels should be revisited if additional raw reading events become available. All numbers describe this fixed 57-step curated view, not raw event indices.
+
+## Run-by-run error and progression audit
+
+There are 24 runs: 19 compiler failures, 3 compilations with failing task checks, and 2 fully passing runs. An error is required only for the first 22; successful runs 56 and 57 must not receive invented errors. The PDF's fuzzy Syntax-to-semantics progression definition requires resolving a syntax error followed by **no revision to fix a behavioral problem**. None of the 24 runs establishes that full pattern: the participant continues carrier, direction, width and cast-on repairs through success.
+
+| Run | Semantic step | Saved result | General error labels | Syntax-to-semantics |
+| --- | --- | --- | --- | --- |
+| 1 | 3 | Parser rejects generated knitout header | Wrong token; Other language | No: no syntax repair yet |
+| 2 | 6 | Parser fails at missing statement terminator | Incomplete structure | No: syntax still fails |
+| 3 | 8 | Parser expects carrier block opening brace | Incomplete structure | No: syntax still fails |
+| 4 | 11 | Same missing carrier brace | Incomplete structure | No: syntax still fails |
+| 5 | 15 | Same missing carrier brace | Incomplete structure | No: syntax still fails |
+| 6 | 17 | Same missing carrier brace | Incomplete structure | No: syntax still fails |
+| 7 | 19 | Same missing carrier brace | Incomplete structure | No: syntax still fails |
+| 8 | 22 | Same missing carrier brace | Incomplete structure | No: syntax still fails |
+| 9 | 24 | Parser rejects comment at block start | Wrong token | No: syntax still fails |
+| 10 | 26 | Variable c not in scope | Identifier issue; Incorrect binding | No: syntax clears but carrier repairs follow |
+| 11 | 28 | Variable c not in scope | Identifier issue; Incorrect binding | No: further carrier repairs follow |
+| 12 | 30 | Parser expects as in carrier header | Incomplete structure | No: syntax still fails |
+| 13 | 32 | Variable carrier1 not in scope | Identifier issue; Incorrect binding | No: syntax clears but further repairs follow |
+| 14 | 36 | Parser rejects bare c1 after needle expression | Wrong token | No: syntax still fails |
+| 15 | 38 | Parser rejects with c1 after needle expression | Wrong token | No: syntax still fails |
+| 16 | 42 | No declared working carriers | Incorrect binding | No: parses, but working-carrier fixes follow |
+| 17 | 44 | No declared working carriers | Incorrect binding | No: further carrier fixes follow |
+| 18 | 46 | Variable carrier1 not in scope | Identifier issue; Incorrect binding | No: further carrier fixes follow |
+| 19 | 48 | Inserting hook must start leftward | Incorrect arrangement | No: subsequent direction repair addresses behavior |
+| 20 | 50 | 4/5 checks; cast-on fails | Valid syntax but incorrect output | No: width and cast-on revisions follow |
+| 21 | 52 | 1/5 checks; width/cast-on/securing/body fail | Valid syntax but incorrect output | No: width reversal and cast-on repairs follow |
+| 22 | 54 | 4/5 checks; cast-on fails | Valid syntax but incorrect output | No: knit→tuck and securing-loop revision follow |
+| 23 | 56 | 5/5 checks pass | None | No: behavioral repair succeeds; not an abandoned behavioral problem |
+| 24 | 57 | Unchanged source; 5/5 pass | None | No: repeat successful evaluation |
+
+The second audit adds Identifier issue at 26, 28, 32 and 46, and Other language at 3. No Syntax-to-semantics label is added. Runtime exceptions are not treated as syntax errors merely because the execution status is compiler_error. Pattern labels on source-edit steps 51, 53 and 55 refer to their following evaluations; the run-level table separately identifies the actual failures.
