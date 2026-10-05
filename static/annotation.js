@@ -509,20 +509,14 @@ async function loadDataset(traceName = new URLSearchParams(location.search).get(
     let dataset = payload.dataset;
     if (["5f427", "691de"].includes(traceName)) dataset = (await api(`/api/admin/annotation-dataset/${traceName}`)).dataset;
     if (["67aa5", "65fda", "67658"].includes(traceName)) {
-      const review = await api(`/api/admin/annotation-review/${traceName}`);
-      const [detail, stream, initial] = await Promise.all([
-        api(`/api/admin/sessions/${review.session}`),
-        api(`/api/admin/sessions/${review.session}/events?limit=10000`),
-        api(`/api/admin/sessions/${review.session}/file?path=code/source-initial.ks`),
-      ]);
-      dataset = buildSessionDataset(detail, stream.events, payload.dataset.codebook, initial.content || "", review.review);
-      dataset.ruleDecisions = review.ruleDecisions || {};
-      dataset.ruleReviewNotes = review.ruleReviewNotes || {};
-      if (review.outcome) dataset.trace.dataNote += ` ${review.outcome}`;
+      dataset = (await api(`/api/admin/annotation-dataset/${traceName}`)).dataset;
     }
-    state.rules = detectAnnotationRules(dataset);
-    dataset = buildUnitDataset(dataset);
-    state.rules.detections = state.rules.detections.flatMap(d => dataset.steps.filter(s => s.rawStepIndices.includes(d.step)).map(s => ({ ...d, step: s.index })));
+    if (dataset.granularity) state.rules = dataset.rules;
+    else {
+      state.rules = detectAnnotationRules(dataset);
+      dataset = buildUnitDataset(dataset);
+      state.rules.detections = state.rules.detections.flatMap(d => dataset.steps.filter(s => s.rawStepIndices.includes(d.step)).map(s => ({ ...d, step: s.index })));
+    }
     state.dataset = dataset;
     state.selectedStep = 0;
     $("#stepFilter").value = "";

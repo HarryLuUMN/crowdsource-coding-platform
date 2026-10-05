@@ -165,6 +165,17 @@ class ServerApiTests(unittest.TestCase):
         status, _ = self.admin_request("/api/admin/sessions/not-in-catalog")
         self.assertEqual(401, status)
 
+    def test_processed_traces_load_without_local_sessions_or_network(self) -> None:
+        with patch("server.urlopen", side_effect=AssertionError("Processed datasets must work offline")):
+            for name, count in (("67658", 528), ("67aa5", 646), ("65fda", 865)):
+                status, payload = self.admin_request(f"/api/admin/annotation-dataset/{name}")
+                self.assertEqual(200, status)
+                dataset = payload["dataset"]
+                self.assertEqual("syntactic-unit-v1", dataset["granularity"])
+                self.assertEqual(count, len(dataset["rawSteps"]))
+                self.assertEqual(count, len({i for step in dataset["steps"] for i in step["rawStepIndices"]}))
+                self.assertEqual(dataset["rawSteps"][-1]["source"], dataset["steps"][-1]["source"])
+
     def test_admin_can_login_and_browse_session_events_and_files(self) -> None:
         _status, session_result = self.post_json(
             "/api/sessions",

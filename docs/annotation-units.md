@@ -1,5 +1,7 @@
 # Annotation edit units
 
+The three recent traces (`67658`, `67aa5`, `65fda`) have materialized datasets in `annotation_data/*-units.json`. Regenerate them with `node scripts/build_annotation_units.cjs` against the local server (optionally pass its base URL). The builder verifies raw event counts, full event coverage, final source equality and annotation preservation before writing. The UI loads these datasets directly; source sessions or a live deployment connection are no longer needed to annotate them. Their existing granularity and step numbering are preserved so prior unit annotations remain compatible.
+
 The studio derives `syntactic-unit-v1` in the browser from the original dataset. It never rewrites stored traces or original annotations. Rule detection runs on the original steps, then maps results to the derived steps, retaining detection IDs and review decisions.
 
 Adjacent local editor edits are accumulated until a statement or structural boundary, a cursor-region change, a five-second gap, or a non-edit event. Strings and comments protect embedded delimiters. Insertions and deletions containing multiple statements are decomposed. A complete inserted block starts with an empty frame, followed by its contents. Incomplete fragments and ambiguous compound replacements are explicitly exposed for inspection. This is delimiter-based segmentation, not a full KnitScript parser.
