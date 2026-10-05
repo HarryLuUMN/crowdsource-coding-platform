@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import io
 import os
 import tempfile
 import threading
@@ -150,6 +151,19 @@ class ServerApiTests(unittest.TestCase):
         self.assertEqual("6638e8aa3d1f38846080806a", dataset["dataset"]["trace"]["participant"])
         self.assertEqual(57, len(dataset["dataset"]["steps"]))
         self.assertGreater(len(dataset["dataset"]["codebook"]), 0)
+
+    def test_missing_catalogued_trace_loads_from_deployment_and_cache(self) -> None:
+        path = "/api/admin/sessions/9da1b0a5-2c84-4720-abac-c8b3a7fa78aa/events?limit=10000"
+        payload = {"ok": True, "events": [{"seq": 1, "type": "editor.edit"}]}
+        with patch("server.urlopen", return_value=io.BytesIO(json.dumps(payload).encode())) as remote:
+            status, actual = self.admin_request(path)
+            self.assertEqual(200, status)
+            self.assertEqual(payload, actual)
+            self.assertEqual(1, remote.call_count)
+        with patch("server.urlopen", side_effect=AssertionError("cache should be used")):
+            self.assertEqual((200, payload), self.admin_request(path))
+        status, _ = self.admin_request("/api/admin/sessions/not-in-catalog")
+        self.assertEqual(401, status)
 
     def test_admin_can_login_and_browse_session_events_and_files(self) -> None:
         _status, session_result = self.post_json(

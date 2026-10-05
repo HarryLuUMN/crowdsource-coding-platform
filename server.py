@@ -18,6 +18,8 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
+from urllib.request import urlopen
+from urllib.error import URLError
 
 from answer_checker import TASK_ID, check_stockinette_answer
 from vega_task import TASK_ID as VEGA_TASK_ID, SALES_DATA, evaluate_vega
@@ -364,6 +366,24 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                     raise KeyError("Unknown admin endpoint")
                 parts = path[len(prefix) :].split("/")
                 session_id = parts[0]
+                if self._annotation_local() and self._annotation_read_path(path, parsed.query) and not (repository.root / session_id / "manifest.json").is_file():
+                    cache_dir = repository.root / ".annotation-cache"
+                    request_path = path + ("?" + parsed.query if parsed.query else "")
+                    cache_file = cache_dir / (hashlib.sha256(request_path.encode()).hexdigest() + ".json")
+                    if cache_file.is_file():
+                        payload = json.loads(cache_file.read_text())
+                    else:
+                        try:
+                            with urlopen("https://crowdsource-code-platform-production.up.railway.app" + request_path, timeout=30) as response:
+                                payload = json.load(response)
+                        except (URLError, TimeoutError) as error:
+                            raise ValueError("Deployment trace unavailable; retry when the connection recovers") from error
+                        if not payload.get("ok"):
+                            raise ValueError("Deployment trace data is unavailable")
+                        cache_dir.mkdir(parents=True, exist_ok=True)
+                        cache_file.write_text(json.dumps(payload), encoding="utf-8")
+                    self._send_json(HTTPStatus.OK, payload)
+                    return
                 if len(parts) == 1:
                     self._send_json(HTTPStatus.OK, {"ok": True, **repository.get_session(session_id)})
                     return

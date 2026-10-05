@@ -38,6 +38,13 @@ function buildUnitDataset(dataset) {
   function emit(group) {
     const first = group[0], last = group[group.length - 1];
     const change = unitChange(first.previousSource || "", last.source || "");
+    if (!change.removed && !change.inserted) {
+      steps.push({ ...last, index: steps.length, event: "editor.edit_group", changed: false,
+        previousSource: first.previousSource, unitType: "reverted_edit", action: "replace",
+        rawStepIndices: group.map(s => s.index), sourceSteps: group.flatMap(s => s.sourceSteps || []), rawSteps: group,
+        note: "Local editing returned to the original source; original events retained." });
+      return;
+    }
     const action = !change.removed ? "insert" : !change.inserted ? "delete" : "replace";
     const pieces = action === "replace" ? [change.inserted] : unitSegments(change.inserted || change.removed);
     let source = first.previousSource || "", offset = change.start;

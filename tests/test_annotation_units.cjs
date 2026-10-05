@@ -34,6 +34,8 @@ const incomplete = context.buildUnitDataset(dataset(['for x in [', 'for x in [']
 assert.equal(incomplete.steps[0].unitType, 'incomplete_unit');
 verify(incomplete, 'for x in [');
 const mapped = context.mapRawAnnotations(units, {2: ['ERROR']});
+const reverted = context.buildUnitDataset(dataset(['x', '']));
+verify(reverted, '');
 assert.equal(mapped[0][0], 'ERROR');
 console.log('Syntactic units: reconstruction, event coverage, boundaries, paste frames, strings, and annotation migration passed');
 for (const name of ['s4', '5f427', '691de']) {
