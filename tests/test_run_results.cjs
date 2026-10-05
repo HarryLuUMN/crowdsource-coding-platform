@@ -21,3 +21,17 @@ assert(content.children[0].children[1].textContent.includes('detailed output was
 context.renderRunResults({ rawSteps: [{ event: 'run.completed', payload: { check: { passed_count: 4, total_count: 5 } } }] });
 assert(content.children[0].children.some(item => item.textContent === 'Task checks: 4/5 passed'));
 console.log('Run results: no-result hiding, failures, checks, raw provenance and legacy limitations passed');
+context.renderRunResults({ event: 'run.requested', rawSteps: [{ event: 'run.requested' }], runResult: { event: 'run.failed', payload: { error_type: 'Parsing_Error', error_message: 'Expected block opening brace', check: { passed_count: 0, total_count: 5 } } } });
+assert.equal(panel.hidden, false);
+assert(content.children[0].children.some(item => item.textContent === 'Expected block opening brace'));
+assert(content.children[0].children.some(item => item.textContent === 'Task checks: 0/5 passed'));
+const dataset = JSON.parse(fs.readFileSync('annotation_data/s4-units.json', 'utf8'));
+const runs = dataset.steps.filter(step => /^(run\.requested|compiler\.execution)$/.test(step.event));
+assert.equal(runs.length, 24);
+assert.equal(new Set(runs.map(step => step.runResult.payload.execution_id)).size, 24);
+for (const step of runs) {
+  const hash = require('node:crypto').createHash('sha256').update(step.source).digest('hex');
+  assert.equal(step.runResult.payload.code_state_id, `sha256:${hash}`);
+  context.renderRunResults(step);
+  assert.equal(panel.hidden, false);
+}

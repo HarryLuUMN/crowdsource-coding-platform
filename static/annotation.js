@@ -508,6 +508,7 @@ function renderAppliedCodes(stepIndex) {
 }
 
 function runResultsForStep(step) {
+  if (step.runResult) return [step.runResult];
   const events = step.rawSteps?.length ? step.rawSteps : [step];
   return events.filter(event => /^(run|submit)\.(completed|failed)$/.test(event.event) || event.event === "compiler.execution");
 }
@@ -527,6 +528,9 @@ function renderRunResults(step) {
     card.append(status);
     if (payload.error_type) {
       const error = document.createElement("p"); error.textContent = `Error: ${payload.error_type}`; card.append(error);
+    }
+    if (payload.error_message) {
+      const message = document.createElement("pre"); message.textContent = payload.error_message; card.append(message);
     }
     const check = payload.check;
     if (check) {
