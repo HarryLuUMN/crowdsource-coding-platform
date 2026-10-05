@@ -335,7 +335,7 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                 return
             try:
                 repository = get_admin_repository()
-                if path in {f"/api/admin/annotation-dataset/{name}" for name in ("67658", "67aa5", "65fda")}:
+                if path in {f"/api/admin/annotation-dataset/{name}" for name in ("67658", "67aa5", "65fda", "s4", "5f427", "691de")}:
                     name = path.rsplit("/", 1)[1]
                     dataset = json.loads((ANNOTATION_DATA_DIR / f"{name}-units.json").read_text())
                     self._send_json(HTTPStatus.OK, {"ok": True, "dataset": dataset})

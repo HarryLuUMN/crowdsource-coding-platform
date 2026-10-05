@@ -19,7 +19,7 @@ let semanticRules = null;
 let semanticAnnotations = null;
 
 function projectRawAnnotations() {
-  const result = structuredClone(semanticDataset.rawAnnotations || {});
+  const result = structuredClone({ ...semanticDataset.rawAnnotations, ...semanticDataset.rawEventAnnotations });
   semanticDataset.steps.forEach(step => {
     if (Object.hasOwn(semanticAnnotations, step.index)) step.rawStepIndices.forEach(index => {
       result[index] = [...new Set([...(result[index] || []), ...semanticAnnotations[step.index]])];
@@ -37,7 +37,9 @@ function projectRawAnnotations() {
 function switchTraceView(view) {
   if (!semanticDataset || view === traceView) return;
   saveAnnotations();
-  const rawIndex = traceView === "raw" ? state.selectedStep : state.dataset.steps[state.selectedStep].rawStepIndices[0];
+  const selected = state.dataset.steps[state.selectedStep];
+  const rawIndex = traceView === "raw" ? state.selectedStep : selected.rawStepIndices[0] ?? Math.max(0,
+    semanticDataset.rawSteps.findLastIndex(step => step.elapsedMs <= selected.elapsedMs));
   traceView = view;
   if (view === "raw") {
     state.dataset = { ...semanticDataset, granularity: "raw-events-v1", steps: semanticDataset.rawSteps,
@@ -50,7 +52,8 @@ function switchTraceView(view) {
     state.dataset = semanticDataset;
     state.annotations = semanticAnnotations;
     state.rules = semanticRules;
-    state.selectedStep = Math.max(0, semanticDataset.steps.findIndex(step => step.rawStepIndices.includes(rawIndex)));
+    const mapped = semanticDataset.steps.findIndex(step => step.rawStepIndices.includes(rawIndex));
+    state.selectedStep = mapped >= 0 ? mapped : Math.max(0, semanticDataset.steps.findLastIndex(step => step.elapsedMs <= semanticDataset.rawSteps[rawIndex].elapsedMs));
   }
   $("#traceView").checked = traceView === "raw";
   $("#stepFilter").value = "";
@@ -107,9 +110,29 @@ function loadAnnotations() {
   }
   try {
     const current = localStorage.getItem(storageKey());
+    if (!current && state.dataset.granularity === "curated-semantic-v1") {
+      const id = `${STORAGE_PREFIX}${state.dataset.trace.id}`;
+      const old = localStorage.getItem(`${id}:syntactic-unit-v2`) || localStorage.getItem(`${id}:syntactic-unit-v1`);
+      const stored = JSON.parse(old || localStorage.getItem(id) || "{}");
+      const annotations = {};
+      if (old) {
+        const derived = buildUnitDataset({ ...state.dataset, steps: state.dataset.curatedSteps, annotations: {} }, { mergeReading: stored.granularity !== "syntactic-unit-v1" });
+        derived.steps.forEach(step => {
+          if (Object.hasOwn(stored.annotations || {}, step.index)) step.rawStepIndices.forEach(index => {
+            annotations[index] = [...new Set([...(annotations[index] || []), ...stored.annotations[step.index]])];
+          });
+        });
+      } else Object.assign(annotations, stored.annotations || {});
+      state.annotations = { ...structuredClone(state.dataset.annotations || {}), ...annotations };
+      state.decisions = { ...(state.dataset.ruleDecisions || {}), ...(stored.ruleDecisions || {}) };
+      state.dataset.legacyStoredAnnotations = stored;
+      state.dataset.rawEventAnnotations = stored.rawEventAnnotations || {};
+      return;
+    }
     const previousUnits = !current && state.dataset.granularity === "syntactic-unit-v2"
       ? localStorage.getItem(`${STORAGE_PREFIX}${state.dataset.trace.id}:syntactic-unit-v1`) : null;
     const stored = JSON.parse(current || previousUnits || localStorage.getItem(`${STORAGE_PREFIX}${state.dataset.trace.id}`) || "{}");
+    state.dataset.rawEventAnnotations = stored.rawEventAnnotations || {};
     let imported = stored.annotations;
     if (previousUnits) {
       const oldDataset = buildUnitDataset({ ...state.dataset, steps: state.dataset.rawSteps, annotations: state.dataset.rawAnnotations }, { mergeReading: false });
@@ -143,7 +166,12 @@ function saveAnnotations() {
     const previous = projectRawAnnotations();
     state.dataset.steps.forEach(step => {
       if (JSON.stringify(previous[step.index] || []) !== JSON.stringify(state.annotations[step.index] || [])) {
-        semanticDataset.steps.filter(unit => unit.rawStepIndices.includes(step.index)).forEach(unit => {
+        const units = semanticDataset.steps.filter(unit => unit.rawStepIndices.includes(step.index));
+        if (!units.length) {
+          semanticDataset.rawEventAnnotations ||= {};
+          semanticDataset.rawEventAnnotations[step.index] = [...(state.annotations[step.index] || [])];
+        }
+        units.forEach(unit => {
           semanticAnnotations[unit.index] = [...(state.annotations[step.index] || [])];
         });
       }
@@ -157,6 +185,7 @@ function saveAnnotations() {
     participant: state.dataset.trace.participant,
     updatedAt: new Date().toISOString(),
     annotations: traceView === "raw" ? semanticAnnotations : state.annotations,
+    rawEventAnnotations: semanticDataset?.rawEventAnnotations || {},
     ruleDecisions: state.decisions,
   }));
   $("#saveState").textContent = "Saved locally";
@@ -502,6 +531,7 @@ function exportAnnotations() {
     ruleDecisions: state.decisions,
     ruleReviewNotes: state.dataset.ruleReviewNotes || {},
     rawAnnotations: state.dataset.rawAnnotations,
+    rawEventAnnotations: semanticDataset?.rawEventAnnotations || {},
     legacyStoredAnnotations: state.dataset.legacyStoredAnnotations,
     rawSteps: state.dataset.rawSteps,
     units: state.dataset.steps.map(({ rawSteps, ...step }) => step),
