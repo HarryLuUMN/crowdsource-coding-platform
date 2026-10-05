@@ -95,6 +95,11 @@ button { color: inherit; }
 .detail-panel { display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) auto auto; }
 .detail-heading { display: flex; justify-content: space-between; align-items: end; }
 .detail-heading time { color: var(--muted); font-family: ui-monospace, monospace; }
+.step-navigation { display: grid; gap: 8px; text-align: right; }
+.step-navigation nav { display: flex; gap: 6px; }
+.step-navigation button { padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); cursor: pointer; }
+.step-navigation button:disabled { opacity: .4; cursor: default; }
+.step-navigation button:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
 .step-summary { min-height: 88px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
 .event-chip { display: inline-block; padding: 5px 8px; border: 1px solid #315276; border-radius: 5px; color: var(--blue); background: rgba(121,184,255,.08); font-size: 10px; font-weight: 800; text-transform: uppercase; }
 .step-summary p { margin: 10px 0 0; color: #c7cbc1; font-size: 13px; line-height: 1.5; }

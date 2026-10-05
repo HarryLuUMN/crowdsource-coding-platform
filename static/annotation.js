@@ -367,6 +367,8 @@ function renderAppliedCodes(stepIndex) {
 function renderDetail() {
   const step = state.dataset.steps[state.selectedStep];
   $("#stepTitle").textContent = `Step ${step.index + 1} of ${state.dataset.steps.length}`;
+  $("#previousStep").disabled = state.selectedStep === 0;
+  $("#nextStep").disabled = state.selectedStep === state.dataset.steps.length - 1;
   $("#stepTime").textContent = elapsed(step.elapsedMs);
   $("#eventChip").textContent = eventName(step.event);
   $("#stepNote").textContent = step.note;
@@ -420,6 +422,12 @@ function selectStep(index) {
   renderDetail();
 }
 
+function moveStep(direction) {
+  if (!state.dataset?.steps.length) return;
+  selectStep(state.selectedStep + direction);
+  $("#matrixBody").rows[state.selectedStep]?.scrollIntoView({ block: "nearest", inline: "nearest" });
+}
+
 function setDetailTab(name) {
   state.activeTab = name;
   document.querySelectorAll("[data-detail-tab]").forEach((button) => button.classList.toggle("active", button.dataset.detailTab === name));
@@ -470,6 +478,8 @@ async function importAnnotations(file) {
 }
 
 function bindInteractions() {
+  $("#previousStep").addEventListener("click", () => moveStep(-1));
+  $("#nextStep").addEventListener("click", () => moveStep(1));
   $("#nextCandidate").addEventListener("click", () => {
     const pending = (state.rules?.detections || []).filter(d => d.status === "candidate" && !state.decisions[d.id]);
     const next = pending.find(d => d.step > state.selectedStep) || pending[0];
