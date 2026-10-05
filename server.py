@@ -444,6 +444,7 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
             "/api/sessions/end",
             "/api/admin/login",
             "/api/admin/logout",
+            "/api/admin/annotation-save",
         }
         if path not in supported_paths:
             self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": {"message": "Not found"}})
@@ -460,6 +461,44 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
             return
 
         try:
+            if path == "/api/admin/annotation-save":
+                origin = self.headers.get("Origin")
+                host = self.headers.get("Host", "")
+                if not self._annotation_local() or urlparse(f"http://{host}").hostname not in {"localhost", "127.0.0.1", "::1"} or (origin and origin != f"http://{host}") or self.headers.get("Content-Type", "").split(";")[0] != "application/json":
+                    self._send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": {"message": "Dataset saving is only available locally."}})
+                    return
+                name = request.get("trace")
+                if not isinstance(name, str) or name not in {"s4", "5f427", "691de", "67658", "67aa5", "65fda"}:
+                    raise ValueError("Unknown annotation trace")
+                target = ANNOTATION_DATA_DIR / f"{name}-units.json"
+                dataset = json.loads(target.read_text())
+                if request.get("traceId") != dataset["trace"]["id"] or request.get("granularity") != dataset["granularity"]:
+                    raise ValueError("Dataset identity or granularity mismatch")
+                codes = {code["id"] for group in dataset["codebook"] for code in group["codes"]}
+                def validate_labels(value: Any, count: int) -> dict[str, list[str]]:
+                    if not isinstance(value, dict):
+                        raise ValueError("Labels must be an object")
+                    for index, labels in value.items():
+                        if not index.isdigit() or not 0 <= int(index) < count or not isinstance(labels, list) or any(not isinstance(code, str) or code not in codes for code in labels):
+                            raise ValueError("Invalid annotation labels")
+                    return value
+                annotations = validate_labels(request.get("annotations"), len(dataset["steps"]))
+                raw_labels = validate_labels(request.get("rawEventAnnotations", {}), len(dataset["rawSteps"]))
+                decisions = request.get("ruleDecisions", {})
+                if not isinstance(decisions, dict) or any(not isinstance(value, str) or value not in {"confirmed", "rejected", "uncertain"} for value in decisions.values()):
+                    raise ValueError("Invalid rule decisions")
+                backup_dir = ANNOTATION_DATA_DIR / ".backups"
+                backup_dir.mkdir(exist_ok=True)
+                backup = backup_dir / f"{name}-{uuid.uuid4().hex}.json"
+                backup.write_bytes(target.read_bytes())
+                dataset.update(annotations=annotations, rawEventAnnotations=raw_labels, ruleDecisions=decisions)
+                with tempfile.NamedTemporaryFile(mode="w", dir=ANNOTATION_DATA_DIR, suffix=".tmp", delete=False) as saved:
+                    json.dump(dataset, saved, ensure_ascii=False)
+                    saved.write("\n")
+                    temporary_path = saved.name
+                os.replace(temporary_path, target)
+                self._send_json(HTTPStatus.OK, {"ok": True, "saved": f"annotation_data/{name}-units.json", "backup": str(backup.relative_to(ANNOTATION_DATA_DIR))})
+                return
             if path == "/api/admin/login":
                 configured_token = _admin_token()
                 supplied_token = request.get("token")

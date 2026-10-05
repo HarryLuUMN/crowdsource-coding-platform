@@ -34,6 +34,25 @@ class ServerApiTests(unittest.TestCase):
         self.base_url = f"http://127.0.0.1:{self.httpd.server_port}"
         self.admin_opener = build_opener(HTTPCookieProcessor(CookieJar()))
 
+    def test_annotation_save_updates_labels_and_preserves_evidence(self) -> None:
+        target = Path(self.temp_dir.name) / "67aa5-units.json"
+        original = json.loads((server.ANNOTATION_DATA_DIR / target.name).read_text())
+        target.write_text(json.dumps(original))
+        payload = {"trace": "67aa5", "traceId": original["trace"]["id"], "granularity": original["granularity"], "annotations": {"51": ["VALID_WRONG_OUTPUT"]}, "rawEventAnnotations": {}, "ruleDecisions": {}}
+        with patch.object(server, "ANNOTATION_DATA_DIR", target.parent):
+            status, response = self.post_json("/api/admin/annotation-save", payload)
+            self.assertEqual(200, status)
+            saved = json.loads(target.read_text())
+            self.assertEqual(payload["annotations"], saved["annotations"])
+            self.assertEqual(original["rawSteps"], saved["rawSteps"])
+            self.assertEqual(original["steps"], saved["steps"])
+            self.assertEqual(original, json.loads((target.parent / response["backup"]).read_text()))
+            with patch.object(server.KnitScriptHandler, "_annotation_local", return_value=False):
+                self.assertEqual(403, self.post_json("/api/admin/annotation-save", payload)[0])
+            payload["annotations"] = {"99999": ["INVALID"]}
+            self.assertEqual(400, self.post_json("/api/admin/annotation-save", payload)[0])
+            self.assertEqual(saved, json.loads(target.read_text()))
+
     def tearDown(self) -> None:
         self.httpd.shutdown()
         self.httpd.server_close()

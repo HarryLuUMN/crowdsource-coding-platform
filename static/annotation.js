@@ -629,6 +629,22 @@ async function importAnnotations(file) {
 }
 
 function bindInteractions() {
+  $("#saveDatasetButton").addEventListener("click", async () => {
+    if (annotationReadOnly || loadingTrace) return;
+    const button = $("#saveDatasetButton");
+    button.disabled = true;
+    try {
+      saveAnnotations();
+      const result = await api("/api/admin/annotation-save", { method: "POST", body: JSON.stringify({
+        trace: TRACE_CATALOG.find(trace => trace.id === semanticDataset.trace.id)?.key,
+        traceId: semanticDataset.trace.id, granularity: semanticDataset.granularity,
+        annotations: semanticAnnotations, rawEventAnnotations: semanticDataset.rawEventAnnotations || {}, ruleDecisions: state.decisions,
+      }) });
+      $("#saveState").textContent = `Saved to ${result.saved}`;
+    } catch (error) {
+      $("#saveState").textContent = `Save failed: ${error.message}. Browser labels are retained.`;
+    } finally { button.disabled = false; }
+  });
   $("#traceView").addEventListener("change", event => switchTraceView(event.target.checked ? "raw" : "semantic"));
   $("#previousStep").addEventListener("click", () => moveStep(-1));
   $("#nextStep").addEventListener("click", () => moveStep(1));
@@ -680,6 +696,7 @@ async function loadDataset(traceName = new URLSearchParams(location.search).get(
   try {
     annotationReadOnly = (await api("/api/admin/annotation-config")).readOnly;
     $("#importButton").hidden = annotationReadOnly;
+    $("#saveDatasetButton").hidden = annotationReadOnly;
     $("#clearStepButton").hidden = annotationReadOnly;
     $("#logoutButton").hidden = true;
     $("#saveState").textContent = annotationReadOnly ? "Read-only" : "Saved locally";
