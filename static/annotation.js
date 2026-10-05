@@ -51,15 +51,18 @@ async function api(path, options = {}) {
 }
 
 function storageKey() {
-  return `${STORAGE_PREFIX}${state.dataset.trace.id}`;
+  return `${STORAGE_PREFIX}${state.dataset.trace.id}:${state.dataset.granularity || "original"}`;
 }
 
 function loadAnnotations() {
   try {
-    const stored = JSON.parse(localStorage.getItem(storageKey()) || "{}");
+    const current = localStorage.getItem(storageKey());
+    const stored = JSON.parse(current || localStorage.getItem(`${STORAGE_PREFIX}${state.dataset.trace.id}`) || "{}");
+    const imported = !current && state.dataset.rawSteps ? mapRawAnnotations(state.dataset, stored.annotations || {}) : stored.annotations;
+    state.dataset.legacyStoredAnnotations = !current ? stored : JSON.parse(localStorage.getItem(`${STORAGE_PREFIX}${state.dataset.trace.id}`) || "{}");
     state.decisions = { ...(state.dataset.ruleDecisions || {}), ...(stored.ruleDecisions || {}) };
-    state.annotations = stored.annotations && typeof stored.annotations === "object"
-      ? { ...structuredClone(state.dataset.annotations || {}), ...stored.annotations }
+    state.annotations = imported && typeof imported === "object"
+      ? { ...structuredClone(state.dataset.annotations || {}), ...imported }
       : structuredClone(state.dataset.annotations || {});
   } catch {
     state.decisions = { ...(state.dataset.ruleDecisions || {}) };
@@ -70,6 +73,7 @@ function loadAnnotations() {
 function saveAnnotations() {
   localStorage.setItem(storageKey(), JSON.stringify({
     schemaVersion: 1,
+    granularity: state.dataset.granularity,
     traceId: state.dataset.trace.id,
     participant: state.dataset.trace.participant,
     updatedAt: new Date().toISOString(),
@@ -115,6 +119,7 @@ function renderTrace() {
   const trace = state.dataset.trace;
   const entry = TRACE_CATALOG.find((item) => item.id === trace.id);
   if (entry) entry.steps = trace.stepCount;
+  if (entry && state.dataset.rawSteps) entry.unit = "units/events";
   renderTraceList();
   $("#traceTask").textContent = trace.task;
   $("#dataNote").textContent = trace.dataNote;
@@ -347,6 +352,8 @@ function renderDetail() {
   renderReading(step);
   renderAppliedCodes(step.index);
   renderRuleEvidence(step.index);
+  $("#rawEvidence").textContent = JSON.stringify({ sourceSteps: step.sourceSteps, synthetic: step.synthetic || false,
+    annotationProvenance: step.annotationProvenance || [], originalSteps: step.rawSteps || [step] }, null, 2);
 }
 
 function renderRuleEvidence(stepIndex) {
@@ -395,6 +402,7 @@ function setDetailTab(name) {
 function exportAnnotations() {
   const payload = {
     schemaVersion: 1,
+    granularity: state.dataset.granularity,
     trace: state.dataset.trace,
     codebookVersion: "behavioral-properties-2026-10-02",
     exportedAt: new Date().toISOString(),
@@ -402,6 +410,10 @@ function exportAnnotations() {
     ruleDetections: state.rules,
     ruleDecisions: state.decisions,
     ruleReviewNotes: state.dataset.ruleReviewNotes || {},
+    rawAnnotations: state.dataset.rawAnnotations,
+    legacyStoredAnnotations: state.dataset.legacyStoredAnnotations,
+    rawSteps: state.dataset.rawSteps,
+    units: state.dataset.steps.map(({ rawSteps, ...step }) => step),
   };
   const anchor = document.createElement("a");
   anchor.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
@@ -420,6 +432,10 @@ async function importAnnotations(file) {
     if (!Number.isInteger(entry.step) || !Array.isArray(entry.codes)) return;
     state.annotations[entry.step] = entry.codes.filter((code) => validCodes.has(code));
   });
+  if (state.dataset.rawSteps && payload.granularity !== state.dataset.granularity) {
+    if (payload.granularity) throw new Error("Unsupported trace granularity.");
+    state.annotations = mapRawAnnotations(state.dataset, state.annotations);
+  }
   saveAnnotations();
   refreshMatrix();
   renderDetail();
@@ -487,8 +503,10 @@ async function loadDataset(traceName = new URLSearchParams(location.search).get(
       dataset.ruleReviewNotes = review.ruleReviewNotes || {};
       if (review.outcome) dataset.trace.dataNote += ` ${review.outcome}`;
     }
-    state.dataset = dataset;
     state.rules = detectAnnotationRules(dataset);
+    dataset = buildUnitDataset(dataset);
+    state.rules.detections = state.rules.detections.flatMap(d => dataset.steps.filter(s => s.rawStepIndices.includes(d.step)).map(s => ({ ...d, step: s.index })));
+    state.dataset = dataset;
     state.selectedStep = 0;
     $("#stepFilter").value = "";
     const url = new URL(location.href); url.searchParams.set("trace", traceName); history.replaceState(null, "", url);
