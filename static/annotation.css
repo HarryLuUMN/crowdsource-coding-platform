@@ -115,6 +115,10 @@ button { color: inherit; }
 .detail-view.active { display: block; }
 #codeSnapshot { min-height: 100%; margin: 0; padding: 18px; color: #dbe4d2; font: 12px/1.65 "SFMono-Regular", Consolas, monospace; tab-size: 2; white-space: pre-wrap; }
 .empty-code { color: var(--muted); font-style: italic; }
+.snapshot-line { display: grid; grid-template-columns: 28px minmax(0, 1fr); margin: 0 -18px; padding: 0 12px; }
+.snapshot-number { color: #6e7569; user-select: none; }
+.snapshot-line.add { background: rgba(110,220,130,.1); color: #b8f1c1; }
+.snapshot-line.remove { background: rgba(255,100,100,.1); color: #ffb4b4; }
 .diff { padding: 12px 0; font: 12px/1.55 "SFMono-Regular", Consolas, monospace; white-space: pre-wrap; }
 .diff-line { display: grid; grid-template-columns: 34px 1fr; padding: 1px 14px; }
 .diff-line b { color: #6e7569; font-weight: 400; }

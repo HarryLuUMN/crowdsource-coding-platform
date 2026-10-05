@@ -398,6 +398,32 @@ function renderDiff(step) {
   });
 }
 
+function renderCodeSnapshot(step) {
+  const code = $("#codeSnapshot code");
+  const before = state.dataset.steps[step.index - 1]?.source ?? step.previousSource ?? "";
+  const after = step.source || "";
+  code.replaceChildren();
+  code.classList.toggle("empty-code", !after && !before);
+  if (!after && !before) {
+    code.textContent = "No code has been written at this step.";
+    return;
+  }
+  const lines = before === after
+    ? after.split("\n").map((text, index) => ({ type: "same", number: index + 1, text: `  ${text}` }))
+    : lineDiff(before, after);
+  lines.forEach(line => {
+    const row = document.createElement("span");
+    row.className = `snapshot-line ${line.type}`;
+    const number = document.createElement("span");
+    number.className = "snapshot-number";
+    number.textContent = line.type === "remove" ? "" : line.number;
+    const text = document.createElement("span");
+    text.textContent = line.text;
+    row.append(number, text);
+    code.append(row);
+  });
+}
+
 function renderReading(step) {
   const container = $("#readingEvidence");
   container.replaceChildren();
@@ -457,9 +483,7 @@ function renderDetail() {
   $("#stepTime").textContent = elapsed(step.elapsedMs);
   $("#eventChip").textContent = eventName(step.event);
   $("#stepNote").textContent = step.note;
-  const code = $("#codeSnapshot code");
-  code.textContent = step.source || "No code has been written at this step.";
-  code.classList.toggle("empty-code", !step.source);
+  renderCodeSnapshot(step);
   renderDiff(step);
   renderReading(step);
   renderAppliedCodes(step.index);
