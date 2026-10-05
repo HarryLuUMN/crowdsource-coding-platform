@@ -533,8 +533,15 @@ async function loadDataset(traceName = new URLSearchParams(location.search).get(
     $("#loginView").hidden = true;
     $("#appView").hidden = false;
   } catch (error) {
-    if (error.status === 401 || error.status === 503) showLogin(error.status === 503 ? "Set TRACE_ADMIN_TOKEN before using this studio." : "");
-    else showLogin(error.message);
+    if (state.dataset) {
+      $("#appView").hidden = false;
+      $("#loginView").hidden = true;
+      $("#dataNote").textContent = `Could not open trace ${traceName}: ${error.message}. The current trace remains open. This server may not contain the original session data.`;
+    } else {
+      showLogin(`Could not load annotation data: ${error.message}`);
+      $("#loginView form").hidden = true;
+      $("#loginView h1").textContent = "Annotation data unavailable";
+    }
   } finally {
     loadingTrace = false;
     if (state.dataset) renderTraceList();
