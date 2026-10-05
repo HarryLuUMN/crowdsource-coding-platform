@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex, nofollow" />
     <title>Trace Annotation Studio</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/annotation.css?v=3" />
+    <link rel="stylesheet" href="/annotation.css?v=4" />
   </head>
   <body>
     <main class="login" id="loginView" hidden>
@@ -54,6 +54,7 @@
         <section class="grid-panel panel">
           <div class="grid-toolbar">
             <div><span class="eyebrow">Codebook matrix</span><h2>Step-by-step annotations</h2></div>
+            <label class="trace-view-switch"><span>Semantic step view</span><input id="traceView" type="checkbox" role="switch" aria-label="Raw data view" /><span>Raw data view</span></label>
             <label class="filter"><span>Filter steps</span><input id="stepFilter" type="search" placeholder="Event, note, step…" /></label>
             <button class="secondary" id="clearStepButton" type="button">Clear selected step</button>
             <div class="matrix-zoom" role="group" aria-label="Grid zoom">
@@ -117,6 +118,6 @@
     <script src="/annotation-session.js?v=1" defer></script>
     <script src="/annotation-units.js?v=3" defer></script>
     <script src="/annotation-rules.js?v=1" defer></script>
-    <script src="/annotation.js?v=11" defer></script>
+    <script src="/annotation.js?v=12" defer></script>
   </body>
 </html>

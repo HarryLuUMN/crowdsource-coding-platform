@@ -13,6 +13,50 @@ const TRACE_CATALOG = [
   { key: "65fda", id: "053e926a-ff9f-4c4a-8868-14f331800b21", participant: "65fda4aa45ba55e983e2a2d9", steps: 865, unit: "events" },
 ];
 let loadingTrace = false;
+let traceView = "semantic";
+let semanticDataset = null;
+let semanticRules = null;
+let semanticAnnotations = null;
+
+function projectRawAnnotations() {
+  const result = structuredClone(semanticDataset.rawAnnotations || {});
+  semanticDataset.steps.forEach(step => {
+    if (Object.hasOwn(semanticAnnotations, step.index)) step.rawStepIndices.forEach(index => {
+      result[index] = [...new Set([...(result[index] || []), ...semanticAnnotations[step.index]])];
+    });
+  });
+  semanticDataset.rawSteps.forEach(step => {
+    const units = semanticDataset.steps.filter(unit => unit.rawStepIndices.includes(step.index));
+    if (units.some(unit => Object.hasOwn(semanticAnnotations, unit.index))) {
+      result[step.index] = [...new Set(units.flatMap(unit => semanticAnnotations[unit.index] || []))];
+    }
+  });
+  return result;
+}
+
+function switchTraceView(view) {
+  if (!semanticDataset || view === traceView) return;
+  saveAnnotations();
+  const rawIndex = traceView === "raw" ? state.selectedStep : state.dataset.steps[state.selectedStep].rawStepIndices[0];
+  traceView = view;
+  if (view === "raw") {
+    state.dataset = { ...semanticDataset, granularity: "raw-events-v1", steps: semanticDataset.rawSteps,
+      annotations: semanticDataset.rawAnnotations, trace: { ...semanticDataset.trace, stepCount: semanticDataset.rawSteps.length,
+        dataNote: "Original events in recorded order. Labels are shared with mapped semantic steps; editing a raw event updates its semantic unit(s)." } };
+    state.annotations = projectRawAnnotations();
+    state.rules = detectAnnotationRules(state.dataset);
+    state.selectedStep = rawIndex;
+  } else {
+    state.dataset = semanticDataset;
+    state.annotations = semanticAnnotations;
+    state.rules = semanticRules;
+    state.selectedStep = Math.max(0, semanticDataset.steps.findIndex(step => step.rawStepIndices.includes(rawIndex)));
+  }
+  $("#traceView").checked = traceView === "raw";
+  $("#stepFilter").value = "";
+  renderTrace(); renderMatrix(); renderDetail(); updateProgress();
+  $("#matrixBody").rows[state.selectedStep]?.scrollIntoView({ block: "nearest" });
+}
 let matrixZoom = 1;
 let fitMatrix = false;
 
@@ -52,7 +96,7 @@ async function api(path, options = {}) {
 }
 
 function storageKey() {
-  return `${STORAGE_PREFIX}${state.dataset.trace.id}:${state.dataset.granularity || "original"}`;
+  return `${STORAGE_PREFIX}${state.dataset.trace.id}:${semanticDataset?.granularity || state.dataset.granularity || "original"}`;
 }
 
 function loadAnnotations() {
@@ -94,13 +138,25 @@ function loadAnnotations() {
 
 function saveAnnotations() {
   if (annotationReadOnly) return;
+  if (traceView === "semantic") semanticAnnotations = state.annotations;
+  if (traceView === "raw") {
+    const previous = projectRawAnnotations();
+    state.dataset.steps.forEach(step => {
+      if (JSON.stringify(previous[step.index] || []) !== JSON.stringify(state.annotations[step.index] || [])) {
+        semanticDataset.steps.filter(unit => unit.rawStepIndices.includes(step.index)).forEach(unit => {
+          semanticAnnotations[unit.index] = [...(state.annotations[step.index] || [])];
+        });
+      }
+    });
+    state.annotations = projectRawAnnotations();
+  }
   localStorage.setItem(storageKey(), JSON.stringify({
     schemaVersion: 1,
-    granularity: state.dataset.granularity,
+    granularity: semanticDataset?.granularity || state.dataset.granularity,
     traceId: state.dataset.trace.id,
     participant: state.dataset.trace.participant,
     updatedAt: new Date().toISOString(),
-    annotations: state.annotations,
+    annotations: traceView === "raw" ? semanticAnnotations : state.annotations,
     ruleDecisions: state.decisions,
   }));
   $("#saveState").textContent = "Saved locally";
@@ -478,6 +534,7 @@ async function importAnnotations(file) {
 }
 
 function bindInteractions() {
+  $("#traceView").addEventListener("change", event => switchTraceView(event.target.checked ? "raw" : "semantic"));
   $("#previousStep").addEventListener("click", () => moveStep(-1));
   $("#nextStep").addEventListener("click", () => moveStep(1));
   $("#nextCandidate").addEventListener("click", () => {
@@ -544,11 +601,16 @@ async function loadDataset(traceName = new URLSearchParams(location.search).get(
       state.rules.detections = state.rules.detections.flatMap(d => dataset.steps.filter(s => s.rawStepIndices.includes(d.step)).map(s => ({ ...d, step: s.index })));
     }
     state.dataset = dataset;
+    traceView = "semantic";
+    semanticDataset = dataset;
+    semanticRules = state.rules;
+    $("#traceView").checked = false;
     state.selectedStep = 0;
     $("#stepFilter").value = "";
     const url = new URL(location.href); url.searchParams.set("trace", traceName); history.replaceState(null, "", url);
     state.codes = visibleCodebook().flatMap((group, groupIndex) => group.codes.map((code) => ({ ...code, group: group.group, groupIndex })));
     loadAnnotations();
+    semanticAnnotations = state.annotations;
     renderTrace(); renderLegend(); renderMatrix(); renderDetail(); updateProgress();
     $("#loginView").hidden = true;
     $("#appView").hidden = false;

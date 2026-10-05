@@ -52,6 +52,7 @@ assert.equal(context.buildUnitDataset(readingRaw, { mergeReading: false }).steps
 verify(readingUnits, 'x;');
 const oldReadingUnits = context.buildUnitDataset(readingRaw, { mergeReading: false });
 context.state = { dataset: readingUnits };
+context.semanticDataset = null;
 context.annotationReadOnly = false;
 context.STORAGE_PREFIX = 'trace-annotations:';
 context.structuredClone = structuredClone;

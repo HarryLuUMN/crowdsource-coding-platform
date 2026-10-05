@@ -100,6 +100,11 @@ button { color: inherit; }
 .step-navigation button { padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); cursor: pointer; }
 .step-navigation button:disabled { opacity: .4; cursor: default; }
 .step-navigation button:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.trace-view-switch { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; }
+.trace-view-switch input { appearance: none; width: 36px; height: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); cursor: pointer; }
+.trace-view-switch input::before { content: ""; display: block; width: 14px; height: 14px; margin: 2px; border-radius: 50%; background: var(--muted); }
+.trace-view-switch input:checked::before { transform: translateX(16px); background: var(--lime); }
+.trace-view-switch input:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
 .step-summary { min-height: 88px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
 .event-chip { display: inline-block; padding: 5px 8px; border: 1px solid #315276; border-radius: 5px; color: var(--blue); background: rgba(121,184,255,.08); font-size: 10px; font-weight: 800; text-transform: uppercase; }
 .step-summary p { margin: 10px 0 0; color: #c7cbc1; font-size: 13px; line-height: 1.5; }
