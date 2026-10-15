@@ -30,6 +30,7 @@ from trace_store import TraceStore, utc_now
 ROOT = Path(__file__).resolve().parent
 STATIC_DIR = ROOT / "static"
 ANNOTATION_DATA_DIR = ROOT / "annotation_data"
+ANNOTATION_DATASET_NAMES = {"s4", "5f427", "691de", "67aa5", "65fda", "67658", "5e219", "5f67b"}
 WORKER = ROOT / "compiler_worker.py"
 MAX_REQUEST_BYTES = 1024 * 1024
 MAX_SOURCE_CHARS = 100_000
@@ -241,6 +242,8 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
         return self.server.server_address[0] in {"127.0.0.1", "::1"} and self.client_address[0] in {"127.0.0.1", "::1"} and not self.headers.get("X-Forwarded-For")
 
     def _annotation_read_path(self, path: str, query: str) -> bool:
+        if path in {f"/api/admin/annotation-dataset/{name}" for name in ANNOTATION_DATASET_NAMES}:
+            return True
         names = {"s4", "5f427", "691de", "67aa5", "65fda", "67658"}
         if path in {f"/api/admin/annotation-{kind}/{name}" for kind in ("dataset", "review") for name in names}:
             return True
@@ -335,7 +338,7 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                 return
             try:
                 repository = get_admin_repository()
-                if path in {f"/api/admin/annotation-dataset/{name}" for name in ("67658", "67aa5", "65fda", "s4", "5f427", "691de")}:
+                if path in {f"/api/admin/annotation-dataset/{name}" for name in ANNOTATION_DATASET_NAMES}:
                     name = path.rsplit("/", 1)[1]
                     dataset = json.loads((ANNOTATION_DATA_DIR / f"{name}-units.json").read_text())
                     dataset["annotationRevision"] = hashlib.sha256(json.dumps({key: dataset.get(key, {}) for key in ("annotations", "ruleDecisions", "rawEventAnnotations")}, sort_keys=True).encode()).hexdigest()
@@ -469,7 +472,7 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                     self._send_json(HTTPStatus.FORBIDDEN, {"ok": False, "error": {"message": "Dataset saving is only available locally."}})
                     return
                 name = request.get("trace")
-                if not isinstance(name, str) or name not in {"s4", "5f427", "691de", "67658", "67aa5", "65fda"}:
+                if not isinstance(name, str) or name not in ANNOTATION_DATASET_NAMES:
                     raise ValueError("Unknown annotation trace")
                 target = ANNOTATION_DATA_DIR / f"{name}-units.json"
                 dataset = json.loads(target.read_text())

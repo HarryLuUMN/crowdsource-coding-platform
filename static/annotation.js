@@ -11,6 +11,8 @@ const TRACE_CATALOG = [
   { key: "s4", id: "443bbe19-51d6-431e-bd0f-55baecdcc183", participant: "6638e8aa3d1f38846080806a", steps: 57, unit: "semantic steps" },
   { key: "67aa5", id: "b8c98aac-ad68-4c62-8a4f-aaf0dbbc3f21", participant: "67aa54c162dc637de018fe18", steps: 646, unit: "events" },
   { key: "65fda", id: "053e926a-ff9f-4c4a-8868-14f331800b21", participant: "65fda4aa45ba55e983e2a2d9", steps: 865, unit: "events" },
+  { key: "5e219", id: "d7438308-77d5-47c3-8d59-a8283bc8a14a", participant: "5e2191a2727e0446c780b2e3", steps: 186, unit: "units/events", language: "Vega-Lite", unannotated: true },
+  { key: "5f67b", id: "2326a06f-8ef5-4840-8172-bf99abb992c9", participant: "5f67bc66777bfd3f9906742c", steps: 406, unit: "units/events", language: "Vega-Lite", unannotated: true },
 ];
 let loadingTrace = false;
 let traceView = "semantic";
@@ -46,7 +48,7 @@ function switchTraceView(view) {
       annotations: semanticDataset.rawAnnotations, trace: { ...semanticDataset.trace, stepCount: semanticDataset.rawSteps.length,
         dataNote: "Original events in recorded order. Labels are shared with mapped semantic steps; editing a raw event updates its semantic unit(s)." } };
     state.annotations = projectRawAnnotations();
-    state.rules = detectAnnotationRules(state.dataset);
+    state.rules = semanticDataset.trace.task === "vega-lite-sales-v1" ? { detections: [] } : detectAnnotationRules(state.dataset);
     state.selectedStep = rawIndex;
   } else {
     state.dataset = semanticDataset;
@@ -270,7 +272,7 @@ function renderTraceList() {
   const list = $("#traceList");
   list.replaceChildren();
   const query = $("#traceSearch").value.trim().toLowerCase();
-  TRACE_CATALOG.filter((item) => `${item.participant} ${item.id}`.includes(query)).forEach((item) => {
+  TRACE_CATALOG.filter((item) => `${item.participant} ${item.id} ${item.language || ""}`.toLowerCase().includes(query)).forEach((item) => {
     const button = document.createElement("button");
     const selected = item.id === state.dataset?.trace.id;
     button.className = `trace-card${selected ? " active" : ""}`;
@@ -280,7 +282,8 @@ function renderTraceList() {
     const dot = document.createElement("span"); dot.className = "status-dot";
     const title = document.createElement("strong"); title.textContent = `Trace ${item.participant.slice(0, 5)}`;
     const participant = document.createElement("small"); participant.textContent = item.participant; participant.title = item.participant;
-    const stats = document.createElement("span"); stats.className = "trace-stats"; stats.textContent = `${item.steps} ${item.unit} · Annotated`;
+    const stats = document.createElement("span"); stats.className = "trace-stats";
+    stats.textContent = `${item.steps} ${item.unit}${item.language ? ` · ${item.language}` : ""} · ${item.unannotated ? "Ready to annotate" : "Annotated"}`;
     button.append(dot, title, participant, stats);
     button.addEventListener("click", () => { if (!selected) loadDataset(item.key); });
     list.append(button);
@@ -740,12 +743,10 @@ async function loadDataset(traceName = new URLSearchParams(location.search).get(
     $("#clearStepButton").hidden = annotationReadOnly;
     $("#logoutButton").hidden = true;
     $("#saveState").textContent = annotationReadOnly ? "Read-only" : "Saved locally";
-    const payload = await api("/api/admin/annotation-dataset/s4");
+    const trace = TRACE_CATALOG.find(item => item.key === traceName);
+    if (!trace) throw new Error("Unknown annotation trace");
+    const payload = await api(`/api/admin/annotation-dataset/${trace.key}`);
     let dataset = payload.dataset;
-    if (["5f427", "691de"].includes(traceName)) dataset = (await api(`/api/admin/annotation-dataset/${traceName}`)).dataset;
-    if (["67aa5", "65fda", "67658"].includes(traceName)) {
-      dataset = (await api(`/api/admin/annotation-dataset/${traceName}`)).dataset;
-    }
     if (dataset.granularity) state.rules = dataset.rules;
     else {
       state.rules = detectAnnotationRules(dataset);
