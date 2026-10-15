@@ -26,7 +26,24 @@ class SemanticStepProcessorTests(unittest.TestCase):
         self.assertEqual(self.processor.compare("", "a=1;b=2;")["unitType"], "compound_edit")
         block = "with Carrier as c1:{ in Leftward direction:{ knit Loops; } }"
         self.assertEqual(self.processor.compare("", block)["rule"], "E4")
-        self.assertEqual(self.processor.compare("", "with Carrier as c1:{}")["rule"], "E1")
+        self.assertEqual(self.processor.compare("", "with Carrier as c1:{}")["unitType"], "empty_frame")
+
+    def test_local_units_survive_invalid_surroundings(self):
+        source = 'width = 10;\nwith Carrier as c:\n    knit Front_Needles[0:width];'
+        units = self.processor.analyze(source)["units"]
+        self.assertEqual([u.production for u in units],
+                         ["declare_variable", "with_statement_header", "instruction_assignment"])
+        result = self.processor.compare(source, source.replace("10", "11"))
+        self.assertEqual(result["rule"], "E6")
+
+    def test_structural_header_change(self):
+        result = self.processor.compare('with Carrier as c:{width=10;}', 'with c1 as c:{width=10;}')
+        self.assertEqual(result["rule"], "E6")
+        self.assertEqual(result["unit"]["production"], "with_statement_header")
+
+    def test_known_unit_survives_unrecognized_fragment(self):
+        result = self.processor.compare('broken @; width=10;', 'broken @; width=11;')
+        self.assertEqual(result["rule"], "E6")
 
     def test_instruction_is_one_unit_not_just_its_first_expression(self):
         before = "in Leftward direction:{knit Front_Needles[0:10];}"

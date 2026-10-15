@@ -5,6 +5,7 @@ from difflib import SequenceMatcher
 from hashlib import sha256
 from importlib.metadata import version
 from importlib.resources import files
+import re
 
 from parglare import Grammar, Parser
 from parglare.exceptions import SyntaxError as GrammarSyntaxError
@@ -29,7 +30,7 @@ class SyntaxUnit:
 class SemanticStepProcessor:
     """Identify syntax units and group edits without executing code."""
 
-    METHOD_VERSION = "grammar-grounded-v1"
+    METHOD_VERSION = "grammar-grounded-v2-local"
 
     def __init__(self, max_gap_ms=5000):
         grammar_text = files("knit_script.knit_script_interpreter").joinpath("knit_script.pg").read_text()
@@ -37,6 +38,18 @@ class SemanticStepProcessor:
             Grammar.from_string(grammar_text, ignore_case=True),
             build_tree=True, call_actions_during_tree_build=False,
         )
+        instruction_grammar = grammar_text.replace("S: program;", "S: instruction_assignment;")
+        self.instruction_parser = Parser(Grammar.from_string(instruction_grammar, ignore_case=True), build_tree=True)
+        headers = []
+        for name in ["with_statement", "for_each_statement", "while_statement", "function_declaration"]:
+            body = re.search(rf"\n{name}: (.*?);", grammar_text, re.S).group(1)
+            headers.append(body.split("colon", 1)[0] + "colon")
+        headers.append('"in" pass_dir=expression "direction" colon')
+        header_grammar = grammar_text.replace("S: program;", "S: analysis_header;")
+        header_grammar = header_grammar.replace("\nterminals", "\nanalysis_header: " + " | ".join(headers) + ";\nterminals")
+        self.header_parser = Parser(Grammar.from_string(header_grammar, ignore_case=True), build_tree=True)
+        self.terminals = [terminal for name, terminal in self.parser.grammar.terminals.items()
+                          if name not in {"EMPTY", "STOP", "KEYWORD", "NotComment", "f_string_text", "f_quote", "quote"}]
         self.max_gap_ms = max_gap_ms
         self.identity = {
             "method": self.METHOD_VERSION,
@@ -48,31 +61,107 @@ class SemanticStepProcessor:
         }
 
     def analyze(self, source):
-        """Return syntax units, tokens, or a parse error."""
-        if not source.strip():
-            return {"valid": True, "units": [], "tokens": [], "diagnostic": None}
-        try:
-            tree = self.parser.parse(source)
-        except GrammarSyntaxError as error:
-            return {"valid": False, "units": [], "tokens": [], "diagnostic": str(error)}
-        units, tokens = [], []
+        """Recognize local units even when surrounding code is unfinished."""
+        tokens = self.lex(source)
+        units, fragments = [], []
+        start, depth = None, 0
 
-        def visit(node):
-            children = getattr(node, "children", None)
-            if children is None:
-                tokens.append(source[node.start_position:node.end_position])
+        def recognize(end):
+            nonlocal start
+            if start is None:
                 return
-            if node.symbol.name in WRAPPERS and children:
-                concrete = node if node.symbol.name == "instruction_assignment" else children[0]
-                units.append(SyntaxUnit(
-                    concrete.symbol.name, node.start_position, node.end_position,
-                    concrete.symbol.name in STRUCTURES,
-                ))
-            for child in children:
-                visit(child)
+            text = source[start:end]
+            found = False
+            for parser, header in [(self.parser, False), (self.instruction_parser, False), (self.header_parser, True)]:
+                try:
+                    tree = parser.parse(text)
+                except GrammarSyntaxError:
+                    continue
+                if header:
+                    first = text.split()[0].lower()
+                    name = {"with": "with_statement", "for": "for_each_statement", "while": "while_statement",
+                            "def": "function_declaration", "in": "carriage_pass"}[first]
+                    units.append(SyntaxUnit(name + "_header", start, end, False))
+                else:
+                    def visit(node):
+                        children = getattr(node, "children", [])
+                        if node.symbol.name in WRAPPERS and children:
+                            concrete = node if node.symbol.name == "instruction_assignment" else children[0]
+                            units.append(SyntaxUnit(concrete.symbol.name, start + node.start_position,
+                                                    start + node.end_position, concrete.symbol.name in STRUCTURES))
+                        for child in children:
+                            visit(child)
+                    visit(tree)
+                found = True
+                break
+            if not found:
+                fragments.append({"start": start, "end": end, "text": text})
+            start = None
 
-        visit(tree)
-        return {"valid": True, "units": units, "tokens": tokens, "diagnostic": None}
+        previous_end = 0
+        for token in tokens:
+            if depth == 0 and "\n" in source[previous_end:token["start"]] and start is not None:
+                # End only recognized lines; incomplete multiline calls stay together.
+                text = source[start:previous_end]
+                if text.rstrip().endswith(":"):
+                    recognize(previous_end)
+            if token["text"] in {"{", "}"} and depth == 0:
+                recognize(token["start"])
+                units.append(SyntaxUnit("frame_boundary", token["start"], token["end"], False))
+            else:
+                if start is None:
+                    start = token["start"]
+                if token["text"] in {"(", "["}:
+                    depth += 1
+                elif token["text"] in {")", "]"}:
+                    depth = max(0, depth - 1)
+                if token["text"] == ";" and depth == 0:
+                    recognize(token["end"])
+            previous_end = token["end"]
+        recognize(previous_end)
+        stack = []
+        for token in tokens:
+            if token["text"] == "{":
+                header = next((u for u in reversed(units) if u.production.endswith("_header")
+                               and u.end <= token["start"] and not source[u.end:token["start"]].strip()), None)
+                stack.append((token, header))
+            elif token["text"] == "}" and stack:
+                opening, header = stack.pop()
+                if header:
+                    empty = not source[opening["end"]:token["start"]].strip()
+                    units.append(SyntaxUnit("empty_frame" if empty else header.production.removesuffix("_header"),
+                                            header.start, token["end"], True))
+        return {"valid": not fragments, "units": units, "tokens": [t["text"] for t in tokens],
+                "fragments": fragments, "diagnostic": fragments or None}
+
+    def lex(self, source):
+        """Use native terminal recognizers; preserve unknown characters."""
+        tokens, position = [], 0
+        while position < len(source):
+            if source[position].isspace():
+                position += 1
+                continue
+            if source.startswith("//", position):
+                end = source.find("\n", position)
+                position = len(source) if end == -1 else end
+                continue
+            if source.startswith("/*", position):
+                end = source.find("*/", position + 2)
+                if end != -1:
+                    position = end + 2
+                    continue
+            matches = []
+            for terminal in self.terminals:
+                value = terminal.recognizer(source, position)
+                if value:
+                    matches.append((len(value), terminal.prior, terminal.name, value))
+            if matches:
+                _, _, kind, text = max(matches)
+            else:
+                kind, text = "unknown", source[position]
+            tokens.append({"kind": kind, "text": text, "start": position, "end": position + len(text)})
+            position += len(text)
+        return tokens
 
     @staticmethod
     def _covering(units, start, end):
@@ -102,8 +191,6 @@ class SemanticStepProcessor:
 
         if before == after:
             return decision("no_net_change", "E0", "Observed endpoints are identical; intervening edits are retained.")
-        if not old["valid"] or not new["valid"]:
-            return decision("unresolved_syntax", "E1", "An endpoint cannot be parsed; no structural repair was inferred.")
         if old["tokens"] == new["tokens"]:
             return decision("non_semantic_edit", "E2", "Grammar tokens are unchanged; only layout differs.")
 
@@ -119,7 +206,13 @@ class SemanticStepProcessor:
                 if not source[start:unit.start].strip() and not source[unit.end:end].strip():
                     if not inserting:
                         return decision("local_deletion", "E3", "Exactly one complete grammar unit was removed.", unit)
+                    if unit.production == "frame_boundary":
+                        return decision("frame_boundary", "E8", "One observed block delimiter was added.", unit)
+                    if unit.production.endswith("_header"):
+                        return decision("structural_header", "E9", "A native grammar header was identified without requiring its body.", unit)
                     if unit.structural:
+                        if unit.production == "empty_frame":
+                            return decision("empty_frame", "E10", "A recognized header and empty brace pair were inserted.", unit)
                         return decision("compound_edit", "E4", "A complete structure and its contents were inserted together; no empty-frame history was invented.", unit)
                     kind = "declaration_assignment" if unit.production in DECLARATIONS else "expression_operation"
                     return decision(kind, "E5", "Exactly one complete grammar unit was inserted.", unit)
@@ -133,7 +226,9 @@ class SemanticStepProcessor:
             for updated in matches:
                 if unit.production == updated.production:
                     return decision("small_span_modification", "E6", "All changed spans lie within one leaf grammar unit on each side.", updated)
-        return decision("compound_edit", "E7", "No single leaf grammar unit contains the entire transition.")
+        if not old["valid"] or not new["valid"]:
+            return decision("unresolved_fragment", "E1", "Changed fragments lack a recognized local unit; other units remain available.")
+        return decision("compound_edit", "E7", "The transition spans more than one local unit.")
 
     def process_events(self, events, initial_source=""):
         """Group edits to one unit; stop at runs and other non-edit events."""
@@ -159,8 +254,13 @@ class SemanticStepProcessor:
                     same_unit = prior["unit"] and extended["unit"] and (
                         prior["unit"]["start"], prior["unit"]["production"]
                     ) == (extended["unit"]["start"], extended["unit"]["production"])
+                    if not prior["unit"] and prior["changes"] and extended["changes"]:
+                        # Continue unfinished typing only in the same edit region.
+                        a, b = prior["changes"][-1]["after"]
+                        incremental = self.compare(source, after)["changes"]
+                        same_unit = incremental and all(a <= c["before"][0] <= c["before"][1] <= b + 1 for c in incremental)
                     if event.get("elapsedMs", 0) - last.get("elapsedMs", 0) > self.max_gap_ms or (
-                        prior["parse"]["after"] and not same_unit
+                        not same_unit
                     ):
                         flush()
                 pending.append((index, {**event, "source": after}, source))

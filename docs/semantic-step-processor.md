@@ -1,5 +1,66 @@
 # Semantic Step Processor: first implementation
 
+## Current method: v2 local recognition
+
+The processor no longer uses complete-program parse success as an eligibility
+gate. It identifies local units independently of surrounding broken syntax.
+
+1. Lex source with native grammar terminal recognizers. Use longest match, then
+   native priority, with a stable terminal-name tie break. Exclude layout-only
+   catch-all terminals from code recognition. Unknown characters remain tokens.
+   This is an analytical lexer policy, not parglare's contextual lexer.
+2. Split candidate fragments at semicolons and braces outside strings, comments,
+   parentheses and brackets. A newline after a colon separates an unfinished
+   block header from its body. Other incomplete fragments remain explicit.
+3. Recognize each fragment using native statement or instruction productions.
+   Recognize headers using a derived start production: native header syntax up
+   to the colon, without requiring a block body. Header alternatives cover with,
+   for, while, def and carriage direction; if/elif/else/try headers are not yet
+   supported by this adapter. No source bytes are inserted to make parsing pass.
+4. Pair observed braces and recognized headers to locate frames, including empty
+   frames. This identifies structure, not grammatical validity of a whole program.
+5. Compare locally recognized units. Unknown fragments elsewhere do not block
+   a known local modification. E8 identifies an added brace, E9 an added header,
+   and E10 an added empty frame. E1 now means unresolved local fragments, not
+   failed whole-program parsing. E6 also accepts header-local changes.
+6. Group edits targeting the same identified unit. If no unit is available yet,
+   continue unfinished typing only while edits stay within the previous changed
+   region (with one-character boundary tolerance). Runs and the five-second gap
+   remain hard boundaries. This fallback uses edit location, not parse success.
+
+The compatibility field `parse.before/after` now indicates whether all local
+fragments were recognized. It is not a whole-program syntax validation result.
+`diagnostics` lists unidentified fragment ranges and text. Neither field decides
+whether recognized neighboring units are usable.
+
+### Second read-only pilot: 6638e
+
+All annotation dataset JSON hashes remained identical. All 123 raw events were
+covered. The same inputs and comparison protocol as the v1 pilot were used.
+
+| Measure | v1 | v2 |
+| --- | --- | --- |
+| Raw output records (includes non-edit events) | 76 | 96 |
+| Raw non-edit records | 58 | 58 |
+| Raw edit-group records | 18 | 38 |
+| Raw edit classifications | 16 unresolved, 1 compound, 1 no-net-change | 20 unresolved, 6 layout-only, 7 brace additions, 3 deletions, 1 compound, 1 local modification |
+| Curated 31 transitions | 23 unresolved, 6 compound, 2 local modifications | 17 unresolved, 9 compound, 2 layout-only, 3 local modifications |
+
+Curated examples: steps 16/18 are now layout-only; step 27 is a local carrier-header
+change; steps 51/53 remain local assignment changes. Steps 12–14 add multiple
+brace boundaries and remain compound. Missing terminators, invalid comments and
+unsupported malformed fragments still limit recognition. More output records
+do not imply more valid semantic steps; the grouping policy also changed.
+
+The input datasets and UI remain unchanged. Recognition accuracy has not been
+established by a full manually labeled benchmark. Fragment recovery, multiline
+incomplete statements and interpolated strings need further evaluation.
+
+## Historical v1 method and first pilot
+
+The sections below describe the original strict-parser baseline, not the current
+local-recognition implementation. They are retained for the experimental comparison.
+
 ## 中文阅读指南
 
 代码只保留简短英文注释，完整方法和使用说明放在本文件。
