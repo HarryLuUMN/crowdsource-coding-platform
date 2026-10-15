@@ -1,25 +1,4 @@
-"""Grammar-grounded, evidence-preserving Semantic Step Processor (v1).
-
-METHOD
-======
-1. Parse observed source states with the installed KnitScript grammar, without
-   interpretation or machine execution. Concrete-tree offsets anchor every unit.
-2. Treat complete leaf statements/instructions as units; structural statements
-   are units only when their entire addition/deletion is under consideration.
-3. Compare states using an ordered text diff. A modification wholly inside one
-   existing leaf unit is a local modification; multiple affected units remain a
-   compound change. This is not semantic equivalence or intention recognition.
-4. Group adjacent editor events only when a valid comparison identifies the same
-   unit. Incomplete intermediate states may accumulate until a valid endpoint.
-   Runs, non-edit events and time gaps are hard boundaries. Invalid endpoints
-   remain unresolved: no inserted repairs or inferred intermediate code.
-5. Return original event indices, explicit rules, grammar identity and source
-   ranges. Snapshot-only comparisons are never called observed edit sequences.
-
-This module deliberately does not migrate annotations, rewrite datasets, execute
-participant programs, or replace the current UI. Offsets are Python Unicode
-code-point indices (half-open), not JavaScript UTF-16 offsets.
-"""
+"""按 KnitScript 语法划分编辑步骤。完整说明见 docs/semantic-step-processor.md。"""
 
 from dataclasses import asdict, dataclass
 from difflib import SequenceMatcher
@@ -48,12 +27,7 @@ class SyntaxUnit:
 
 
 class SemanticStepProcessor:
-    """Parse syntax and apply the separately named step-classification policy.
-
-    The grammar hash is recorded because a package version alone does not detect
-    a locally modified grammar. Tree building avoids KnitScript's executable
-    semantic actions; failed parsing is evidence, not permission to repair input.
-    """
+    """识别语法单元，再按规则合并编辑事件；不执行参与者代码。"""
 
     METHOD_VERSION = "grammar-grounded-v1"
 
@@ -74,12 +48,7 @@ class SemanticStepProcessor:
         }
 
     def analyze(self, source):
-        """Return grammar units and tokens, or an explicit syntax diagnostic.
-
-        Empty source is a valid analytical baseline even though the language's
-        program production requires at least one statement. Layout is omitted
-        from token signatures, allowing comment/whitespace-only comparisons.
-        """
+        """解析代码，返回语法单元、词法符号或错误信息。"""
         if not source.strip():
             return {"valid": True, "units": [], "tokens": [], "diagnostic": None}
         try:
@@ -107,19 +76,12 @@ class SemanticStepProcessor:
 
     @staticmethod
     def _covering(units, start, end):
-        # A local modification must fit inside a leaf, not merely share a large
-        # enclosing loop. Otherwise unrelated edits would collapse into one step.
+        # 只找包含修改的单条语句，不能拿整个循环当作局部修改。
         return [unit for unit in units if not unit.structural
                 and unit.start <= start and end <= unit.end]
 
     def compare(self, before, after, evidence="observed_edits"):
-        """Classify one net transition; retain compound edits instead of splitting.
-
-        Text alignment is deterministic but not AST node identity matching.
-        Repeated identical statements can be ambiguous; returned ranges make the
-        chosen alignment inspectable. A compound result is not a single-unit
-        semantic step and must remain visibly unresolved downstream.
-        """
+        """比较修改前后代码；无法归入一个单元时，保留为复合修改。"""
         old, new = self.analyze(before), self.analyze(after)
         changes = [
             {"operation": tag, "before": [a, b], "after": [c, d]}
@@ -145,8 +107,7 @@ class SemanticStepProcessor:
         if old["tokens"] == new["tokens"]:
             return decision("non_semantic_edit", "E2", "Grammar tokens are unchanged; only layout differs.")
 
-        # Pure insertion/deletion can contain layout beside the actual unit.
-        # Select the largest fully contained unit, avoiding nested double counts.
+        # 取完整插入或删除的最大单元，避免重复计算嵌套语句。
         if len(changes) == 1 and changes[0]["operation"] in {"insert", "delete"}:
             change = changes[0]
             inserting = change["operation"] == "insert"
@@ -175,13 +136,7 @@ class SemanticStepProcessor:
         return decision("compound_edit", "E7", "No single leaf grammar unit contains the entire transition.")
 
     def process_events(self, events, initial_source=""):
-        """Group normalized events with source/event/elapsedMs fields.
-
-        Input sources must already be reconstructed from original telemetry.
-        Non-editor events are preserved as hard boundaries. Snapshot comparisons
-        are separate transitions, never merged with recorded keyboard edits.
-        Event indices refer to positions in this input, not synthetic timestamps.
-        """
+        """合并同一单元的连续编辑；遇到运行等事件就结束当前组。"""
         steps, pending = [], []
         source = initial_source
 

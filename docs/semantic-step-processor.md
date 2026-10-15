@@ -1,5 +1,31 @@
 # Semantic Step Processor: first implementation
 
+## 中文阅读指南
+
+代码只保留简短注释，完整方法和使用说明放在本文件。
+
+三个主要方法：
+
+- `analyze(source)`：看一份代码有哪些语法单元，以及能否解析。
+- `compare(before, after)`：比较两份代码，说明改了什么、依据哪条规则。
+- `process_events(events)`：把同一个语法单元的连续编辑合为一步。
+
+处理顺序：原始事件重建代码 → 原生语法解析 → 比较变化 → 判断单元类型 → 合并连续编辑。
+
+返回结果中，`unitType` 是变化类别，`rule` 是规则编号，`reason` 是判定理由，
+`unit` 是语法类型和代码位置，`rawStepIndices` 指向原始事件。
+
+几个容易误解的地方：
+
+- 空代码作为比较起点，不代表 grammar 允许空程序。
+- 比较词法符号时不计空白和合法注释，因此能识别仅格式变化。
+- 记录 grammar 哈希，便于发现同版本包里的语法文件是否被改过。
+- 代码位置按 Python 字符编号，包含起点、不包含终点；与浏览器 UTF-16 编号不同。
+- 重复语句可能让文本对齐有歧义；这里不是完整的 AST 节点匹配算法。
+- 快照只能说明两份代码有差别，不能还原参与者的输入过程。
+
+下面保留完整的英文方法定义、规则表、使用示例和限制，供复现与论文写作参考。
+
 ## Scope and operational definition
 
 `semantic_step_processor.py` is an independent Python analysis module. It does
