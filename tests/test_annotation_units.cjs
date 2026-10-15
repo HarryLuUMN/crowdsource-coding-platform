@@ -16,6 +16,13 @@ function verify(result, finalSource) {
 }
 const typing = dataset(['x', 'x =', 'x = 10', 'x = 10;', 'x = 10;', 'x = 11;'], ['', '', '', '', 'run.requested']);
 const units = context.buildUnitDataset(typing);
+assert.equal(context.classifyEditUnit('insert', {}, 'x = 1;', false), 'assignment');
+assert.equal(context.classifyEditUnit('insert', {}, 'knit Loops;', false), 'operation');
+assert.equal(context.classifyEditUnit('insert', {}, 'with Carrier as c1:{', true), 'empty_frame');
+assert.equal(context.classifyEditUnit('replace', { removed: 'a=1;b=2;', inserted: 'a=3;' }, '', false), 'unresolved_compound_edit');
+const priorEdit = typing.steps[0];
+assert.equal(context.startsNewEditGroup(priorEdit, { ...typing.steps[1], elapsedMs: 5000 }), false);
+assert.equal(context.startsNewEditGroup(priorEdit, { ...typing.steps[1], elapsedMs: 5001 }), true);
 assert.equal(units.steps.length, 3);
 assert.equal(units.steps[0].unitType, 'assignment');
 assert.equal(units.steps[2].unitType, 'small_span');
@@ -67,6 +74,24 @@ assert.equal(context.state.decisions.saved, 'confirm');
 assert.equal(oldReadingUnits.steps[3].event, 'run.requested');
 assert.equal(mapped[0][0], 'ERROR');
 console.log('Syntactic units: reconstruction, event coverage, boundaries, paste frames, strings, and annotation migration passed');
+// Freeze pre-refactor outputs; review these hashes after fixture changes.
+const baselineDigests = {
+  s4: 'dfa2bb74112af53ce351e95aa615b9c26eb1a44da33e0cae8d2a5cf6b3f0332d',
+  '5f427': '0e6a1ee4eece8f1e3295689db82816c97d527756f6a7885ffd9e5aacbd0c9ecb',
+  '691de': '573192fe9c99f88bd95c541c22cc74dd676584481ea20231e892b20b2d23cf5b',
+  '67658': 'bb05e7a16075dc2a18975bb259d60349aefdf23991a806987e6fe4c529d0d354',
+  '67aa5': 'b8f9a305ec06232a1e0778841aee7a23acd9f3c8dbb0d5c367b97dde4782d374',
+  '65fda': 'dec1c624f9d26b01d40fb2438a674e3b615cf15d87c89584c7d07748b4c6db3f',
+};
+for (const [name, expected] of Object.entries(baselineDigests)) {
+  const saved = JSON.parse(fs.readFileSync(`annotation_data/${name}-units.json`, 'utf8'));
+  const input = { ...saved, steps: saved.rawSteps, annotations: saved.rawAnnotations || {} };
+  const before = JSON.stringify(input);
+  const output = context.buildUnitDataset(input);
+  const digest = require('node:crypto').createHash('sha256').update(JSON.stringify(output)).digest('hex');
+  assert.equal(digest, expected, `${name}: processing output changed`);
+  assert.equal(JSON.stringify(input), before, `${name}: input was mutated`);
+}
 for (const name of ['s4', '5f427', '691de']) {
   const original = JSON.parse(fs.readFileSync(`annotation_data/${name}.json`, 'utf8'));
   const saved = JSON.stringify(original);

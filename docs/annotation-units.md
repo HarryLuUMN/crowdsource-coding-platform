@@ -1,5 +1,9 @@
 # Annotation edit units
 
+For the current JavaScript method definition and a guided code walkthrough, see
+[Semantic Step Processing](semantic-step-processing.md). The Python parser-based
+processor is an independent experiment, not a replacement for this builder.
+
 Dataset reads are uncached and include a content-derived annotation revision. Browser autosaves retain the dataset label baseline; on refresh, only additions/removals made locally since that baseline are applied to the latest server labels. Unchanged stale labels no longer override external updates. Older caches without a baseline are copied to a `:before-dataset-sync` localStorage backup and the persisted dataset takes precedence on their first refresh. Save establishes the newly saved dataset as the local baseline.
 
 Local annotations still autosave in browser storage. The header's Save button additionally writes manual labels, raw-only labels and rule decisions to the selected `annotation_data/<trace>-units.json`, keeping event evidence and rules unchanged. Each save creates a recoverable copy under ignored `annotation_data/.backups/` and replaces the dataset atomically. Only loopback servers and clients with a loopback Host and same-origin JSON requests can save; deployed read-only viewers cannot. This does not commit or deploy the saved labels. Regenerating a materialized dataset can overwrite these file labels; export them or retain the save backup before rebuilding.
