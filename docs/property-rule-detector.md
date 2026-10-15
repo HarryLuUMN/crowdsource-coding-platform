@@ -6,6 +6,23 @@ patterns and General Errors are included, not KnitScript-specific challenge code
 Each property has one `detect_*` function in the `DETECTORS` registry. Short English
 comments describe each rule; this document contains the usage and limitations.
 
+## Reading the script
+
+The implementation uses ordinary loops and explicit `if` statements. It avoids
+comprehensions, generators, lambdas and inline conditional expressions.
+
+Read the file in this order:
+
+1. `collect_runs()`: find recorded results, remove duplicates, and classify outcomes.
+2. `build_episodes()`: collect edits between two consecutive evaluations.
+3. A `detect_*` function: follow the conditions for one property.
+4. `error_matches()`: loop over failed evaluations and check a diagnostic pattern.
+5. `detect_properties()`: run the functions and collect proposals and coverage gaps.
+
+Regular expressions are retained as diagnostic matching rules; their meaning is
+listed in the rule table below. The readability rewrite does not broaden them or
+change detection statuses. All dataset inputs remain read-only.
+
 ## Usage
 
 ```sh

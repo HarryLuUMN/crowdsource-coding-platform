@@ -1,4 +1,6 @@
 import copy
+import ast
+from pathlib import Path
 import unittest
 from unittest.mock import patch
 
@@ -63,6 +65,14 @@ class PropertyRuleTests(unittest.TestCase):
         self.assertNotIn('PASTE_DOC', [d['property'] for d in self.detect(steps)['detections']])
         result = self.detect(steps, documentation_examples=['x=1;'])
         self.assertIn('PASTE_DOC', [d['property'] for d in result['detections']])
+
+    def test_detector_keeps_explicit_control_flow(self):
+        source = Path('property_rule_detector.py').read_text()
+        tree = ast.parse(source)
+        hidden_control_flow = (ast.ListComp, ast.SetComp, ast.DictComp,
+                               ast.GeneratorExp, ast.Lambda, ast.IfExp)
+        for node in ast.walk(tree):
+            self.assertNotIsInstance(node, hidden_control_flow)
 
     def test_wrong_output_requires_success(self):
         check = {'passed': False, 'passed_count': 0, 'total_count': 5}
