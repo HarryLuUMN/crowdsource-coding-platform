@@ -5,6 +5,7 @@ function unitChange(before, after) {
   let start = 0;
   let beforeEnd = before.length;
   let afterEnd = after.length;
+  // Remove matching edges; separate edits may remain inside one wide range.
   while (start < beforeEnd && start < afterEnd && before[start] === after[start]) start++;
   while (beforeEnd > start && afterEnd > start && before[beforeEnd - 1] === after[afterEnd - 1]) {
     beforeEnd--;
@@ -29,6 +30,7 @@ function unitSegments(text) {
       else continue;
     }
     if (quote) {
+      // An escaped quote must not end the string.
       if (escape) escape = false;
       else if (c === "\\") escape = true;
       else if (c === quote) quote = "";
@@ -50,6 +52,7 @@ function unitSegments(text) {
       start = i + 1;
     }
   }
+  // Retain unfinished text even when no delimiter closes it.
   if (start < text.length) segments.push(text.slice(start));
   return segments;
 }

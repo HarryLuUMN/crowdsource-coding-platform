@@ -3,6 +3,7 @@
 // Merge adjacent reading evidence; a non-reading event ends the sequence.
 function appendReadingSequence(steps, step, dataset) {
   const previous = steps[steps.length - 1];
+  // Only adjacency matters here, not time gaps or document changes.
   const group = previous?.unitType === "reading_sequence" ? [...previous.rawSteps, step] : [step];
   const first = group[0];
   const combined = { ...step, index: previous?.unitType === "reading_sequence" ? previous.index : steps.length,
@@ -17,6 +18,7 @@ function appendReadingSequence(steps, step, dataset) {
       excerpt: [...new Set(group.map(s => s.reading.excerpt).filter(Boolean))].join("\n\n"),
       precision: step.reading.precision },
   };
+  // Extend the existing row instead of adding another reading step.
   if (previous?.unitType === "reading_sequence") steps[steps.length - 1] = combined;
   else steps.push(combined);
 }

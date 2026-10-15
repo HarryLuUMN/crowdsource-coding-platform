@@ -13,11 +13,13 @@ function buildUnitDataset(dataset, { mergeReading = true } = {}) {
   }
   rawSteps.forEach(step => {
     if (mergeReading && step.reading) {
+      // Reading cannot share a group with unfinished edits.
       flush();
       appendReadingSequence(steps, step, dataset);
       return;
     }
     if (!step.event.startsWith("editor.") || !step.changed) {
+      // Runs and unchanged events remain separate evidence steps.
       flush();
       steps.push({ ...step, index: steps.length, rawStepIndices: [step.index], rawSteps: [step] });
       return;
@@ -26,8 +28,10 @@ function buildUnitDataset(dataset, { mergeReading = true } = {}) {
     if (previous && startsNewEditGroup(previous, step)) flush();
     const change = unitChange(step.previousSource || "", step.source || "");
     pending.push(step);
+    // Paste-like events and multi-piece changes are emitted immediately.
     if (step.event !== "editor.edit" || unitSegments(change.inserted || change.removed).length > 1) flush();
   });
+  // Emit trailing edits even if no run or reading event follows.
   flush();
   const annotations = mapRawAnnotations({ steps }, dataset.annotations || {});
   return { ...dataset, granularity: mergeReading ? "syntactic-unit-v2" : "syntactic-unit-v1", rawSteps, rawAnnotations: dataset.annotations || {}, steps, annotations,
@@ -38,6 +42,7 @@ function buildUnitDataset(dataset, { mergeReading = true } = {}) {
 function mapRawAnnotations(dataset, annotations) {
   const mapped = {};
   dataset.steps.forEach(step => {
+    // Merge source labels; shared raw events may label several derived steps.
     const codes = [...new Set((step.rawStepIndices || [step.index]).flatMap(index => annotations[index] || []))];
     if (codes.length) mapped[step.index] = codes;
   });
