@@ -17,8 +17,10 @@ for (const [key, rawCount, unitCount] of [['5e219', 1050, 186], ['5f67b', 2176, 
   assert(dataset.rawSteps.some(step => step.event === 'session.ended'));
   assert(dataset.rawSteps.some(step => step.event === 'submit.accepted' && step.payload.check.passed));
   assert.equal(dataset.codebook.length, 2);
-  assert.deepEqual(dataset.annotations, {});
-  assert.deepEqual(dataset.rules.detections, []);
+  assert.equal(dataset.automaticLabeling.ruleVersion, 'properties-v1');
+  assert.equal(Object.keys(dataset.annotations).length, key === '5e219' ? 6 : 31);
+  assert(dataset.rules.detections.every(rule => rule.status === 'auto'));
+  assert(dataset.rules.detections.every(rule => Array.isArray(rule.evidence.events)));
   const rebuilt = context.buildUnitDataset({ ...dataset, steps: dataset.rawSteps, annotations: dataset.rawAnnotations });
   assert.deepEqual(JSON.parse(JSON.stringify(rebuilt.steps)), dataset.steps);
   console.log(`${key}: legacy output reproduced, raw coverage complete, passed submission retained`);

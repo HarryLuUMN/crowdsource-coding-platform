@@ -11,8 +11,8 @@ const TRACE_CATALOG = [
   { key: "s4", id: "443bbe19-51d6-431e-bd0f-55baecdcc183", participant: "6638e8aa3d1f38846080806a", steps: 57, unit: "semantic steps" },
   { key: "67aa5", id: "b8c98aac-ad68-4c62-8a4f-aaf0dbbc3f21", participant: "67aa54c162dc637de018fe18", steps: 646, unit: "events" },
   { key: "65fda", id: "053e926a-ff9f-4c4a-8868-14f331800b21", participant: "65fda4aa45ba55e983e2a2d9", steps: 865, unit: "events" },
-  { key: "5e219", id: "d7438308-77d5-47c3-8d59-a8283bc8a14a", participant: "5e2191a2727e0446c780b2e3", steps: 186, unit: "units/events", language: "Vega-Lite", unannotated: true },
-  { key: "5f67b", id: "2326a06f-8ef5-4840-8172-bf99abb992c9", participant: "5f67bc66777bfd3f9906742c", steps: 406, unit: "units/events", language: "Vega-Lite", unannotated: true },
+  { key: "5e219", id: "d7438308-77d5-47c3-8d59-a8283bc8a14a", participant: "5e2191a2727e0446c780b2e3", steps: 186, unit: "units/events", language: "Vega-Lite", labeling: "Auto-labeled" },
+  { key: "5f67b", id: "2326a06f-8ef5-4840-8172-bf99abb992c9", participant: "5f67bc66777bfd3f9906742c", steps: 406, unit: "units/events", language: "Vega-Lite", labeling: "Auto-labeled" },
 ];
 let loadingTrace = false;
 let traceView = "semantic";
@@ -283,7 +283,7 @@ function renderTraceList() {
     const title = document.createElement("strong"); title.textContent = `Trace ${item.participant.slice(0, 5)}`;
     const participant = document.createElement("small"); participant.textContent = item.participant; participant.title = item.participant;
     const stats = document.createElement("span"); stats.className = "trace-stats";
-    stats.textContent = `${item.steps} ${item.unit}${item.language ? ` · ${item.language}` : ""} · ${item.unannotated ? "Ready to annotate" : "Annotated"}`;
+    stats.textContent = `${item.steps} ${item.unit}${item.language ? ` · ${item.language}` : ""} · ${item.labeling || (item.unannotated ? "Ready to annotate" : "Annotated")}`;
     button.append(dot, title, participant, stats);
     button.addEventListener("click", () => { if (!selected) loadDataset(item.key); });
     list.append(button);

@@ -20,7 +20,41 @@ synthetic intermediate states may be invalid JSON and must not be interpreted as
 observed edits. Neither the Python parser experiment nor the property detector
 was applied. Only the general patterns/errors codebook is included. Existing
 KnitScript rule suggestions are disabled for these Vega-Lite datasets in both
-views; they are ready for annotation, not pre-annotated.
+views. A subsequent first-pass run of `property_rule_detector.py` has now applied
+supported general-property findings. This does not enable the old KnitScript
+rule engine or constitute manual verification.
+
+## First-pass automatic labels
+
+Detection ran on genuine raw events, not synthetic unit steps. Findings were
+mapped back to the existing semantic view without rebuilding source states.
+Opening reading-series labels cover the corresponding reading groups; other
+properties use the final matching semantic step of the raw evidence. Original
+manual labels and review decisions are preserved. Candidate/unknown suggestions
+would remain pending, not confirmed annotations.
+
+| Trace | Detector findings | Labeled semantic steps | Properties |
+| --- | --- | --- | --- |
+| 5e219 | 5 supported | 6 | Opening reading series; 4 wrong-output evaluations |
+| 5f67b | 30 supported | 31 | Opening reading series; delete/repaste; 28 wrong-output evaluations |
+
+Each reading series maps to two existing reading groups, so labeled-step counts
+exceed finding counts. The raw reports are `annotation_data/5e219-properties.json`
+and `annotation_data/5f67b-properties.json`. Both datasets retain the report and
+coverage metadata under `automaticLabeling`. No candidate findings were produced
+in this run. Code/view counts and all raw evidence remain unchanged.
+
+Only 7 and 49 unique results are represented in event telemetry, compared with
+8 and 50 saved server executions. The detector uses recorded result events, not
+invented evaluations. Two and twenty failure events respectively lack detailed
+messages. Existing rules also use KnitScript-oriented local-unit recognition,
+so absent labels are not proof that the corresponding property never occurred.
+Saved server diagnostics were inspected but were not added to detector inputs or
+used to manually supplement this pass.
+
+To reproduce proposals, run `scripts/label_vega_traces.py` without arguments.
+Use `--apply` to save them, or `--report-directory annotation_data --apply` to apply
+the stored reports. Before saving, the script creates an ignored `.backups` copy.
 
 For reproduction, run the builder with a server base URL and optional configured
 Railway CLI path. It uses existing administrator credentials without printing or
