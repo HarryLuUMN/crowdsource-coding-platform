@@ -25,12 +25,13 @@ class SyntaxUnit:
     start: int
     end: int
     structural: bool
+    recognition: str = "native_grammar"
 
 
 class SemanticStepProcessor:
     """Identify syntax units and group edits without executing code."""
 
-    METHOD_VERSION = "grammar-grounded-v2-local"
+    METHOD_VERSION = "grammar-grounded-v3-local"
 
     def __init__(self, max_gap_ms=5000):
         grammar_text = files("knit_script.knit_script_interpreter").joinpath("knit_script.pg").read_text()
@@ -48,6 +49,8 @@ class SemanticStepProcessor:
         header_grammar = grammar_text.replace("S: program;", "S: analysis_header;")
         header_grammar = header_grammar.replace("\nterminals", "\nanalysis_header: " + " | ".join(headers) + ";\nterminals")
         self.header_parser = Parser(Grammar.from_string(header_grammar, ignore_case=True), build_tree=True)
+        instruction_rule = re.search(r"\nneedle_instruction: (.*?);", grammar_text, re.S).group(1)
+        self.instruction_words = set(re.findall(r'"([a-z]+)"', instruction_rule))
         self.terminals = [terminal for name, terminal in self.parser.grammar.terminals.items()
                           if name not in {"EMPTY", "STOP", "KEYWORD", "NotComment", "f_string_text", "f_quote", "quote"}]
         self.max_gap_ms = max_gap_ms
@@ -95,7 +98,22 @@ class SemanticStepProcessor:
                 found = True
                 break
             if not found:
-                fragments.append({"start": start, "end": end, "text": text})
+                local_tokens = self.lex(text)
+                words = [t["text"].lower() for t in local_tokens]
+                production = None
+                if len(words) >= 2 and local_tokens[0]["kind"] == "identifier" and words[1] == "=":
+                    production = "declare_variable"
+                elif words and words[0] in self.instruction_words:
+                    production = "instruction_assignment"
+                elif words and words[0] in {"with", "for", "while", "def", "in"}:
+                    production = {"with": "with_statement", "for": "for_each_statement", "while": "while_statement",
+                                  "def": "function_declaration", "in": "carriage_pass"}[words[0]] + "_header"
+                elif text.startswith("#"):
+                    production = "foreign_annotation"
+                if production:
+                    units.append(SyntaxUnit(production, start, end, False, "lexical_candidate"))
+                fragments.append({"start": start, "end": end, "text": text,
+                                  "candidate": production})
             start = None
 
         previous_end = 0
@@ -103,7 +121,9 @@ class SemanticStepProcessor:
             if depth == 0 and "\n" in source[previous_end:token["start"]] and start is not None:
                 # End only recognized lines; incomplete multiline calls stay together.
                 text = source[start:previous_end]
-                if text.rstrip().endswith(":"):
+                next_word = token["text"].lower()
+                next_assignment = re.match(r"[a-zA-Z_]\w*\s*=", source[token["start"]:])
+                if text.rstrip().endswith(":") or text.startswith("#") or next_assignment or next_word in {"with", "for", "while", "def", "in"}:
                     recognize(previous_end)
             if token["text"] in {"{", "}"} and depth == 0:
                 recognize(token["start"])
@@ -205,7 +225,7 @@ class SemanticStepProcessor:
                 unit = max(candidates, key=lambda u: u.end - u.start)
                 if not source[start:unit.start].strip() and not source[unit.end:end].strip():
                     if not inserting:
-                        return decision("local_deletion", "E3", "Exactly one complete grammar unit was removed.", unit)
+                        return decision("local_deletion", "E3", "One recognized unit or explicit lexical candidate was removed.", unit)
                     if unit.production == "frame_boundary":
                         return decision("frame_boundary", "E8", "One observed block delimiter was added.", unit)
                     if unit.production.endswith("_header"):
@@ -215,7 +235,7 @@ class SemanticStepProcessor:
                             return decision("empty_frame", "E10", "A recognized header and empty brace pair were inserted.", unit)
                         return decision("compound_edit", "E4", "A complete structure and its contents were inserted together; no empty-frame history was invented.", unit)
                     kind = "declaration_assignment" if unit.production in DECLARATIONS else "expression_operation"
-                    return decision(kind, "E5", "Exactly one complete grammar unit was inserted.", unit)
+                    return decision(kind, "E5", "One recognized unit or explicit lexical candidate was inserted.", unit)
 
         old_start = min(c["before"][0] for c in changes)
         old_end = max(c["before"][1] for c in changes)
@@ -225,8 +245,16 @@ class SemanticStepProcessor:
             matches = self._covering(new["units"], new_start, new_end)
             for updated in matches:
                 if unit.production == updated.production:
-                    return decision("small_span_modification", "E6", "All changed spans lie within one leaf grammar unit on each side.", updated)
+                    result["beforeUnit"] = asdict(unit)
+                    return decision("small_span_modification", "E6", "All changed spans lie within matching local units; recognition records grammar or candidate evidence.", updated)
         if not old["valid"] or not new["valid"]:
+            # Multiple recognized candidates are compound, not a parse failure.
+            def identified(parsed, side):
+                return all(any(u.start <= c[side][0] and c[side][1] <= u.end
+                               for u in parsed["units"] if not u.structural)
+                           for c in changes if c[side][0] != c[side][1])
+            if identified(old, "before") and identified(new, "after"):
+                return decision("compound_edit", "E7", "Changed spans cover multiple recognized units or lexical candidates.")
             return decision("unresolved_fragment", "E1", "Changed fragments lack a recognized local unit; other units remain available.")
         return decision("compound_edit", "E7", "The transition spans more than one local unit.")
 

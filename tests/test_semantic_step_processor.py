@@ -45,6 +45,27 @@ class SemanticStepProcessorTests(unittest.TestCase):
         result = self.processor.compare('broken @; width=10;', 'broken @; width=11;')
         self.assertEqual(result["rule"], "E6")
 
+    def test_missing_terminators_remain_separate_candidates(self):
+        units = self.processor.analyze('width = 10\nheight = 6\nwith Carrier as c:')["units"]
+        self.assertEqual([u.production for u in units],
+                         ['declare_variable', 'declare_variable', 'with_statement_header'])
+        self.assertEqual(units[0].recognition, 'lexical_candidate')
+
+    def test_foreign_annotation_does_not_swallow_following_header(self):
+        units = self.processor.analyze('# not a legal comment\nin Leftward direction:\nknit Loops;')["units"]
+        self.assertEqual([u.production for u in units],
+                         ['foreign_annotation', 'carriage_pass_header', 'instruction_assignment'])
+        self.assertEqual(units[0].recognition, 'lexical_candidate')
+
+    def test_candidate_to_native_keeps_both_sources_of_evidence(self):
+        result = self.processor.compare('knit Loops with c1;', 'knit Loops, c1;')
+        self.assertEqual(result['rule'], 'E6')
+        self.assertEqual(result['beforeUnit']['recognition'], 'lexical_candidate')
+        self.assertEqual(result['unit']['recognition'], 'native_grammar')
+
+    def test_unknown_text_is_not_promoted_to_a_unit(self):
+        self.assertEqual(self.processor.compare('', '@@@;')['rule'], 'E1')
+
     def test_instruction_is_one_unit_not_just_its_first_expression(self):
         before = "in Leftward direction:{knit Front_Needles[0:10];}"
         after = before.replace("10", "11")

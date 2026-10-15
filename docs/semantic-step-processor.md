@@ -1,6 +1,50 @@
 # Semantic Step Processor: first implementation
 
-## Current method: v2 local recognition
+## Current method: v3 local recognition
+
+V3 adds explicitly labeled lexical candidates for incomplete assignments,
+instruction forms and supported structural headers. Candidate recognition uses
+native terminal tokens and a small documented prefix policy: identifier followed
+by `=`, a native `needle_instruction` word, or with/for/while/def/in. It does not
+certify a candidate's full syntax. A line beginning with `#` is retained as a
+`foreign_annotation` candidate, not discarded as valid KnitScript layout.
+
+At bracket depth zero, new assignment/header lines delimit previous incomplete
+fragments; foreign annotation candidates end at a newline. Missing punctuation
+is never inserted. Units expose `recognition` as `native_grammar` or
+`lexical_candidate`; E6 returns `beforeUnit` as well as the updated `unit` so a
+candidate-to-grammar repair does not hide its weaker starting evidence.
+
+### Third read-only pilot: 6638e
+
+Run `PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/test_semantic_step_processor.py`.
+The runner prints results only, checks raw-event coverage and verifies annotation
+JSON hashes. It does not save or replace any dataset.
+
+| Curated 31 transitions | v1 | v2 | v3 |
+| --- | --- | --- | --- |
+| Unresolved | 23 | 17 | 6 |
+| Compound | 6 | 9 | 11 |
+| Local modification | 2 | 3 | 8 |
+| Local deletion | 0 | 0 | 3 |
+| Assignment insertion | 0 | 0 | 1 |
+| Layout only | 0 | 2 | 2 |
+
+V3 groups 123 raw events into 89 records: 58 non-edit events, 6 unresolved groups,
+6 local modifications, 6 local deletions, 7 brace additions, 3 layout-only groups,
+2 compound edits and 1 assignment insertion. Counts include lexical candidates;
+they are not verified recognition-accuracy scores or evidence of program validity.
+
+Steps 29/31 now identify carrier-header revisions; 39–41 identify instruction
+argument changes, including malformed-to-recognized transitions. Step 7 changes
+two assignment terminators and is compound. Steps 9/10 delete foreign annotation
+candidates. Steps 33/34 insert/remove an incomplete assignment candidate.
+
+Unresolved curated steps remain 2, 4, 5, 23, 25 and 35: foreign code, broad mixed
+replacements and disjoint text alignment still need further handling. No change
+was made to the UI, original sources, raw events or annotation labels.
+
+### Local recognition introduced in v2
 
 The processor no longer uses complete-program parse success as an eligibility
 gate. It identifies local units independently of surrounding broken syntax.
