@@ -1,4 +1,4 @@
-"""按 KnitScript 语法划分编辑步骤。完整说明见 docs/semantic-step-processor.md。"""
+"""Group edits using KnitScript syntax. See docs/semantic-step-processor.md."""
 
 from dataclasses import asdict, dataclass
 from difflib import SequenceMatcher
@@ -27,7 +27,7 @@ class SyntaxUnit:
 
 
 class SemanticStepProcessor:
-    """识别语法单元，再按规则合并编辑事件；不执行参与者代码。"""
+    """Identify syntax units and group edits without executing code."""
 
     METHOD_VERSION = "grammar-grounded-v1"
 
@@ -48,7 +48,7 @@ class SemanticStepProcessor:
         }
 
     def analyze(self, source):
-        """解析代码，返回语法单元、词法符号或错误信息。"""
+        """Return syntax units, tokens, or a parse error."""
         if not source.strip():
             return {"valid": True, "units": [], "tokens": [], "diagnostic": None}
         try:
@@ -76,12 +76,12 @@ class SemanticStepProcessor:
 
     @staticmethod
     def _covering(units, start, end):
-        # 只找包含修改的单条语句，不能拿整个循环当作局部修改。
+        # A shared loop does not make edits to different statements local.
         return [unit for unit in units if not unit.structural
                 and unit.start <= start and end <= unit.end]
 
     def compare(self, before, after, evidence="observed_edits"):
-        """比较修改前后代码；无法归入一个单元时，保留为复合修改。"""
+        """Classify one change; keep multi-unit edits compound."""
         old, new = self.analyze(before), self.analyze(after)
         changes = [
             {"operation": tag, "before": [a, b], "after": [c, d]}
@@ -107,7 +107,7 @@ class SemanticStepProcessor:
         if old["tokens"] == new["tokens"]:
             return decision("non_semantic_edit", "E2", "Grammar tokens are unchanged; only layout differs.")
 
-        # 取完整插入或删除的最大单元，避免重复计算嵌套语句。
+        # Choose the largest complete unit to avoid counting nested units twice.
         if len(changes) == 1 and changes[0]["operation"] in {"insert", "delete"}:
             change = changes[0]
             inserting = change["operation"] == "insert"
@@ -136,7 +136,7 @@ class SemanticStepProcessor:
         return decision("compound_edit", "E7", "No single leaf grammar unit contains the entire transition.")
 
     def process_events(self, events, initial_source=""):
-        """合并同一单元的连续编辑；遇到运行等事件就结束当前组。"""
+        """Group edits to one unit; stop at runs and other non-edit events."""
         steps, pending = [], []
         source = initial_source
 

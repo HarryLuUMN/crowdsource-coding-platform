@@ -2,7 +2,7 @@
 
 ## 中文阅读指南
 
-代码只保留简短注释，完整方法和使用说明放在本文件。
+代码只保留简短英文注释，完整方法和使用说明放在本文件。
 
 三个主要方法：
 
@@ -106,6 +106,36 @@ dataset = processor.process_events(normalized_events, initial_source="")
   integration/migration is designed and verified.
 - Direct browser use needs explicit Unicode code-point to UTF-16 conversion.
 - No throughput benchmark or full six-trace evaluation has yet been performed.
+
+## Read-only pilot: Trace 6638e
+
+The existing processor was exercised against `s4-units.json` in memory, without
+regenerating any dataset. SHA-256 checks of all `annotation_data/*.json` before
+and after the run were identical. Every raw input event remained covered.
+
+Two separate inputs were evaluated; their results must not be combined:
+
+| Input | Output |
+| --- | --- |
+| 123 genuine raw events, grouped with `process_events` | 76 records: 58 non-edit events, 16 unresolved syntax groups, 1 compound edit, 1 no-net-change group |
+| 31 changing source transitions in the curated view, classified individually with `compare` | 23 unresolved syntax, 6 compound edits, 2 local modifications |
+
+The 76 records are not 76 confirmed semantic edit steps. Reading and run events
+remain separate, and most edit groups lack a supported single-unit classification.
+
+Examples from the curated comparisons (one-based existing step numbers):
+
+| Step | Observed difference | Processor result |
+| --- | --- | --- |
+| 51 | `width = 10;` to `width = 11;` | E6, local modification within `declare_variable`, range [0, 11) |
+| 53 | `width = 11;` to `width = 10;` | E6, same assignment-unit classification |
+| 55 | `knit` to `tuck` plus securing-loop bound change | E7, compound edit; not forced into one unit |
+
+These later transitions retain snapshot-difference provenance, not keyboard-event
+provenance. The pilot demonstrates substantial coverage limits: requiring both
+endpoints to parse loses most early error-repair transitions. A partial-parse or
+token-level fallback needs its own explicit definition and tests before this
+processor can replace the existing pipeline. No fallback was added in this pilot.
 
 ## Verification
 
