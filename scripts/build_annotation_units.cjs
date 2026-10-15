@@ -4,7 +4,7 @@ const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '..');
 const context = vm.createContext({});
-for (const name of ['annotation-session', 'annotation-units', 'annotation-rules']) {
+for (const name of ['annotation-session', 'annotation-unit-text', 'annotation-unit-edits', 'annotation-unit-reading', 'annotation-units', 'annotation-rules']) {
   vm.runInContext(fs.readFileSync(path.join(root, 'static', `${name}.js`), 'utf8'), context);
 }
 const base = process.argv[2] || 'http://127.0.0.1:8000';

@@ -2,7 +2,20 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const context = vm.createContext({});
-vm.runInContext(fs.readFileSync('static/annotation-units.js', 'utf8'), context);
+for (const name of ['annotation-unit-text', 'annotation-unit-edits', 'annotation-unit-reading', 'annotation-units']) {
+  vm.runInContext(fs.readFileSync(`static/${name}.js`, 'utf8'), context);
+}
+const helperOrder = ['annotation-unit-text', 'annotation-unit-edits', 'annotation-unit-reading', 'annotation-units'];
+const html = fs.readFileSync('static/annotation.html', 'utf8');
+const builder = fs.readFileSync('scripts/build_annotation_units.cjs', 'utf8');
+for (const loader of [html, builder]) {
+  let previousPosition = -1;
+  for (const name of helperOrder) {
+    const position = loader.indexOf(name);
+    assert(position > previousPosition, `${name} must load after its helpers`);
+    previousPosition = position;
+  }
+}
 function dataset(sources, events = []) {
   return {trace: {id: 'test'}, annotations: {1: ['LABEL']}, steps: sources.map((source, index) => ({
     index, source, previousSource: index ? sources[index - 1] : '', changed: !index || source !== sources[index - 1],
@@ -43,6 +56,10 @@ verify(incomplete, 'for x in [');
 const mapped = context.mapRawAnnotations(units, {2: ['ERROR']});
 const reverted = context.buildUnitDataset(dataset(['x', '']));
 verify(reverted, '');
+const cursor = { source: 'frame{}', offset: 6, frames: 1 };
+assert.equal(context.applyEditPiece(cursor, '\n}', 'insert', false, ''), false);
+assert.equal(cursor.source, 'frame{\n}');
+assert.equal(cursor.frames, 0);
 const readingRaw = dataset(['x;', 'x;', 'x;', 'x;', 'x;', 'x;'], ['editor.edit', 'guide.scroll', 'guide.open', 'run.requested', 'guide.scroll', 'guide.scroll']);
 for (const index of [1, 2, 4, 5]) readingRaw.steps[index].reading = { title: `Guide ${index}`, location: `Page ${index}`, excerpt: `Text ${index}`, precision: 'Visibility is not attention.' };
 readingRaw.annotations[2] = ['SECOND'];

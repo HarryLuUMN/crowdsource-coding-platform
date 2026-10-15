@@ -1,7 +1,16 @@
 # Semantic Step Processing
 
-本文件说明当前 JavaScript 流程。入口是 `buildUnitDataset()`，实现位于
-`static/annotation-units.js`。Python parser processor 是独立实验，不是本流程。
+本文件说明当前 JavaScript 流程。入口是 `buildUnitDataset()`，实现按职责拆分：
+
+| 文件 | 职责 |
+| --- | --- |
+| `static/annotation-units.js` | 主流程、输出数据集、标签映射 |
+| `static/annotation-unit-text.js` | 找净变化、按边界切分文本 |
+| `static/annotation-unit-edits.js` | 分组条件、类型判断、逐片段重放 |
+| `static/annotation-unit-reading.js` | 合并连续 reading |
+
+浏览器页面和构建脚本都先加载三个 helper 文件，再加载入口文件。
+Python parser processor 是独立实验，不是本流程。
 
 ## 1. Semantic step 是什么？
 
@@ -92,6 +101,17 @@ syntactic units.
 拆分出的状态保留 `synthetic` 标记，多个单元可以对应同一个 paste。
 这种顺序只是算法的分析顺序，不是参与者实际操作顺序。
 synthetic 不表示代码正确，empty_frame 也不表示 KnitScript 接受空 block。
+
+为避免一个函数同时做所有事情，编辑部分进一步分开：
+
+- `appendEditUnits()`：计划分段，串起处理步骤。
+- `applyEditPiece()`：只更新当前代码和插入位置。
+- `createEditStep()`：只组装步骤和原始证据。
+- `appendRevertedEdit()`：保留改后又恢复的编辑。
+- `appendEditRemainder()`：确保真实最终代码不丢失。
+
+`cursor` 只记录重放位置、当前代码和已经补过的闭括号数。所有合成状态都
+只存在于返回的分析结果里，不写回原始 trace。
 
 ## 6. Reading 和其他事件
 
