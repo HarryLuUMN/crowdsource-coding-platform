@@ -123,7 +123,7 @@ Idyll uses the official compiler and a browser runtime with selected built-in co
 
 Penrose accepts Substance programs against the versioned `static/penrose-domain.dsl` and `static/penrose-style.sty`. They support sets, points, containment, intersection, disjointness and membership. The official engine compiles and optimizes diagrams with a fixed variation, rendering SVG inside a script-free sandbox. Successful rendering is not proof that every visual constraint is satisfied.
 
-Both new languages are Run-only previews: formal task checks and Submit are deliberately unavailable. Existing KnitScript and Vega-Lite tasks retain their current checks and limitations. All runners share concurrency bounds, and each additional-language subprocess has a 25-second timeout and a Node heap limit. Docker installs pinned dependencies and builds the preview automatically.
+The legacy Idyll/Penrose playground URLs remain Run-only; the DSL task-set paths support checked submission and sequential progression. Existing KnitScript and Vega-Lite tasks retain their current checks and limitations. All runners share concurrency bounds, and each additional-language subprocess has a 25-second timeout and a Node heap limit. Docker installs pinned dependencies and builds the preview automatically.
 
 Runtime checks:
 
@@ -141,10 +141,24 @@ For the full browser smoke test, start the app and run `STUDIO_URL=http://127.0.
 
 Use `/knitscript`, `/vega-lite`, `/idyll`, or `/penrose` to assign a language and its three-task set. A trailing slash is also accepted. Each path opens Task 01 by default; `?task=<catalog-task-id>` selects another task within that DSL. For example, `/penrose?task=penrose-points-v1&preview=1` opens the points-and-sets task. Unknown or cross-DSL task query values fall back to that path's first task, never another language.
 
-The task selector switches between the three tasks within the assigned DSL. The language selector is locked on these paths, including local previews. Each task has an independent draft and telemetry session; returning to a task restores its draft. Navigation preserves Prolific ID parameters and waits for pending events to save. Without `preview=1`, the existing participant identity gate remains in place.
+The task selector shows the three tasks in order; later tasks stay locked until the current task passes Submit and its trace is finalized. The language selector is locked on these paths, including local previews. Each task has an independent draft and telemetry session. Reload resumes the earliest unfinished task; editing the URL cannot bypass progression. Navigation preserves Prolific ID parameters and waits for pending events to save. Without `preview=1`, the existing participant identity gate remains in place.
 
-`study_tasks.py` is the shared task catalog, exposed through `/api/task-catalog` and `/task-catalog.js`. New catalog sessions and Run requests include both `task_id` and `dsl`; the server rejects mismatches. These tasks are Run-only pending formal task checkers. Legacy root `/?task=...` links and their existing submission behavior are preserved.
+`study_tasks.py` is the shared task catalog, exposed through `/api/task-catalog` and `/task-catalog.js`. New catalog sessions and Run requests include both `task_id` and `dsl`; the server rejects mismatches. Run displays task feedback. Submit re-evaluates the current source, saves the execution and submission, and advances only after accepted source and trace finalization are durable. Legacy root `/?task=...` links and their existing submission behavior are preserved.
 
 For the new Vega-Lite tasks, the runtime supports aggregation, transforms and composed views with inline data or `/sales-data.json`. Supplied data is normalized to inline values; other data URLs and external resources are not loaded. Legacy Vega-Lite task restrictions remain unchanged.
 
 Verify path assignment, task navigation, independent drafts, participant query preservation and actual previews with `STUDIO_URL=http://127.0.0.1:8000 node tests/dsl_paths_browser.cjs` while the server is running. Chrome and Node 22+ are required; `CHROME_BIN` overrides the Chrome executable.
+
+
+## Checked submission and sequential completion
+
+Every DSL task set now enforces Task 01 → Task 02 → Task 03 on the server. Progress is reconstructed from saved passing submissions, linked successful executions and finalized source snapshots, scoped by participant, study and Prolific session. A passing submission alone does not unlock the next task until trace finalization succeeds. Failed attempts remain saved. Exact-source retries reuse the accepted submission; finalized source cannot be replaced. Only completion of all three tasks exposes the Prolific completion link.
+
+KnitScript rubrics inspect compiled stitches, securing rows, bed patterns and carrier use. Vega-Lite checks executed chart marks, values, colors and titles; it verifies output semantics, not source-data provenance. Penrose checks compiled declarations/relations, labels and optimized geometric relationships. Idyll checks bound controls and reactive outputs over all integer inputs using a bounded AST interpreter, never server-side participant JavaScript evaluation. Its accepted checking subset is documented in the runtime guide; custom functions/styles and arbitrary calls are not supported by task checking even if the preview can render them. Pilot these rubrics with participants before formal collection.
+
+Regression commands:
+
+```bash
+.venv/bin/python -m unittest discover -s tests -v
+STUDIO_URL=http://127.0.0.1:8000 node tests/sequential_browser.cjs
+```
