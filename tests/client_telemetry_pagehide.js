@@ -94,6 +94,7 @@ const hooks = `
   globalThis.__telemetryTest = {
     begin(sessionId) {
       studyStarted = true;
+      formalSessionReady = true;
       currentStudyPhase = "formal";
       telemetrySessionId = sessionId;
       telemetryStorageKey = "knitscript-telemetry-outbox:test";

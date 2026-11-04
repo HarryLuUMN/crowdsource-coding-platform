@@ -101,6 +101,7 @@ let telemetryStartedAt = performance.now();
 let onboardingActive = false;
 let formalSessionReady = false;
 let enteringFormal = false;
+let replayingGuide = false;
 const clientInstanceId = crypto.randomUUID();
 const layoutStorageKey = "knitscript-studio-layout:v1";
 
@@ -855,6 +856,7 @@ async function executePractice(mode) {
       localStorage.setItem(practiceCompletionKey, "completed");
       const sourceStorageScope = prolificRecruitment.prolific_session_id || participantId;
       setStudyPhase("formal", sourceStorageScope);
+      activeButton.querySelector("span").textContent = "Submit";
       await beginFormalTask("practice_completed");
     } else if (isSubmission) {
       showToast("Complete the practice task before continuing");
@@ -1161,13 +1163,14 @@ async function beginFormalTask(transition) {
 
 document.querySelector("#onboardingRetryButton").addEventListener("click", () => beginFormalTask("guide_retried"));
 document.querySelector("#howItWorksButton").addEventListener("click", async () => {
-  if (onboardingActive || enteringFormal) return;
+  if (onboardingActive || enteringFormal || replayingGuide) return;
   if (!formalSessionReady && !taskProgress?.completed) return beginFormalTask("guide_reopened");
   if (runButton.disabled && !taskProgress?.completed) return;
   if (!window.StudioOnboarding) {
     showToast("The guide could not load. Please reload to retry.");
     return;
   }
+  replayingGuide = true;
   await flushEvents();
   const pausedAt = performance.now();
   onboardingActive = true;
@@ -1176,6 +1179,7 @@ document.querySelector("#howItWorksButton").addEventListener("click", async () =
   finally {
     telemetryStartedAt += performance.now() - pausedAt;
     onboardingActive = false;
+    replayingGuide = false;
     setStudyControlsEnabled(!taskProgress?.completed);
   }
 });
