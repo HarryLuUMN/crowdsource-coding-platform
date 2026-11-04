@@ -743,8 +743,8 @@ function showResult(result) {
       }
       visualizationOutput.append(frame);
     }
-    renderCheck(null);
-    selectTab(result.ok ? "visualization" : "console");
+    renderCheck(check);
+    selectTab(result.ok ? (check && !check.passed ? "tests" : "visualization") : "console");
     return;
   }
 
@@ -762,7 +762,7 @@ function showResult(result) {
       visualizationOutput.append(frame);
     }
     renderCheck(check);
-    selectTab(result.ok ? "visualization" : "console");
+    selectTab(result.ok ? (check && !check.passed ? "tests" : "visualization") : "console");
     return;
   }
 

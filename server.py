@@ -693,6 +693,14 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                 if task_id in TASK_DSL:
                     assert_task_unlocked(get_trace_store(), manifest["participant_id"], task_id, manifest.get("recruitment"))
                     if manifest["status"] == "completed":
+                        source_hash = "sha256:" + hashlib.sha256(source.encode("utf-8")).hexdigest() if isinstance(source, str) else None
+                        if is_submission and source_hash == manifest.get("final_code_state_id") and manifest.get("passed_submission_id"):
+                            session_dir = get_trace_store()._session_dir(session_id)
+                            accepted = json.loads((session_dir / "submissions" / f"{manifest['passed_submission_id']}.json").read_text())
+                            execution = json.loads((session_dir / "executions" / accepted["execution_id"] / "result.json").read_text())
+                            replay = {**execution["compiler_result"], "trace_saved": True, "execution_id": accepted["execution_id"], "code_state_id": accepted["code_state_id"], "submission": accepted}
+                            self._send_json(HTTPStatus.OK, replay)
+                            return
                         raise ValueError("This task session is completed and cannot be changed")
             status, result = evaluate_source(source, task_id) if task_id != TASK_ID else evaluate_source(source)
             stored = None
