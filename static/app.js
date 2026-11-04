@@ -608,7 +608,7 @@ function setStudyPhase(phase, sourceStorageScope) {
     const dot = document.createElement("span");
     dot.className = "task-step-dot";
     dot.setAttribute("aria-hidden", "true");
-    dot.textContent = status === "passed" ? "✓" : status === "locked" ? "" : "";
+    dot.textContent = status === "passed" ? "✓" : "";
     const label = document.createElement("span");
     label.textContent = `Level ${index + 1}`;
     step.append(dot, label);

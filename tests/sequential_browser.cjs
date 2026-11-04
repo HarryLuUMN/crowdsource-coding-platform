@@ -77,6 +77,8 @@ async function main() {
     await waitFor("document.querySelector('#fileName').textContent==='diagram.substance' && !document.querySelector('#runButton').disabled", 'Onboarding must enter Task1');
     assert.deepEqual(await evaluate("Array.from(document.querySelector('#taskSelect').options).map(option=>option.disabled)"), [false, true, true]);
     assert.equal(await evaluate("document.querySelector('#submitButton').hidden"), false);
+    assert.equal(await evaluate("document.querySelector('#taskDropdown').hidden"), true);
+    assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#taskProgress li')).map(step=>step.className)"), ['task-step current','task-step locked','task-step locked']);
     await enterSource('Set A\nAutoLabel All');
     await evaluate("document.querySelector('#submitButton').click()");
     await waitFor("!document.querySelector('#submitButton').disabled && document.querySelector('#testOutput').textContent.includes('Required typed objects')", 'Failed submission did not return feedback', 25000);
@@ -88,6 +90,7 @@ async function main() {
       if (index < 2) {
         await waitFor(`document.querySelector('#taskSelect').value===${JSON.stringify(tasks[index + 1])} && !document.querySelector('#runButton').disabled`, `Accepted task${index + 1} did not advance`, 30000);
         assert.equal(await evaluate("document.querySelector('#sourceEditor').value"), '', 'Next task starts blank');
+        assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#taskProgress li')).map(step=>step.className)"), tasks.map((_, step) => `task-step ${step <= index ? 'passed' : step === index + 1 ? 'current' : 'locked'}`));
         assert.equal(await evaluate("new URLSearchParams(location.search).get('PROLIFIC_PID')"), participant);
         assert.equal(await evaluate("new URLSearchParams(location.search).get('STUDY_ID')"), 'sequence-study');
         assert.equal(await evaluate("new URLSearchParams(location.search).get('SESSION_ID')"), 'sequence-session');
@@ -101,6 +104,7 @@ async function main() {
     await send('Page.reload', {}, sessionId);
     await waitFor("document.querySelector('#completionDialog')?.open && document.querySelector('#completionTitle').textContent==='All three tasks completed'", 'Completed set must remain completed after reload');
     assert.equal(await evaluate("document.querySelector('#submitButton').disabled"), true);
+    assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#taskProgress li')).map(step=>step.className)"), tasks.map(()=> 'task-step passed'));
     console.log('Sequential browser: failed check stays, URL skipping blocked, all3 Submit/save/advance, identity and reload passed.');
   } finally {
     socket?.close();
