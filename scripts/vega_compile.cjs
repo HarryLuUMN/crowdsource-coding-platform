@@ -35,7 +35,7 @@ process.stdin.on("end", async () => {
         for (const [key, encoding] of Object.entries(definition?.encode?.update || {})) {
           if (encoding.field) channels[key] = sandbox.vega.field(encoding.field)(item.datum);
         }
-        marks.push({ type: item.mark.marktype, channels, datum: item.datum });
+        marks.push({ type: item.mark.marktype, channels, datum: item.datum, appearance: { x: item.x, y: item.y, width: item.width, height: item.height, size: item.size, fill: item.fill, stroke: item.stroke, opacity: item.opacity } });
       }
       if (["axis-title", "title-text"].includes(item.mark?.role) && item.text) titles.push({ role: item.mark.role, text: String(item.text) });
       for (const child of item.items || []) visit(child);

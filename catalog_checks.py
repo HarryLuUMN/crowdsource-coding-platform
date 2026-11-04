@@ -38,17 +38,17 @@ def check_knit(result, task_id):
     positions = {int(op[2][1:]) for row in body for op in row if len(op) >= 4 and op[2][1:].lstrip("-").isdigit()}
     width = len(positions) == 10 and max(positions, default=0) - min(positions, default=0) == 9
     full_rows = width and len(body) == 6 and all(len(row) == 10 and {int(op[2][1:]) for op in row} == positions and len({op[2] for op in row}) == 10 for row in body)
-    alternate = all(body[i][0][1] != body[i - 1][0][1] for i in range(1, len(body)))
+    alternate = all(body[i][0][1] != body[i - 1][0][1] or body[i][0][3:] != body[i - 1][0][3:] for i in range(1, len(body)))
     cast_positions = [int(op[2][1:]) for op in tucks if len(op) >= 4]
     secure = release >= 0 and len(tucks) == 10 and len(set(cast_positions)) == 10 and set(cast_positions) == positions and len(securing) == 2 and all(len(row) == 10 and {int(op[2][1:]) for op in row} == positions for row in securing)
     allowed = {"inhook", "tuck", "knit", "releasehook", "outhook", "rack", "xfer"}
-    structural = all(op[0] in allowed for op in operations) and not any(op[0] == "tuck" for op in operations[first_knit:])
+    first_body_knit = next((i for i, op in enumerate(operations) if i > release and op[0] == "knit"), len(operations))
+    structural = all(op[0] in allowed for op in operations) and not any(op[0] == "tuck" for op in operations[first_knit:]) and not any(op[0] == "xfer" for op in operations[first_body_knit:])
     rib = task_id == "knitscript-ribbed-v1"
     bed_pattern = full_rows and all(all((op[2][0] != row[j - 1][2][0]) for j, op in enumerate(row) if j) for row in body) if rib else full_rows and all(op[2].startswith("f") for row in body for op in row)
     if rib and body:
         pattern = {int(op[2][1:]): op[2][0] for op in body[0]}
         bed_pattern = bed_pattern and all(all(pattern.get(int(op[2][1:])) == op[2][0] for op in row) for row in body)
-    carriers = [tuple(op[3:] for op in row) for row in body]
     row_carriers = [set(tuple(op[3:]) for op in row) for row in body]
     color_ok = all(len(c) == 1 for c in row_carriers)
     if task_id == "knitscript-striped-v1":
@@ -102,11 +102,20 @@ def check_vega(result, task_id):
         expected = Counter((datetime.fromisoformat(row["month"]).replace(tzinfo=timezone.utc).timestamp() * 1000, row["sales"], row["category"]) for row in SALES_DATA if row["category"] in {"Books", "Games"})
     else:
         expected = Counter((int(row["month"][5:7]), row["sales"], row["category"]) for row in SALES_DATA if row["sales"] >= 120)
+    positioned = relevant and len({mark.get("appearance", {}).get("x") for mark in relevant}) > 1 and len({mark.get("appearance", {}).get("y") for mark in relevant}) > 1
+    if task_id == "vega-lite-bar-v1":
+        visible = (len({mark.get("appearance", {}).get("x") for mark in relevant}) > 1 or len({mark.get("appearance", {}).get("y") for mark in relevant}) > 1) and all(mark.get("appearance", {}).get("width", 0) > 0 and mark.get("appearance", {}).get("height", 0) > 0 for mark in relevant)
+    else:
+        colors = {mark.get("appearance", {}).get("stroke") or mark.get("appearance", {}).get("fill") for mark in relevant}
+        expected_colors = 2 if task_id == "vega-lite-line-v1" else 3
+        visible = positioned and len(colors) >= expected_colors
+        if task_id == "vega-lite-scatter-v1":
+            visible = visible and all(mark.get("appearance", {}).get("size", 0) > 0 for mark in relevant)
     chart_titles = [title for title in titles if title.get("role") == "title-text" and title.get("text", "").strip()]
     axis_titles = [title for title in titles if title.get("role") == "axis-title" and title.get("text", "").strip()]
     return _check(task_id, [
         ("compiles", "Chart compiles and executes", compiled, "Fix the Vega-Lite execution error."),
         ("mark", "Required chart type", compiled and bool(relevant) and len(relevant) == len(marks), "Use only the required bar, line or point marks."),
-        ("data", "Required data and visual encodings", compiled and Counter(observed) == expected, "Encode all and only the required category totals or filtered records, with the requested x/y values and category colors."),
+        ("data", "Required data and visual encodings", compiled and visible and Counter(observed) == expected, "Encode all and only the required category totals or filtered records, with the requested x/y values and category colors."),
         ("titles", "Chart and axis titles", compiled and bool(chart_titles) and len(axis_titles) >= 2, "Include a chart title and titles for both axes."),
     ])
