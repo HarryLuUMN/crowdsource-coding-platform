@@ -111,6 +111,7 @@ async function main() {
     assert.equal(await evaluate("document.querySelector('#runButton').disabled && document.querySelector('#sourceEditor').disabled"), true);
     assert.match(await evaluate("document.querySelector('.introjs-tooltip').textContent"), /Complete three tasks/);
     assert.equal(await evaluate("document.querySelector('#submitButton span').textContent.trim()"),'Submit','Guide must not retain practice submission loading text');
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('.introjs-helperLayer')).borderTopWidth"), '3px');
     await screenshot('step1');
     await next();
     assert.match(await evaluate("document.querySelector('.introjs-tooltip').textContent"), /Read the task requirements/);
@@ -121,15 +122,29 @@ async function main() {
     await send('Input.dispatchKeyEvent',{type:'keyUp',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39},sessionId);
     await delay(200);
     assert.match(await evaluate("document.querySelector('.introjs-tooltip').textContent"), /Read the task requirements/);
-    for (let step=2; step<7; step++) await next();
+    for (let step=2; step<7; step++) {
+      await next();
+      assert.equal(await evaluate("getComputedStyle(document.querySelector('.introjs-helperLayer')).borderTopWidth"), '3px', `Step ${step+1} has a visible outline`);
+      if (step === 4) {
+        assert.equal(await evaluate("getComputedStyle(document.querySelector('#runButton')).opacity"), '1');
+        assert.equal(await evaluate("document.querySelector('#runButton').classList.contains('studio-onboarding-action')"), true);
+        assert.equal(await evaluate("document.querySelector('#runButton').disabled"), true);
+        await screenshot('step5');
+      }
+    }
     assert.match(await evaluate("document.querySelector('.introjs-tooltip').textContent"), /Submit when you are ready/);
     assert.equal(await evaluate("document.querySelector('.introjs-nextbutton').textContent.trim()"), 'Start Level 1');
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('#submitButton')).opacity"), '1');
+    assert.equal(await evaluate("document.querySelector('#submitButton').classList.contains('studio-onboarding-action')"), true);
     await screenshot('step7');
     assert.equal(mutations().length, 0, "The entire guide is excluded from formal trace recording");
     assert.equal(await evaluate("document.querySelector('#sourceEditor').value"), '');
     await next();
     await waitFor("formalSessionReady && !onboardingActive && !document.querySelector('#runButton').disabled && !document.querySelector('.introjs-tooltip')", "Completion must start formal task");
     await waitFor("!!telemetrySessionId", "Formal trace starts only after tour completion");
+    assert.equal(await evaluate("document.body.classList.contains('studio-onboarding-action-step')"), false);
+    assert.equal(await evaluate("document.body.classList.contains('studio-onboarding-active')"), false);
+    assert.equal(await evaluate("document.querySelectorAll('.studio-onboarding-action').length"), 0);
     assert.equal(requests.filter(request => new URL(request.url).pathname==='/api/sessions').length,1);
     await send('Page.reload',{},sessionId);
     await waitFor("document.readyState==='complete' && formalSessionReady && !document.querySelector('#runButton').disabled", "Formal progress should resume");

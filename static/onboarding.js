@@ -36,6 +36,7 @@
         if (settled) return;
         settled = true;
         highlightAction(null);
+        document.body.classList.remove("studio-onboarding-active");
         activeTour = null;
         pendingTour = null;
         if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus({ preventScroll: true });
@@ -62,6 +63,7 @@
           overlayOpacity: 0.65,
           helperElementPadding: 6
         });
+        document.body.classList.add("studio-onboarding-active");
         activeTour.onAfterChange(highlightAction);
         activeTour.onComplete((_step, reason) => { completed = reason === "done" || reason === "end"; });
         activeTour.onExit(() => finish(completed));

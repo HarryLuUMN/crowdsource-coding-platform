@@ -71,7 +71,7 @@
 .studio-onboarding-tooltip .introjs-arrow.right { border-left-color: var(--panel-raised); }
 .studio-onboarding-highlight { border-radius: 7px; }
 
-.studio-onboarding-action-step .introjs-helperLayer {
+.studio-onboarding-active .introjs-helperLayer {
   border: 3px solid var(--warning);
   border-radius: 12px;
   box-shadow: 0 0 0 6px rgba(246, 199, 109, 0.22), 0 0 28px rgba(246, 199, 109, 0.35);
@@ -85,3 +85,5 @@
   color: #171910;
   box-shadow: 0 0 18px rgba(246, 199, 109, 0.3);
 }
+
+.studio-onboarding-active .tab.introjs-showElement { color: var(--ink); }
