@@ -1,10 +1,15 @@
 const queryParameters = new URLSearchParams(window.location.search);
 const languageTasks = { knitscript: "stockinette-swatch-v1", "vega-lite": "vega-lite-sales-v1", idyll: "idyll-playground-v1", penrose: "penrose-playground-v1" };
 const requestedTask = queryParameters.get("task");
-const TASK_ID = Object.values(languageTasks).includes(requestedTask) ? requestedTask : "stockinette-swatch-v1";
-const language = Object.keys(languageTasks).find(key => languageTasks[key] === TASK_ID);
+const taskCatalog = window.DSL_TASK_CATALOG || {};
+const pathLanguage = window.location.pathname.replace(/^\/|\/$/g, "");
+const pathTaskSet = taskCatalog[pathLanguage];
+const selectedTask = pathTaskSet?.tasks.find(task => task.id === requestedTask) || pathTaskSet?.tasks[0];
+const TASK_ID = selectedTask?.id || (Object.values(languageTasks).includes(requestedTask) ? requestedTask : "stockinette-swatch-v1");
+const language = pathTaskSet ? pathLanguage : Object.keys(languageTasks).find(key => languageTasks[key] === TASK_ID);
+const runOnlyTask = Boolean(selectedTask) || language === "idyll" || language === "penrose";
 const isRuntimeTask = language === "idyll" || language === "penrose";
-const isVegaTask = TASK_ID === "vega-lite-sales-v1";
+const isVegaTask = language === "vega-lite";
 const languageSelect = document.querySelector("#languageSelect");
 const taskSelect = document.querySelector("#taskSelect");
 const localTaskSelection = ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname)
@@ -191,6 +196,7 @@ function persistTelemetryOutbox() {
     localStorage.setItem(telemetryStorageKey, JSON.stringify({
       version: 1,
       task_id: TASK_ID,
+      dsl: language,
       session_id: telemetrySessionId,
       seq: telemetrySeq,
       initial_source: telemetryInitialSource,
@@ -376,6 +382,7 @@ async function createTelemetrySession(initialSource, eventType, eventPayload = {
       body: JSON.stringify({
         participant_id: participantId,
         task_id: TASK_ID,
+      dsl: language,
         initial_source: initialSource,
         recruitment: hasProlificParticipant ? prolificRecruitment : { source: "direct" },
         client: {
@@ -579,7 +586,7 @@ function setStudyPhase(phase, sourceStorageScope) {
   const practice = phase === "practice";
   document.querySelector(".task-selectors").hidden = practice;
   languageSelect.value = language;
-  taskSelect.replaceChildren(new Option("Task 01", TASK_ID));
+  taskSelect.replaceChildren(...(pathTaskSet ? pathTaskSet.tasks.map(task => new Option(task.label, task.id, false, task.id === TASK_ID)) : [new Option("Task 01", TASK_ID)]));
   sourceStorageKey = practice
     ? `coding-platform-practice-source:v1:${sourceStorageScope}`
     : `knitscript-studio-source:${TASK_ID}:from-scratch-v1:${sourceStorageScope}`;
@@ -615,7 +622,8 @@ function setStudyPhase(phase, sourceStorageScope) {
     documentationFrame.src = `/dsl-guide.html#${language}`;
     tutorialFrame.src = `/dsl-guide.html#${language}`;
   }
-  submitButton.hidden = !practice && isRuntimeTask;
+  if (!practice && selectedTask) taskDescription.textContent = selectedTask.description;
+  submitButton.hidden = !practice && runOnlyTask;
   knitoutTab.textContent = !practice && isRuntimeTask ? "Compiled output" : !practice && isVegaTask ? "Specification" : "Knitout";
   emptyStateTitle.textContent = practice ? "Run your practice program" : "Run your code against the task";
   emptyStateMessage.textContent = practice
@@ -860,7 +868,7 @@ async function executeSource(mode, trigger = "button") {
   if (currentStudyPhase === "practice") return executePractice(mode);
   clearToast();
   const isSubmission = mode === "submit";
-  if (isSubmission && isRuntimeTask) return;
+  if (isSubmission && runOnlyTask) return;
   const activeButton = isSubmission ? submitButton : runButton;
   runButton.disabled = true;
   submitButton.disabled = true;
@@ -873,7 +881,7 @@ async function executeSource(mode, trigger = "button") {
     const response = await fetch(isSubmission ? "/api/submit" : "/api/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source: editor.value, session_id: telemetrySessionId, task_id: TASK_ID }),
+      body: JSON.stringify({ source: editor.value, session_id: telemetrySessionId, task_id: TASK_ID, dsl: language }),
     });
     const result = await response.json();
     showResult(result);
@@ -1000,8 +1008,8 @@ fetch("/api/health")
   });
 
 function setStudyControlsEnabled(enabled) {
-  languageSelect.disabled = !enabled || !localTaskSelection;
-  taskSelect.disabled = !enabled || !localTaskSelection;
+  languageSelect.disabled = !enabled || Boolean(pathTaskSet) || !localTaskSelection;
+  taskSelect.disabled = !enabled || (!pathTaskSet && !localTaskSelection);
   editor.disabled = !enabled;
   runButton.disabled = !enabled;
   submitButton.disabled = !enabled;
@@ -1028,7 +1036,7 @@ function startStudy(identityMethod) {
 }
 
 languageSelect.addEventListener("change", async () => {
-  if (!localTaskSelection) return;
+  if (!localTaskSelection || pathTaskSet) return;
   if (runButton.disabled || submitButton.disabled) {
     languageSelect.value = language;
     return;
@@ -1041,8 +1049,32 @@ languageSelect.addEventListener("change", async () => {
     await flushEvents();
   } finally {
     const destination = new URL(window.location.href);
-    destination.searchParams.set("task", languageTasks[languageSelect.value]);
+    destination.pathname = `/${languageSelect.value}`;
+    destination.searchParams.delete("task");
     window.location.assign(destination.href);
+  }
+});
+
+taskSelect.addEventListener("change", async () => {
+  if (!pathTaskSet || currentStudyPhase !== "formal") return;
+  const nextTask = taskSelect.value;
+  if (!pathTaskSet.tasks.some(task => task.id === nextTask) || runButton.disabled) {
+    taskSelect.value = TASK_ID;
+    return;
+  }
+  setStudyControlsEnabled(false);
+  clearTimeout(saveTimer);
+  localStorage.setItem(sourceStorageKey, editor.value);
+  await sessionReady;
+  try {
+    await flushEvents();
+    const destination = new URL(window.location.href);
+    destination.searchParams.set("task", nextTask);
+    window.location.assign(destination.href);
+  } catch (error) {
+    setStudyControlsEnabled(true);
+    taskSelect.value = TASK_ID;
+    showToast("Could not save the current task. Please retry before switching.");
   }
 });
 
