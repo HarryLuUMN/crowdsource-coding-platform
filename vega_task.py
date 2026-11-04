@@ -109,6 +109,6 @@ def evaluate_vega_runtime(source):
         output = json.loads(completed.stdout)
         if completed.returncode or not output.get("ok"):
             raise ValueError(output.get("error", "Vega-Lite compilation failed."))
-        return {"ok": True, "spec": spec, "error": None, "stdout": "Vega-Lite compiled and evaluated."}
+        return {"ok": True, "spec": spec, "error": None, "evidence": output.get("evidence", {}), "stdout": "Vega-Lite compiled and evaluated."}
     except (ValueError, TypeError, AttributeError, OSError, subprocess.TimeoutExpired) as error:
         return {"ok": False, "spec": None, "error": {"type": type(error).__name__, "message": str(error)}}
