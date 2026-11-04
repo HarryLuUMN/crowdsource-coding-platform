@@ -139,6 +139,15 @@ async function main() {
     assert.ok(elapsedAfter-elapsedBefore<1500,`Replay should pause formal elapsed time: ${elapsedAfter-elapsedBefore}`);
     assert.equal(mutations().length,countBeforeReplay,"Replay creates no formal events or executions");
     assert.equal(await evaluate("document.querySelector('#sourceEditor').value"),draft);
+    await navigate(`${url}&onboarding=1`);
+    await waitFor("onboardingActive && !!document.querySelector('.introjs-tooltip')", "URL flag must force an already-completed guide");
+    assert.equal(await evaluate("formalSessionReady"), false, "Forced guide still gates formal recording");
+    assert.equal(await evaluate("document.querySelector('#sourceEditor').value"), draft, "Force replay preserves the current draft");
+    await completeTour();
+    await waitFor("formalSessionReady && !onboardingActive", "Forced guide must finish normally");
+    await navigate(url);
+    await waitFor("formalSessionReady && !document.querySelector('#runButton').disabled", "Removing force flag must restore normal entry");
+    assert.equal(await evaluate("!!document.querySelector('.introjs-tooltip')"), false);
     const second=`missing-smoke-${Date.now()}`;
     await navigate(`${base}/knitscript?preview=1&PROLIFIC_PID=${second}&STUDY_ID=intro-study&SESSION_ID=intro-missing-session`);
     await evaluate("window.savedOnboarding=window.StudioOnboarding; window.StudioOnboarding=undefined;");
