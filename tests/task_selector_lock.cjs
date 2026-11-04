@@ -7,7 +7,9 @@ const controls = source.match(/function setStudyControlsEnabled\(enabled\) \{[\s
 
 for (const hostname of ["localhost", "127.0.0.1", "[::1]", "example.com", "crowdsource-code-platform-production.up.railway.app"]) {
   for (const enabled of [true, false]) {
+   for (const hasPath of [true, false]) {
     const context = {
+      pathTaskSet: hasPath ? { tasks: [] } : undefined,
       window: { location: { hostname, protocol: "http:", search: "?preview=1" } },
     };
     for (const key of ["languageSelect", "taskSelect", "editor", "runButton", "submitButton", "resetButton"]) {
@@ -15,10 +17,11 @@ for (const hostname of ["localhost", "127.0.0.1", "[::1]", "example.com", "crowd
     }
     vm.runInNewContext(`${policy}\n${controls}\nsetStudyControlsEnabled(${enabled});`, context);
     const local = ["localhost", "127.0.0.1", "[::1]"].includes(hostname);
-    assert.equal(context.languageSelect.disabled, !enabled || !local);
-    assert.equal(context.taskSelect.disabled, !enabled || !local);
+    assert.equal(context.languageSelect.disabled, !enabled || hasPath || !local);
+    assert.equal(context.taskSelect.disabled, !enabled || (!hasPath && !local));
     assert.equal(context.runButton.disabled, !enabled);
     assert.equal(context.editor.disabled, !enabled);
+   }
   }
 }
 console.log("Task selector environment lock checks passed");

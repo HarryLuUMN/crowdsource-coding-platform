@@ -8,7 +8,9 @@ window.addEventListener("message", async event => {
     document.querySelector("#chart").replaceChildren();
     document.querySelector("#error").textContent = "";
     const spec = structuredClone(event.data.spec);
-    spec.data = { values: await (await fetch("/sales-data.json")).json() };
+    if (spec.data?.url === "/sales-data.json") {
+      spec.data = { values: await (await fetch("/sales-data.json")).json() };
+    }
     if (current !== generation) return;
     const compiled = vegaLite.compile(spec).spec;
     view = new vega.View(vega.parse(compiled), {

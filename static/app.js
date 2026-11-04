@@ -382,7 +382,7 @@ async function createTelemetrySession(initialSource, eventType, eventPayload = {
       body: JSON.stringify({
         participant_id: participantId,
         task_id: TASK_ID,
-      dsl: language,
+        dsl: language,
         initial_source: initialSource,
         recruitment: hasProlificParticipant ? prolificRecruitment : { source: "direct" },
         client: {
@@ -1065,9 +1065,9 @@ taskSelect.addEventListener("change", async () => {
   setStudyControlsEnabled(false);
   clearTimeout(saveTimer);
   localStorage.setItem(sourceStorageKey, editor.value);
-  await sessionReady;
   try {
-    await flushEvents();
+    await sessionReady;
+    if (!await flushEvents()) throw new Error("Task events have not been saved");
     const destination = new URL(window.location.href);
     destination.searchParams.set("task", nextTask);
     window.location.assign(destination.href);
