@@ -13,15 +13,17 @@ globalThis.document = dom.window.document;
 globalThis.DOMParser = dom.window.DOMParser;
 globalThis.XMLSerializer = dom.window.XMLSerializer;
 
-const { compile, step, isOptimized, finalStage, nextStage, toSVG, showError } = await import("@penrose/core");
+const { compileDomain, compileSubstance, compile, step, isOptimized, finalStage, nextStage, toSVG, showError } = await import("@penrose/core");
 
 async function run(source) {
   if (typeof source !== "string" || !source.trim()) {
     return { ok: false, error: { type: "SourceError", message: "Write a Penrose Substance program before running." } };
   }
+  const domain = fs.readFileSync(fileURLToPath(new URL("static/penrose-domain.dsl", root)), "utf8");
+  const substance = compileSubstance(source, compileDomain(domain).value);
   const compiled = await compile({
     substance: source,
-    domain: fs.readFileSync(fileURLToPath(new URL("static/penrose-domain.dsl", root)), "utf8"),
+    domain,
     style: fs.readFileSync(fileURLToPath(new URL("static/penrose-style.sty", root)), "utf8"),
     variation: "autodsl-eval-v1",
   });
@@ -43,7 +45,21 @@ async function run(source) {
     state = result.value;
   }
   const svg = await toSVG(state, async () => undefined, "autodsl");
-  return { ok: true, svg: svg.outerHTML, stdout: "Penrose Substance compiled and diagram layout completed.", error: null };
+  const entries = value => value instanceof Map ? [...value.entries()] : Object.entries(value || {});
+  const number = value => typeof value === "number" ? value : value?.val;
+  const evidence = {
+    objects: Object.fromEntries(entries(substance.value.objs).map(([name, type]) => [name, type.name.value])),
+    labels: Object.fromEntries(entries(substance.value.labels).map(([name, label]) => [name, label.value])),
+    predicates: substance.value.ast.statements.filter(statement => statement.tag === "ApplyPredicate")
+      .map(statement => ({ name: statement.name.value, args: statement.args.map(arg => arg.value) })),
+    shapes: Object.fromEntries(state.shapes.filter(shape => shape.shapeType === "Circle")
+      .map(shape => [shape.path.access.parent.substanceObject.name, {
+        type: shape.shapeType,
+        center: shape.center.contents.map(number),
+        radius: number(shape.r.contents),
+      }])),
+  };
+  return { ok: true, evidence, svg: svg.outerHTML, stdout: "Penrose Substance compiled and diagram layout completed.", error: null };
 }
 
 try {
