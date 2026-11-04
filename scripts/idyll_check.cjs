@@ -1,8 +1,10 @@
 const fs = require('node:fs');
 const acorn = require('acorn');
+const formatNumber = require('d3-format').format;
 
 function check(ast, task) {
   const definitions = new Map();
+  const mutable = new Set();
   const controls = [];
   const declarations = node => {
     if (!node || typeof node !== 'object') return;
@@ -10,6 +12,7 @@ function check(ast, task) {
       const name = node.properties?.name?.value;
       if (typeof name !== 'string' || definitions.has(name)) throw Error('Use unique variable names.');
       definitions.set(name, node.properties.value);
+      if (node.type === "var") mutable.add(name);
     }
     if (['range', 'textinput'].includes(String(node.name).toLowerCase().replace(/-/g, ''))) controls.push(node);
     (node.children || []).forEach(declarations);
@@ -76,17 +79,24 @@ function check(ast, task) {
   };
   const render = (overrides) => {
     const numbers = [];
+    const visibleControls = new Set();
     let text = '';
     const visit = node => {
       if (node.type === 'textnode') { text += `${node.value} `; return; }
       if (node.type !== 'component') return;
       const name = String(node.name).toLowerCase().replace(/-/g, '');
       if (name === 'conditional' && !evaluate(node.properties?.if, overrides)) return;
+      if (node.properties?.style) throw Error('The task checker cannot verify custom styles; use unstyled built-in components.');
+      if (name === 'range' || name === 'textinput') visibleControls.add(node.id);
       if (name === 'display' || name === 'dynamic') {
         const accessed = new Set();
-        const value = evaluate(node.properties?.value, overrides, new Set(), accessed);
-        if (Number.isFinite(Number(value)) && value !== '') numbers.push({value:Number(value), reactive:Object.keys(overrides).some(name => accessed.has(name))});
-        text += `${value} `;
+        const property = name === 'dynamic' && node.properties?.display ? node.properties.display : node.properties?.value || node.properties?.var;
+        const value = evaluate(property, overrides, new Set(), accessed);
+        const format = evaluate(node.properties?.format, overrides) || '0.2f';
+        const rendered = typeof value === 'number' ? formatNumber(format)(value) : String(value);
+        const numeric = Number(rendered.replace(/[$,]/g, ''));
+        if (Number.isFinite(numeric) && rendered !== '') numbers.push({value:numeric, reactive:Object.keys(overrides).some(name => accessed.has(name))});
+        text += `${rendered} `;
       }
       if (name === 'switch') {
         const value = evaluate(node.properties?.value, overrides);
@@ -98,12 +108,16 @@ function check(ast, task) {
       (node.children || []).forEach(visit);
     };
     visit(ast);
-    return {numbers,text};
+    return {numbers,text,visibleControls};
   };
+  for (const name of definitions.keys()) evaluate({type:'variable',value:name}, {});
   const maximum = task === 'idyll-calculator-v1' ? 10 : 100;
   const candidates = controls.filter(control => {
     const bound = control.properties?.value;
-    if (bound?.type !== 'variable' || !definitions.has(bound.value)) return false;
+    if (bound?.type !== 'variable' || !mutable.has(bound.value)) return false;
+    if (evaluate(control.properties?.disabled, {})) return false;
+    const step = evaluate(control.properties?.step, {});
+    if (step !== undefined && Number(step) !== 1) return false;
     if (task !== 'idyll-converter-v1' && String(control.name).toLowerCase() !== 'range') return false;
     return Number(evaluate(control.properties?.min, {})) === 0 && Number(evaluate(control.properties?.max, {})) === maximum;
   });
@@ -116,6 +130,7 @@ function check(ast, task) {
       let correct = true;
       for (let value = 0; value <= maximum; value++) {
         const shown = render({[variable]:value});
+        correct &&= shown.visibleControls.has(control.id);
         const has = expected => shown.numbers.some(number => number.reactive && Math.abs(number.value - expected) < 0.011);
         if (task === 'idyll-calculator-v1') correct &&= has(value) && has(value * 5);
         else if (task === 'idyll-converter-v1') correct &&= has(value * 9 / 5 + 32);

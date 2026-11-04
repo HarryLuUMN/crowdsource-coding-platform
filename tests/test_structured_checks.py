@@ -43,6 +43,11 @@ class StructuredChecksTests(unittest.TestCase):
         self.assertFalse(check['passed'])
         self.assertIn('cannot safely evaluate', check['tests'][-1]['message'])
 
+    def test_idyll_rendered_format_and_disabled_control_are_checked(self):
+        source = SOLUTIONS['idyll-converter-v1']
+        self.assertFalse(self.evaluate('idyll-converter-v1', source.replace('value:fahrenheit /]', 'value:fahrenheit format:".0f" /]'))[0]['passed'])
+        self.assertFalse(self.evaluate('idyll-converter-v1', source.replace('min:0 max:100', 'min:0 max:100 disabled:true'))[0]['passed'])
+
     def test_penrose_requires_real_relations_and_labels(self):
         for task in ['penrose-nested-v1', 'penrose-overlap-v1', 'penrose-points-v1']:
             source = SOLUTIONS[task]
