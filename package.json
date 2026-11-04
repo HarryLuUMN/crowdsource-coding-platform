@@ -2,16 +2,17 @@
   "name": "autodsl-study-runtimes",
   "private": true,
   "scripts": {
-    "build": "esbuild static/idyll-preview.js --bundle --platform=browser --outfile=static/vendor/idyll-preview.bundle.js --define:process.env.NODE_ENV=\"\\\"production\\\"\" --minify --legal-comments=linked --alias:util=./static/idyll-browser-util.js --alias:csv-parse/lib/es5/sync=./static/idyll-browser-csv.js"
+    "build": "esbuild static/idyll-preview.js --bundle --platform=browser --outfile=static/vendor/idyll-preview.bundle.js --define:process.env.NODE_ENV=\"\\\"production\\\"\" --minify --legal-comments=linked --alias:util=./static/idyll-browser-util.js --alias:csv-parse/lib/es5/sync=./static/idyll-browser-csv.js && node scripts/copy_onboarding.cjs"
   },
   "dependencies": {
     "@penrose/core": "3.3.1",
     "idyll-compiler": "4.0.26",
-    "idyll-document": "3.4.25",
     "idyll-components": "5.1.2",
+    "idyll-document": "3.4.25",
+    "intro.js": "8.6.0",
+    "jsdom": "26.1.0",
     "react": "16.14.0",
-    "react-dom": "16.14.0",
-    "jsdom": "26.1.0"
+    "react-dom": "16.14.0"
   },
   "devDependencies": {
     "esbuild": "0.28.2"

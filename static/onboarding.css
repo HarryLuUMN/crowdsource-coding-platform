@@ -1,0 +1,69 @@
+.studio-onboarding-tooltip {
+  min-width: min(280px, calc(100vw - 32px));
+  max-width: min(370px, calc(100vw - 32px));
+  background: var(--panel-raised);
+  color: var(--ink);
+  border: 1px solid #4b4e40;
+  border-radius: 12px;
+  box-shadow: 0 14px 48px rgba(0, 0, 0, 0.5);
+  font-family: inherit;
+}
+.studio-onboarding-tooltip .introjs-tooltip-title {
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.4;
+  padding-right: 32px;
+}
+.studio-onboarding-tooltip .introjs-tooltiptext {
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.6;
+  padding-top: 12px;
+}
+.studio-onboarding-tooltip .introjs-skipbutton {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  width: auto;
+  padding: 12px;
+}
+.studio-onboarding-tooltip .introjs-tooltipbuttons {
+  border-top-color: var(--line);
+  padding: 14px 20px;
+}
+.studio-onboarding-tooltip .introjs-button {
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid #53564a;
+  border-radius: 7px;
+  text-shadow: none;
+  box-shadow: none;
+  font: 600 13px/1.4 inherit;
+  padding: 8px 12px;
+}
+.studio-onboarding-tooltip .introjs-nextbutton {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #191c12;
+}
+.studio-onboarding-tooltip .introjs-disabled {
+  color: var(--faint);
+  background: var(--panel);
+  border-color: var(--line);
+}
+.studio-onboarding-tooltip .introjs-button:focus-visible,
+.studio-onboarding-tooltip .introjs-skipbutton:focus-visible {
+  outline: 2px solid var(--warning);
+  outline-offset: 3px;
+}
+.studio-onboarding-tooltip .introjs-progress {
+  background: var(--line);
+  box-shadow: none;
+  margin: 0 20px 14px;
+}
+.studio-onboarding-tooltip .introjs-progressbar { background: var(--accent); }
+.studio-onboarding-tooltip .introjs-arrow.top { border-bottom-color: var(--panel-raised); }
+.studio-onboarding-tooltip .introjs-arrow.bottom { border-top-color: var(--panel-raised); }
+.studio-onboarding-tooltip .introjs-arrow.left { border-right-color: var(--panel-raised); }
+.studio-onboarding-tooltip .introjs-arrow.right { border-left-color: var(--panel-raised); }
+.studio-onboarding-highlight { border-radius: 7px; }
