@@ -136,3 +136,15 @@ node tests/penrose_runtime.cjs
 Dependency audit note: the pinned stable Idyll packages retain upstream advisories in legacy transitive packages (including charting, syntax-highlighting, CSV and tooltip dependencies). The preview bundles only selected components; CSV imports and networking are disabled. This does not constitute a clean dependency audit or a production sandbox review. Container changes have not been build-tested when Docker is unavailable.
 
 For the full browser smoke test, start the app and run `STUDIO_URL=http://127.0.0.1:8000 node tests/idyll_browser.cjs` with Node 22+ and Chrome installed (`CHROME_BIN` overrides the executable path). It checks real reactive updates, preview isolation, diagnostics, onboarding, and Idyll/Penrose Run from the editor.
+
+## DSL paths and task sets
+
+Use `/knitscript`, `/vega-lite`, `/idyll`, or `/penrose` to assign a language and its three-task set. A trailing slash is also accepted. Each path opens Task 01 by default; `?task=<catalog-task-id>` selects another task within that DSL. For example, `/penrose?task=penrose-points-v1&preview=1` opens the points-and-sets task. Unknown or cross-DSL task query values fall back to that path's first task, never another language.
+
+The task selector switches between the three tasks within the assigned DSL. The language selector is locked on these paths, including local previews. Each task has an independent draft and telemetry session; returning to a task restores its draft. Navigation preserves Prolific ID parameters and waits for pending events to save. Without `preview=1`, the existing participant identity gate remains in place.
+
+`study_tasks.py` is the shared task catalog, exposed through `/api/task-catalog` and `/task-catalog.js`. New catalog sessions and Run requests include both `task_id` and `dsl`; the server rejects mismatches. These tasks are Run-only pending formal task checkers. Legacy root `/?task=...` links and their existing submission behavior are preserved.
+
+For the new Vega-Lite tasks, the runtime supports aggregation, transforms and composed views with inline data or `/sales-data.json`. Supplied data is normalized to inline values; other data URLs and external resources are not loaded. Legacy Vega-Lite task restrictions remain unchanged.
+
+Verify path assignment, task navigation, independent drafts, participant query preservation and actual previews with `STUDIO_URL=http://127.0.0.1:8000 node tests/dsl_paths_browser.cjs` while the server is running. Chrome and Node 22+ are required; `CHROME_BIN` overrides the Chrome executable.
