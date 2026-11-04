@@ -134,3 +134,5 @@ node tests/penrose_runtime.cjs
 ```
 
 Dependency audit note: the pinned stable Idyll packages retain upstream advisories in legacy transitive packages (including charting, syntax-highlighting, CSV and tooltip dependencies). The preview bundles only selected components; CSV imports and networking are disabled. This does not constitute a clean dependency audit or a production sandbox review. Container changes have not been build-tested when Docker is unavailable.
+
+For the full browser smoke test, start the app and run `STUDIO_URL=http://127.0.0.1:8000 node tests/idyll_browser.cjs` with Node 22+ and Chrome installed (`CHROME_BIN` overrides the executable path). It checks real reactive updates, preview isolation, diagnostics, onboarding, and Idyll/Penrose Run from the editor.
