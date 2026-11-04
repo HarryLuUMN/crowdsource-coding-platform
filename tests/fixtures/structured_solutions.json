@@ -1,0 +1,8 @@
+{
+  "idyll-calculator-v1": "[var name:\"quantity\" value:2 /]\n# Cost calculator\n[Range value:quantity min:0 max:10 /]\nQuantity: [Display value:quantity /]\nTotal: [Display value:`quantity * 5` /]",
+  "idyll-converter-v1": "[var name:\"celsius\" value:20 /]\n[derived name:\"fahrenheit\" value:`celsius * 9 / 5 + 32` /]\n# Temperature converter\n[Range value:celsius min:0 max:100 /]\nFahrenheit: [Display value:fahrenheit /]",
+  "idyll-conditional-v1": "[var name:\"level\" value:50 /]\n[Range value:level min:0 max:100 /]\nValue: [Display value:level /]\n[Conditional if:`level < 30`]Low[/Conditional]\n[Conditional if:`level >= 30 && level < 70`]Medium[/Conditional]\n[Conditional if:`level >= 70`]High[/Conditional]",
+  "penrose-nested-v1": "Set A, B, C\nSubset(A, B)\nSubset(B, C)\nAutoLabel All",
+  "penrose-overlap-v1": "Set A, B, C\nIntersecting(A, B)\nDisjoint(A, C)\nDisjoint(B, C)\nAutoLabel All",
+  "penrose-points-v1": "Set A, B\nPoint p, q\nDisjoint(A, B)\nIn(p, A)\nNotIn(p, B)\nIn(q, B)\nNotIn(q, A)\nAutoLabel All"
+}

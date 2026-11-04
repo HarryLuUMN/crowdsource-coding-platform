@@ -61,13 +61,13 @@ function check(ast, task) {
     };
     return visit(tree);
   };
-  const evaluate = (property, overrides, trail = new Set()) => {
+  const evaluate = (property, overrides, trail = new Set(), accessed = new Set()) => {
     if (!property) return undefined;
     const resolve = name => {
-      if (Object.hasOwn(overrides, name)) return overrides[name];
+      if (Object.hasOwn(overrides, name)) { accessed.add(name); return overrides[name]; }
       if (!definitions.has(name)) throw Error(`Unknown variable: ${name}`);
       if (trail.has(name)) throw Error('Circular variable definitions.');
-      return evaluate(definitions.get(name), overrides, new Set([...trail, name]));
+      return evaluate(definitions.get(name), overrides, new Set([...trail, name]), accessed);
     };
     if (property.type === 'value') return property.value;
     if (property.type === 'variable') return resolve(property.value);
@@ -83,8 +83,9 @@ function check(ast, task) {
       const name = String(node.name).toLowerCase().replace(/-/g, '');
       if (name === 'conditional' && !evaluate(node.properties?.if, overrides)) return;
       if (name === 'display' || name === 'dynamic') {
-        const value = evaluate(node.properties?.value, overrides);
-        if (Number.isFinite(Number(value)) && value !== '') numbers.push(Number(value));
+        const accessed = new Set();
+        const value = evaluate(node.properties?.value, overrides, new Set(), accessed);
+        if (Number.isFinite(Number(value)) && value !== '') numbers.push({value:Number(value), reactive:Object.keys(overrides).some(name => accessed.has(name))});
         text += `${value} `;
       }
       if (name === 'switch') {
@@ -115,7 +116,7 @@ function check(ast, task) {
       let correct = true;
       for (let value = 0; value <= maximum; value++) {
         const shown = render({[variable]:value});
-        const has = expected => shown.numbers.some(number => Math.abs(number - expected) < 0.011);
+        const has = expected => shown.numbers.some(number => number.reactive && Math.abs(number.value - expected) < 0.011);
         if (task === 'idyll-calculator-v1') correct &&= has(value) && has(value * 5);
         else if (task === 'idyll-converter-v1') correct &&= has(value * 9 / 5 + 32);
         else {
