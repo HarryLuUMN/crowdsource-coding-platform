@@ -6,7 +6,7 @@ from urllib.request import urlopen
 
 import server
 from dsl_runtime import evaluate_runtime
-from tests.test_server_api import ServerApiTests
+from tests import test_server_api
 
 
 class RuntimeFailureTests(unittest.TestCase):
@@ -28,10 +28,10 @@ class RuntimeFailureTests(unittest.TestCase):
 
 
 class RuntimeApiTests(unittest.TestCase):
-    ADMIN_TOKEN = ServerApiTests.ADMIN_TOKEN
-    setUp = ServerApiTests.setUp
-    tearDown = ServerApiTests.tearDown
-    post_json = ServerApiTests.post_json
+    ADMIN_TOKEN = test_server_api.ServerApiTests.ADMIN_TOKEN
+    setUp = test_server_api.ServerApiTests.setUp
+    tearDown = test_server_api.ServerApiTests.tearDown
+    post_json = test_server_api.ServerApiTests.post_json
 
     def test_languages_run_but_cannot_pass_study_submission(self):
         for task, source, artifact in [
@@ -50,6 +50,12 @@ class RuntimeApiTests(unittest.TestCase):
                 self.assertTrue(result['trace_saved'])
                 self.assertFalse(result['check']['passed'])
                 self.assertEqual(self.post_json('/api/submit', request)[0], 400)
+                request['source'] = '[Range value:' if task.startswith('idyll') else 'Set A\nSubset(A, missing)'
+                status, failed = self.post_json('/api/run', request)
+                self.assertEqual(status, 200)
+                self.assertFalse(failed['ok'])
+                self.assertTrue(failed['error']['message'])
+                self.assertTrue(failed['trace_saved'])
                 request['task_id'] = 'vega-lite-sales-v1'
                 self.assertEqual(self.post_json('/api/run', request)[0], 400)
 
