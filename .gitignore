@@ -6,3 +6,5 @@ data/
 annotation_data/.backups/
 node_modules/
 static/vendor/idyll-preview.bundle.js*
+
+static/vendor/introjs.*

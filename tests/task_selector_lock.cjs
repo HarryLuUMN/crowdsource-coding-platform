@@ -9,6 +9,7 @@ for (const hostname of ["localhost", "127.0.0.1", "[::1]", "example.com", "crowd
   for (const enabled of [true, false]) {
    for (const hasPath of [true, false]) {
     const context = {
+      onboardingActive: false, currentStudyPhase: "formal", formalSessionReady: true,
       pathTaskSet: hasPath ? { tasks: [] } : undefined,
       window: { location: { hostname, protocol: "http:", search: "?preview=1" } },
     };

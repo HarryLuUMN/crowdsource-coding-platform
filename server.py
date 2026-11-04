@@ -233,6 +233,7 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
         self.send_header(
             "Content-Security-Policy",
             ("default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; " if path == "/vega-preview.html" else "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; ")
+            + ("style-src-attr 'unsafe-inline'; " if path in {"/", "/index.html"} or path.strip("/") in DSL_TASK_CATALOG else "")
             + "connect-src 'self'; object-src 'none'; base-uri 'none'; "
             + ("frame-ancestors 'self'; form-action 'none'; sandbox allow-same-origin allow-scripts" if path == "/vega-preview.html" else "frame-ancestors 'self'; form-action 'none'; sandbox allow-same-origin" if is_embeddable_guide else "frame-ancestors 'none'; form-action 'self'"),
         )

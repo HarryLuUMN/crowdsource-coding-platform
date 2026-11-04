@@ -97,7 +97,10 @@ let studyStarted = false;
 let documentationMatches = [];
 let activeDocumentationMatch = -1;
 const pendingEvents = [];
-const telemetryStartedAt = performance.now();
+let telemetryStartedAt = performance.now();
+let onboardingActive = false;
+let formalSessionReady = false;
+let enteringFormal = false;
 const clientInstanceId = crypto.randomUUID();
 const layoutStorageKey = "knitscript-studio-layout:v1";
 
@@ -231,7 +234,7 @@ function restoreTelemetryOutbox() {
 }
 
 function recordEvent(type, payload = {}) {
-  if (!studyStarted || currentStudyPhase !== "formal" || telemetryEnded) return;
+  if (!studyStarted || currentStudyPhase !== "formal" || telemetryEnded || onboardingActive || !formalSessionReady) return;
   telemetrySeq += 1;
   pendingEvents.push({
     client_event_id: `${clientInstanceId}:${telemetrySeq}`,
@@ -436,6 +439,7 @@ async function recoverMissingTelemetrySession() {
 }
 
 async function flushEvents() {
+  if (!studyStarted || currentStudyPhase !== "formal" || onboardingActive || !formalSessionReady || telemetryEnded) return false;
   telemetryFlush = telemetryFlush.catch(() => false).then(async () => {
     await sessionReady;
     if (!telemetrySessionId) {
@@ -586,6 +590,7 @@ function clearResult() {
 function setStudyPhase(phase, sourceStorageScope) {
   currentStudyPhase = phase;
   const practice = phase === "practice";
+  document.querySelector("#howItWorksButton").hidden = practice || !pathTaskSet;
   document.querySelector(".task-selectors").hidden = practice;
   languageSelect.value = language;
   taskSelect.replaceChildren(...(pathTaskSet ? pathTaskSet.tasks.map(task => {
@@ -850,12 +855,7 @@ async function executePractice(mode) {
       localStorage.setItem(practiceCompletionKey, "completed");
       const sourceStorageScope = prolificRecruitment.prolific_session_id || participantId;
       setStudyPhase("formal", sourceStorageScope);
-      sessionReady = initializeTelemetrySession();
-      await sessionReady;
-      recordEvent("formal_task.started", { transition: "practice_completed" });
-      await flushEvents();
-      showToast("Practice complete — the formal task has started");
-      editor.focus();
+      await beginFormalTask("practice_completed");
     } else if (isSubmission) {
       showToast("Complete the practice task before continuing");
     }
@@ -1061,6 +1061,7 @@ fetch("/api/health")
   });
 
 function setStudyControlsEnabled(enabled) {
+  enabled = enabled && !onboardingActive && (currentStudyPhase === "practice" || formalSessionReady);
   languageSelect.disabled = !enabled || Boolean(pathTaskSet) || !localTaskSelection;
   taskSelect.disabled = !enabled || (!pathTaskSet && !localTaskSelection);
   editor.disabled = !enabled;
@@ -1111,13 +1112,73 @@ async function startStudy(identityMethod) {
   studyState.textContent = hasProlificParticipant ? "Prolific session" : "Preview mode";
   setStudyPhase(localStorage.getItem(practiceCompletionKey) === "completed" ? "formal" : "practice", sourceStorageScope);
   if (currentStudyPhase === "formal") {
-    sessionReady = initializeTelemetrySession();
-    sessionReady.then(() => {
-      if (identityMethod === "manual") recordEvent("participant.id_provided", { method: identityMethod });
-      return flushEvents();
-    });
+    await beginFormalTask("page_opened");
+    if (identityMethod === "manual") recordEvent("participant.id_provided", { method: identityMethod });
   }
 }
+
+function onboardingStorageKey() {
+  return `coding-platform-onboarding:v1:${language}:${participantId}:${prolificRecruitment.study_id}:${prolificRecruitment.prolific_session_id}`;
+}
+
+async function beginFormalTask(transition) {
+  if (enteringFormal || formalSessionReady || taskProgress?.completed) return;
+  enteringFormal = true;
+  const notice = document.querySelector("#onboardingNotice");
+  try {
+    let seen = false;
+    try { seen = localStorage.getItem(onboardingStorageKey()) === "completed"; } catch (_) {}
+    const firstTask = pathTaskSet?.tasks[0].id === TASK_ID;
+    if (pathTaskSet && firstTask && !seen) {
+      onboardingActive = true;
+      setStudyControlsEnabled(false);
+      notice.hidden = true;
+      const completed = await window.StudioOnboarding?.start({ required: true });
+      onboardingActive = false;
+      if (!completed) {
+        notice.hidden = false;
+        return;
+      }
+      try { localStorage.setItem(onboardingStorageKey(), "completed"); } catch (_) {}
+    }
+    notice.hidden = true;
+    telemetryStartedAt = performance.now();
+    formalSessionReady = true;
+    sessionReady = initializeTelemetrySession();
+    await sessionReady;
+    recordEvent("formal_task.started", { transition });
+    await flushEvents();
+    setStudyControlsEnabled(true);
+    editor.focus();
+  } catch (_) {
+    onboardingActive = false;
+    notice.hidden = false;
+    showToast("Could not start the task. Please retry the guide.");
+  } finally {
+    enteringFormal = false;
+  }
+}
+
+document.querySelector("#onboardingRetryButton").addEventListener("click", () => beginFormalTask("guide_retried"));
+document.querySelector("#howItWorksButton").addEventListener("click", async () => {
+  if (onboardingActive || enteringFormal) return;
+  if (!formalSessionReady) return beginFormalTask("guide_reopened");
+  if (runButton.disabled && !taskProgress?.completed) return;
+  if (!window.StudioOnboarding) {
+    showToast("The guide could not load. Please reload to retry.");
+    return;
+  }
+  await flushEvents();
+  const pausedAt = performance.now();
+  onboardingActive = true;
+  setStudyControlsEnabled(false);
+  try { await window.StudioOnboarding.start({ required: false }); }
+  finally {
+    telemetryStartedAt += performance.now() - pausedAt;
+    onboardingActive = false;
+    setStudyControlsEnabled(!taskProgress?.completed);
+  }
+});
 
 languageSelect.addEventListener("change", async () => {
   if (!localTaskSelection || pathTaskSet) return;

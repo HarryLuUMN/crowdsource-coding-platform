@@ -6,7 +6,9 @@
     <meta name="description" content="Write and run KnitScript in your browser." />
     <title>KnitScript Studio</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=24" />
+    <link rel="stylesheet" href="/vendor/introjs.css" />
+    <link rel="stylesheet" href="/styles.css?v=25" />
+    <link rel="stylesheet" href="/onboarding.css?v=1" />
   </head>
   <body>
     <div hidden>
@@ -20,7 +22,8 @@
         <div class="guide-view task-guide">
           <div class="task-copy">
             <span class="task-phase-badge" id="taskPhaseBadge" hidden>Practice · not part of the study</span>
-            <h1>Task Description</h1>
+            <div class="task-title-row"><h1>Task Description</h1><button id="howItWorksButton" class="ghost-button" type="button" hidden>How it works</button></div>
+            <div id="onboardingNotice" class="onboarding-notice" role="status" hidden>Complete the guide before starting Level 1. If it did not load, reload this page and retry. <button id="onboardingRetryButton" type="button" class="ghost-button">Start guide</button></div>
             <div class="task-selectors">
               <label>Language <select id="languageSelect" disabled><option value="knitscript">KnitScript</option><option value="vega-lite">Vega-Lite</option><option value="idyll">Idyll</option><option value="penrose">Penrose</option></select></label>
               <label id="taskDropdown">Task <select id="taskSelect" disabled><option value="stockinette-swatch-v1">Task 01</option></select></label>
@@ -165,6 +168,8 @@
     <script src="/knitout-visualizer.js?v=1" defer></script>
     <script src="/practice-task.js?v=1" defer></script>
     <script src="/task-catalog.js" defer></script>
-    <script src="/app.js?v=29" defer></script>
+    <script src="/vendor/introjs.js" defer></script>
+    <script src="/onboarding.js?v=1" defer></script>
+    <script src="/app.js?v=30" defer></script>
   </body>
 </html>
