@@ -52,7 +52,7 @@ async function run(source) {
     labels: Object.fromEntries(entries(substance.value.labels).map(([name, label]) => [name, label.value])),
     predicates: substance.value.ast.statements.filter(statement => statement.tag === "ApplyPredicate")
       .map(statement => ({ name: statement.name.value, args: statement.args.map(arg => arg.value) })),
-    shapes: Object.fromEntries(state.shapes.filter(shape => shape.shapeType === "Circle")
+    shapes: Object.fromEntries(state.computeShapes(state.varyingValues).filter(shape => shape.shapeType === "Circle")
       .map(shape => [shape.path.access.parent.substanceObject.name, {
         type: shape.shapeType,
         center: shape.center.contents.map(number),
