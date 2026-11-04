@@ -45,7 +45,7 @@ async function run(source) {
     state = result.value;
   }
   const svg = await toSVG(state, async () => undefined, "autodsl");
-  const entries = value => value instanceof Map ? [...value.entries()] : Object.entries(value || {});
+  const entries = value => typeof value?.entries === "function" ? [...value.entries()] : Object.entries(value || {});
   const number = value => typeof value === "number" ? value : value?.val;
   const evidence = {
     objects: Object.fromEntries(entries(substance.value.objs).map(([name, type]) => [name, type.name.value])),
