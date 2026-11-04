@@ -139,7 +139,7 @@ async function main() {
     assert.equal(mutations().length,countBeforeReplay,"Replay creates no formal events or executions");
     assert.equal(await evaluate("document.querySelector('#sourceEditor').value"),draft);
     const second=`missing-smoke-${Date.now()}`;
-    await navigate(`${base}/knitscript?preview=1&PROLIFIC_PID=${second}&STUDY_ID=intro-study&SESSION_ID=intro-session`);
+    await navigate(`${base}/knitscript?preview=1&PROLIFIC_PID=${second}&STUDY_ID=intro-study&SESSION_ID=intro-missing-session`);
     await evaluate("window.savedOnboarding=window.StudioOnboarding; window.StudioOnboarding=undefined;");
     const beforeFailure=mutations().length;
     await enterPractice();
