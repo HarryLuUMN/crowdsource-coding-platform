@@ -7,7 +7,9 @@ const pathTaskSet = taskCatalog[pathLanguage];
 const selectedTask = pathTaskSet?.tasks.find(task => task.id === requestedTask) || pathTaskSet?.tasks[0];
 const TASK_ID = selectedTask?.id || (Object.values(languageTasks).includes(requestedTask) ? requestedTask : "stockinette-swatch-v1");
 const language = pathTaskSet ? pathLanguage : Object.keys(languageTasks).find(key => languageTasks[key] === TASK_ID);
-const runOnlyTask = Boolean(selectedTask) || language === "idyll" || language === "penrose";
+const runOnlyTask = !selectedTask && (language === "idyll" || language === "penrose");
+let taskProgress = null;
+let finalizationResult = null;
 const isRuntimeTask = language === "idyll" || language === "penrose";
 const isVegaTask = language === "vega-lite";
 const languageSelect = document.querySelector("#languageSelect");
@@ -503,7 +505,7 @@ async function finishTelemetrySession() {
       body: JSON.stringify({ session_id: telemetrySessionId, final_source: editor.value }),
     });
     if (!response.ok) return false;
-    await response.text();
+    finalizationResult = await response.json();
   } catch (_error) {
     return false;
   }
@@ -586,7 +588,12 @@ function setStudyPhase(phase, sourceStorageScope) {
   const practice = phase === "practice";
   document.querySelector(".task-selectors").hidden = practice;
   languageSelect.value = language;
-  taskSelect.replaceChildren(...(pathTaskSet ? pathTaskSet.tasks.map(task => new Option(task.label, task.id, false, task.id === TASK_ID)) : [new Option("Task 01", TASK_ID)]));
+  taskSelect.replaceChildren(...(pathTaskSet ? pathTaskSet.tasks.map(task => {
+    const state = taskProgress?.tasks.find(item => item.id === task.id);
+    const option = new Option(`${task.label}${state?.completed ? " — Completed" : state && !state.unlocked ? " — Locked" : ""}`, task.id, false, task.id === TASK_ID);
+    option.disabled = Boolean(state && (state.completed || !state.unlocked));
+    return option;
+  }) : [new Option("Task 01", TASK_ID)]));
   sourceStorageKey = practice
     ? `coding-platform-practice-source:v1:${sourceStorageScope}`
     : `knitscript-studio-source:${TASK_ID}:from-scratch-v1:${sourceStorageScope}`;
@@ -833,8 +840,7 @@ async function executePractice(mode) {
       showToast("Complete the practice task before continuing");
     }
   } finally {
-    runButton.disabled = false;
-    submitButton.disabled = false;
+    setStudyControlsEnabled(!taskProgress?.completed);
     activeButton.querySelector("span").textContent = isSubmission ? "Submit" : "Run";
   }
 }
@@ -869,6 +875,12 @@ async function executeSource(mode, trigger = "button") {
   clearToast();
   const isSubmission = mode === "submit";
   if (isSubmission && runOnlyTask) return;
+  const submittedSource = editor.value;
+  if (isSubmission) {
+    editor.disabled = true;
+    resetButton.disabled = true;
+    taskSelect.disabled = true;
+  }
   const activeButton = isSubmission ? submitButton : runButton;
   runButton.disabled = true;
   submitButton.disabled = true;
@@ -876,12 +888,12 @@ async function executeSource(mode, trigger = "button") {
   compilerState.innerHTML = `<i></i> ${isSubmission ? "Checking submission" : "Running tests"}`;
   try {
     await sessionReady;
-    recordEvent(`${mode}.requested`, { trigger, source_length: editor.value.length });
-    await flushEvents();
+    recordEvent(`${mode}.requested`, { trigger, source_length: submittedSource.length });
+    if (!await flushEvents()) throw new Error("Your trace could not be saved. Please retry.");
     const response = await fetch(isSubmission ? "/api/submit" : "/api/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source: editor.value, session_id: telemetrySessionId, task_id: TASK_ID, dsl: language }),
+      body: JSON.stringify({ source: submittedSource, session_id: telemetrySessionId, task_id: TASK_ID, dsl: language }),
     });
     const result = await response.json();
     showResult(result);
@@ -899,16 +911,28 @@ async function executeSource(mode, trigger = "button") {
     await flushEvents();
     if (isSubmission && result.submission?.passed) {
       const traceFinalized = await finishTelemetrySession();
-      showCompletion(result);
-      if (!traceFinalized) showToast("Submission accepted; the trace is still saving");
+      if (!traceFinalized) {
+        showToast("Submission passed, but saving is incomplete. Please retry Submit before continuing.");
+      } else if (selectedTask && finalizationResult?.progress) {
+        taskProgress = finalizationResult.progress;
+        if (taskProgress.current_task_id) {
+          const destination = new URL(window.location.href);
+          destination.searchParams.set("task", taskProgress.current_task_id);
+          window.location.assign(destination.href);
+        } else {
+          showCompletion({ ...result, completion_url: finalizationResult.completion_url });
+          document.querySelector("#completionTitle").textContent = "All three tasks completed";
+        }
+      } else {
+        showCompletion(result);
+      }
     }
     if (isSubmission && result.submission && !result.submission.passed) showToast("Not accepted yet — review the failed tests");
   } catch (error) {
-    showResult({ ok: false, error: { type: "ConnectionError", message: "Could not reach the compiler backend." } });
+    showResult({ ok: false, error: { type: "ConnectionError", message: error.message || "Could not reach the compiler backend." } });
     recordEvent(`${mode}.connection_error`);
   } finally {
-    runButton.disabled = false;
-    submitButton.disabled = false;
+    setStudyControlsEnabled(!taskProgress?.completed);
     activeButton.querySelector("span").textContent = isSubmission ? "Submit" : "Run";
     compilerState.innerHTML = "<i></i> Compiler ready";
   }
@@ -1016,13 +1040,44 @@ function setStudyControlsEnabled(enabled) {
   resetButton.disabled = !enabled;
 }
 
-function startStudy(identityMethod) {
+async function startStudy(identityMethod) {
   if (studyStarted) return;
   if (!participantId) participantId = getPersistentId("knitscript-participant-id");
   const sourceStorageScope = prolificRecruitment.prolific_session_id || participantId;
   practiceCompletionKey = `coding-platform-practice-complete:v1:${sourceStorageScope}`;
   telemetryStorageKey = `knitscript-telemetry-outbox:${TASK_ID}:${sourceStorageScope}`;
   studyStarted = true;
+  if (pathTaskSet) {
+    setStudyControlsEnabled(false);
+    studyState.textContent = "Loading task progress…";
+    try {
+      const response = await fetch("/api/progress", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ participant_id: participantId, dsl: language, recruitment: hasProlificParticipant ? prolificRecruitment : { source: "direct" } }),
+      });
+      const body = await response.json();
+      if (!response.ok || !body.ok) throw new Error(body.error?.message || "Progress unavailable");
+      taskProgress = body.progress;
+      if (taskProgress.completed) {
+        setStudyPhase("formal", sourceStorageScope);
+        setStudyControlsEnabled(false);
+        studyState.textContent = "All tasks completed";
+        showCompletion({ completion_url: body.completion_url });
+        document.querySelector("#completionTitle").textContent = "All three tasks completed";
+        return;
+      }
+      if (taskProgress.current_task_id !== TASK_ID) {
+        const destination = new URL(window.location.href);
+        destination.searchParams.set("task", taskProgress.current_task_id);
+        window.location.replace(destination.href);
+        return;
+      }
+    } catch (error) {
+      studyState.textContent = "Could not load task progress";
+      showToast("Could not load saved progress. Please reload to retry.");
+      return;
+    }
+  }
   setStudyControlsEnabled(true);
   studyState.textContent = hasProlificParticipant ? "Prolific session" : "Preview mode";
   setStudyPhase(localStorage.getItem(practiceCompletionKey) === "completed" ? "formal" : "practice", sourceStorageScope);
@@ -1058,7 +1113,7 @@ languageSelect.addEventListener("change", async () => {
 taskSelect.addEventListener("change", async () => {
   if (!pathTaskSet || currentStudyPhase !== "formal") return;
   const nextTask = taskSelect.value;
-  if (!pathTaskSet.tasks.some(task => task.id === nextTask) || runButton.disabled) {
+  if (nextTask !== taskProgress?.current_task_id || !pathTaskSet.tasks.some(task => task.id === nextTask) || runButton.disabled) {
     taskSelect.value = TASK_ID;
     return;
   }
