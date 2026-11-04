@@ -15,6 +15,7 @@ function validate(node) {
     node.forEach(validate);
     return;
   }
+  if (node.type === "data") throw new Error("Data imports are not supported in this coding environment.");
   if (node.name && !components.has(node.name.toLowerCase().replace(/-/g, ""))) {
     throw new Error(`Unsupported component: ${node.name}. Use the provided built-in components.`);
   }

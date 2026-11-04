@@ -20,6 +20,16 @@ const points = run("Set A, B\nPoint p\nIntersecting(A, B)\nIn(p, A)\nNotIn(p, B)
 assert.equal(points.ok, true, JSON.stringify(points.error));
 assert.match(points.svg, /<circle/);
 
+for (const source of [
+  "Set A, B, C\nSubset(A, B)\nSubset(B, C)\nAutoLabel All",
+  "Set A, B, C\nIntersecting(A, B)\nDisjoint(A, C)\nDisjoint(B, C)\nAutoLabel All",
+  "Set A, B\nPoint p, q\nSubset(A, B)\nIn(p, A)\nIn(q, B)\nNotIn(q, A)\nAutoLabel All",
+]) {
+  const diagram = run(source);
+  assert.equal(diagram.ok, true, JSON.stringify(diagram.error));
+  assert.match(diagram.svg, /<svg/);
+}
+
 for (const source of ["", "Set A\nSubset(A, missing)", "Point p\nSubset(p, p)", "Set A\nSubset("]) {
   const failure = run(source);
   assert.equal(failure.ok, false, source);

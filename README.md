@@ -101,3 +101,34 @@ See [PROLIFIC_SETUP.md](PROLIFIC_SETUP.md) for the external study URL, completio
 ## Current safety boundary
 
 Compilation runs in a temporary subprocess with time, file-size, and file-descriptor limits. This is appropriate for local development and controlled testing. Before accepting untrusted public submissions, move `compiler_worker.py` into a dedicated sandbox such as Modal Sandbox, gVisor, or Firecracker and disable outbound networking.
+
+## Four-language runtime support
+
+Install the pinned JavaScript runtimes and build the isolated Idyll preview before starting the Python server:
+
+```bash
+npm ci --ignore-scripts
+npm run build
+.venv/bin/python server.py
+```
+
+The local language selector now includes KnitScript, Vega-Lite, Idyll and Penrose. Production language assignment remains URL-based. Direct preview URLs:
+
+- KnitScript: `/?preview=1&task=stockinette-swatch-v1`
+- Vega-Lite: `/?preview=1&task=vega-lite-sales-v1`
+- Idyll: `/?preview=1&task=idyll-playground-v1`
+- Penrose: `/?preview=1&task=penrose-playground-v1`
+
+Idyll uses the official compiler and a browser runtime with selected built-in controls, variables and reactive expressions. Its preview runs in an opaque sandbox without network access. Custom components, front matter and dataset imports are excluded. Compilation checks markup; JavaScript expression failures are reported by the browser preview. As with other browser programming environments, nonterminating expressions can stall the preview; this is intended for controlled research use.
+
+Penrose accepts Substance programs against the versioned `static/penrose-domain.dsl` and `static/penrose-style.sty`. They support sets, points, containment, intersection, disjointness and membership. The official engine compiles and optimizes diagrams with a fixed variation, rendering SVG inside a script-free sandbox. Successful rendering is not proof that every visual constraint is satisfied.
+
+Both new languages are Run-only previews: formal task checks and Submit are deliberately unavailable. Existing KnitScript and Vega-Lite tasks retain their current checks and limitations. All runners share concurrency bounds, and each additional-language subprocess has a 25-second timeout and a Node heap limit. Docker installs pinned dependencies and builds the preview automatically.
+
+Runtime checks:
+
+```bash
+node tests/idyll_runtime.cjs
+node tests/penrose_runtime.cjs
+.venv/bin/python -m unittest tests.test_dsl_runtime -v
+```

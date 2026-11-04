@@ -1,6 +1,6 @@
 const React = require("react");
 const ReactDOM = require("react-dom");
-const IdyllDocument = require("idyll-document").default;
+const IdyllDocument = require("idyll-document/dist/cjs/runtime").default;
 
 const names = ["range", "display", "dynamic", "conditional", "button", "boolean", "select", "text-input", "switch", "case", "default", "inline", "text-container", "h1", "h2", "h3", "h4", "h5", "h6"];
 const components = {};
