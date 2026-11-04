@@ -1,0 +1,63 @@
+canvas {
+  width = 700
+  height = 500
+}
+
+forall Set s {
+  s.icon = Circle {
+    center: (?, ?)
+    r: ?
+    fillColor: rgba(0.25, 0.55, 0.85, 0.15)
+    strokeColor: rgba(0.15, 0.35, 0.65, 1)
+    strokeWidth: 2
+  }
+  s.text = Equation {
+    string: s.label
+    fontSize: "18px"
+  }
+  ensure lessThan(35, s.icon.r)
+  ensure lessThan(s.icon.r, 190)
+  ensure contains(s.icon, s.text, 8)
+  encourage sameCenter(s.text, s.icon)
+  layer s.text above s.icon
+}
+
+forall Point p {
+  p.icon = Circle {
+    center: (?, ?)
+    r: 4
+    fillColor: rgba(0.1, 0.1, 0.1, 1)
+    strokeWidth: 0
+  }
+  p.text = Equation {
+    string: p.label
+    fontSize: "16px"
+    center: p.icon.center + (12, 12)
+  }
+  layer p.text above p.icon
+}
+
+forall Set a; Set b where Subset(a, b) {
+  ensure contains(b.icon, a.icon, 12)
+  ensure disjoint(b.text, a.icon, 8)
+  layer a.icon above b.icon
+}
+
+forall Set a; Set b where Disjoint(a, b) {
+  ensure disjoint(a.icon, b.icon, 15)
+}
+
+forall Set a; Set b where Intersecting(a, b) {
+  ensure overlapping(a.icon, b.icon, 12)
+  ensure lessThan(a.icon.r - b.icon.r + 12, vdist(a.icon.center, b.icon.center))
+  ensure lessThan(b.icon.r - a.icon.r + 12, vdist(a.icon.center, b.icon.center))
+}
+
+forall Point p; Set s where In(p, s) {
+  ensure contains(s.icon, p.icon, 10)
+  layer p.icon above s.icon
+}
+
+forall Point p; Set s where NotIn(p, s) {
+  ensure disjoint(s.icon, p.icon, 10)
+}
