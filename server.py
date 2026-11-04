@@ -626,6 +626,8 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                 if saved_manifest["task_id"] in TASK_DSL:
                     final_hash = "sha256:" + hashlib.sha256(request.get("final_source", "").encode("utf-8")).hexdigest() if isinstance(request.get("final_source", ""), str) else None
                     accepted_id = saved_manifest.get("passed_submission_id")
+                    if not accepted_id:
+                        raise ValueError("Pass and submit the current task before completing its session")
                     if accepted_id:
                         accepted = json.loads((get_trace_store()._session_dir(request["session_id"]) / "submissions" / f"{accepted_id}.json").read_text())
                         if accepted["code_state_id"] != final_hash:
