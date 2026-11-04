@@ -1,4 +1,5 @@
 const queryParameters = new URLSearchParams(window.location.search);
+const forceOnboarding = queryParameters.get("onboarding") === "1";
 const languageTasks = { knitscript: "stockinette-swatch-v1", "vega-lite": "vega-lite-sales-v1", idyll: "idyll-playground-v1", penrose: "penrose-playground-v1" };
 const requestedTask = queryParameters.get("task");
 const taskCatalog = window.DSL_TASK_CATALOG || {};
@@ -1094,6 +1095,11 @@ async function startStudy(identityMethod) {
         setStudyPhase("formal", sourceStorageScope);
         setStudyControlsEnabled(false);
         studyState.textContent = "All tasks completed";
+        if (forceOnboarding) {
+          onboardingActive = true;
+          try { await window.StudioOnboarding?.start({ required: false }); }
+          finally { onboardingActive = false; }
+        }
         showCompletion({ completion_url: body.completion_url });
         document.querySelector("#completionTitle").textContent = "All three tasks completed";
         return;
@@ -1131,11 +1137,11 @@ async function beginFormalTask(transition) {
     let seen = false;
     try { seen = localStorage.getItem(onboardingStorageKey()) === "completed"; } catch (_) {}
     const firstTask = pathTaskSet?.tasks[0].id === TASK_ID;
-    if (pathTaskSet && firstTask && !seen) {
+    if (pathTaskSet && (forceOnboarding || (firstTask && !seen))) {
       onboardingActive = true;
       setStudyControlsEnabled(false);
       notice.hidden = true;
-      const completed = await window.StudioOnboarding?.start({ required: true });
+      const completed = await window.StudioOnboarding?.start({ required: firstTask });
       onboardingActive = false;
       if (!completed) {
         notice.hidden = false;
