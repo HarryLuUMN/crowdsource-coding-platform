@@ -69,7 +69,12 @@ class SequentialApiTests(unittest.TestCase):
             self.assertEqual(status, 200, ended)
             self.assertEqual(ended['progress']['current_task_id'], TASKS[index + 1] if index < 2 else None)
             self.assertTrue(ended['progress']['tasks'][index]['completed'])
-            self.assertEqual(self.submit(index, sid)[0], 400, 'Completed sessions must stay immutable')
+            before = server.get_trace_store()._read_manifest(sid)['submission_count']
+            status, repeated = self.submit(index, sid)
+            self.assertEqual(status, 200)
+            self.assertEqual(repeated['submission']['submission_id'], accepted['submission']['submission_id'])
+            self.assertEqual(server.get_trace_store()._read_manifest(sid)['submission_count'], before)
+            self.assertEqual(self.submit(index, sid, SOURCES[index] + '\nSet Other')[0], 400, 'Completed sessions must stay immutable')
             self.assertEqual(self.post_json('/api/sessions/end', {'session_id': sid, 'final_source': SOURCES[index] + '\nSet Other'})[0], 400)
         self.assertTrue(self.progress()['completed'])
         self.assertEqual(self.progress('another-study')['current_task_id'], TASKS[0])
