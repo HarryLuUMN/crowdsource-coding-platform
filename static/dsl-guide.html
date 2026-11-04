@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>DSL runtime guides</title><link rel="stylesheet" href="/documentation.css"></head>
+<body>
+<h1>DSL runtime guides</h1>
+<section id="idyll">
+<h2>Idyll</h2>
+<p>Write article source in the editor and choose Run. Variables, derived expressions and built-in controls update in the interactive preview. Compilation checks markup; expression errors appear when the preview runs. Custom components, data imports and front matter are not available.</p>
+<pre>[var name:"quantity" value:2 /]
+[derived name:"total" value:`quantity * 5` /]
+# Cost calculator
+[Range value:quantity min:0 max:10 /]
+Total: [Display value:total /]
+[Conditional if:`quantity &gt; 5`]Bulk order[/Conditional]</pre>
+<p><a href="https://idyll-lang.org/docs/syntax" target="_blank" rel="noopener noreferrer">Official Idyll syntax reference</a></p>
+</section>
+<section id="penrose">
+<h2>Penrose Substance</h2>
+<p>The editor accepts Substance source. A fixed Domain and Style provide Set and Point objects and the relationships Subset, Disjoint, Intersecting, In and NotIn. Layout uses a fixed variation for repeatability.</p>
+<pre>Set A, B
+Point p
+Subset(A, B)
+In(p, A)
+AutoLabel All</pre>
+<p><a href="/penrose-domain.dsl" target="_blank">Provided Domain</a> · <a href="/penrose-style.sty" target="_blank">Provided Style</a> · <a href="https://penrose.ink/docs/ref/substance/" target="_blank" rel="noopener noreferrer">Official Substance reference</a></p>
+</section>
+<p>These runtime previews do not yet have formal task checks or submission enabled.</p>
+</body></html>

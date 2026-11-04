@@ -9,10 +9,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 COPY requirements.txt .
-RUN apt-get update && apt-get install -y --no-install-recommends nodejs && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends nodejs npm && rm -rf /var/lib/apt/lists/*
 RUN python -m pip install --no-cache-dir -r requirements.txt
 
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts
 COPY . .
+RUN npm run build && npm prune --omit=dev --ignore-scripts
 
 EXPOSE 8000
 
