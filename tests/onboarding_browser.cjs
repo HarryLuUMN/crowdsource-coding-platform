@@ -100,6 +100,7 @@ async function main() {
     assert.equal(await evaluate("formalSessionReady"), false);
     assert.equal(await evaluate("document.querySelector('#runButton').disabled && document.querySelector('#sourceEditor').disabled"), true);
     assert.match(await evaluate("document.querySelector('.introjs-tooltip').textContent"), /Complete three tasks/);
+    assert.equal(await evaluate("document.querySelector('#submitButton span').textContent.trim()"),'Submit','Guide must not retain practice submission loading text');
     await screenshot('step1');
     await next();
     assert.match(await evaluate("document.querySelector('.introjs-tooltip').textContent"), /Read the task requirements/);
