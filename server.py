@@ -1,4 +1,4 @@
-"""Small local web server for the KnitScript Studio MVP."""
+"""Small local web server for the CrowdCode MVP."""
 
 from __future__ import annotations
 
@@ -765,12 +765,12 @@ def main() -> None:
     host = os.environ.get("HOST", "127.0.0.1")
     port = int(os.environ.get("PORT", "8000"))
     server = ThreadingHTTPServer((host, port), KnitScriptHandler)
-    print(f"KnitScript Studio is running at http://{host}:{port}")
+    print(f"CrowdCode is running at http://{host}:{port}")
     print("Press Ctrl+C to stop.")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\nStopping KnitScript Studio.")
+        print("\nStopping CrowdCode.")
     finally:
         server.server_close()
 

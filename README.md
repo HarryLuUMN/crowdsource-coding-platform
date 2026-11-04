@@ -1,4 +1,4 @@
-# KnitScript Studio
+# CrowdCode
 
 A browser-based environment for writing KnitScript and compiling it through the real KnitScript toolchain. It also records replayable programming traces and preserves every compiler result for later benchmark analysis.
 
