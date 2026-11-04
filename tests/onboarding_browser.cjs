@@ -93,6 +93,16 @@ async function main() {
       fs.writeFileSync(`/tmp/intro-${name}.png`, Buffer.from(shot.data,'base64'));
     };
     await navigate(url);
+    await waitFor("!document.querySelector('#submitButton').disabled", "Practice controls should load");
+    assert.equal(await evaluate("document.querySelector('#howItWorksButton').hidden"), false);
+    assert.equal(await evaluate("document.querySelector('#howItWorksButton').textContent"), 'Start UI Tutorial');
+    await evaluate("document.querySelector('#howItWorksButton').click()");
+    await waitFor("onboardingActive && !!document.querySelector('.introjs-tooltip')", "Visible tutorial button must work during practice");
+    assert.equal(await evaluate("currentStudyPhase"), 'practice');
+    assert.equal(await evaluate("formalSessionReady"), false);
+    await screenshot('manual-practice');
+    await evaluate("document.querySelector('.introjs-skipbutton').click()");
+    await waitFor("!onboardingActive && !document.querySelector('#runButton').disabled", "Closing practice tutorial must restore practice");
     await delay(2200);
     assert.equal(mutations().length, 0, "Practice creates no formal traces");
     await enterPractice();
