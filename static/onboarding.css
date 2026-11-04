@@ -38,7 +38,10 @@
   border-radius: 7px;
   text-shadow: none;
   box-shadow: none;
-  font: 600 13px/1.4 inherit;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
   padding: 8px 12px;
 }
 .studio-onboarding-tooltip .introjs-nextbutton {

@@ -18,7 +18,7 @@
     const steps = definitions.map(([selector, title, description]) => {
       let element = document.querySelector(selector);
       if (selector === "#taskProgress" && (!element || element.hidden)) element = document.querySelector(".task-selectors");
-      return { element, title, intro: description, position: "auto" };
+      return { element, title, intro: description, position: "bottom" };
     });
     if (steps.some(step => !step.element || step.element.hidden)) return Promise.resolve(false);
     const previousFocus = document.activeElement;
