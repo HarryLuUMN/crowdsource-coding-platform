@@ -57,6 +57,15 @@ async function main() {
       }
       throw new Error(message);
     };
+    const completeTour = async () => {
+      for (let step = 0; step < 9; step++) {
+        const active = await evaluate("!!document.querySelector('.introjs-tooltip')");
+        if (!active) return;
+        await evaluate("document.querySelector('.introjs-nextbutton').click()");
+        await delay(160);
+      }
+      throw new Error("The onboarding tour did not finish");
+    };
     const participant = `sequence-smoke-${Date.now()}`;
     const parameters = `?preview=1&PROLIFIC_PID=${participant}&STUDY_ID=sequence-study&SESSION_ID=sequence-session`;
     const navigate = async url => {
@@ -74,6 +83,8 @@ async function main() {
     await waitFor("new URLSearchParams(location.search).get('task')==='penrose-nested-v1' && !document.querySelector('#runButton').disabled", 'Task3 jump must return to Task1');
     await enterSource('print("Hello, coding platform!")');
     await evaluate("document.querySelector('#submitButton').click()");
+    await waitFor("!!document.querySelector('.introjs-tooltip') || (document.querySelector('#fileName').textContent==='diagram.substance' && !document.querySelector('#runButton').disabled)", 'Onboarding must enter the guide or Task1');
+    await completeTour();
     await waitFor("document.querySelector('#fileName').textContent==='diagram.substance' && !document.querySelector('#runButton').disabled", 'Onboarding must enter Task1');
     assert.deepEqual(await evaluate("Array.from(document.querySelector('#taskSelect').options).map(option=>option.disabled)"), [false, true, true]);
     assert.equal(await evaluate("document.querySelector('#submitButton').hidden"), false);

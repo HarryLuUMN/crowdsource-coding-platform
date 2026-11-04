@@ -57,10 +57,21 @@ async function main() {
       }
       throw new Error(message);
     };
+    const completeTour = async () => {
+      for (let step = 0; step < 9; step++) {
+        const active = await evaluate("!!document.querySelector('.introjs-tooltip')");
+        if (!active) return;
+        await evaluate("document.querySelector('.introjs-nextbutton').click()");
+        await delay(160);
+      }
+      throw new Error("The onboarding tour did not finish");
+    };
     const parameters = "?preview=1&PROLIFIC_PID=path-smoke-user&STUDY_ID=path-smoke-study&SESSION_ID=path-smoke-session";
     const navigate = async url => {
       await send("Page.navigate", { url }, sessionId);
-      await waitFor("document.readyState === 'complete' && !!window.DSL_TASK_CATALOG && !!document.querySelector('#sourceEditor') && !document.querySelector('#runButton').disabled", `Page failed to load: ${url}`);
+      await waitFor("document.readyState === 'complete' && !!window.DSL_TASK_CATALOG && !!document.querySelector('#sourceEditor') && (!!document.querySelector('.introjs-tooltip') || !document.querySelector('#runButton').disabled)", `Page failed to load: ${url}`);
+      await completeTour();
+      await waitFor("!document.querySelector('#runButton').disabled", `Guide did not release the editor: ${url}`);
     };
     const enterSource = source => evaluate(`document.querySelector('#sourceEditor').value=${JSON.stringify(source)}; document.querySelector('#sourceEditor').dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText'}));`);
     const assertTaskSet = async (dsl, firstTask) => {
@@ -75,6 +86,8 @@ async function main() {
     await navigate(`${base}/knitscript${parameters}`);
     await enterSource('print("Hello, coding platform!")');
     await evaluate("document.querySelector('#submitButton').click()");
+    await waitFor("!!document.querySelector('.introjs-tooltip') || (document.querySelector('#fileName').textContent === 'swatch.ks' && !document.querySelector('#runButton').disabled)", "Onboarding did not enter guide");
+    await completeTour();
     await waitFor("document.querySelector('#fileName').textContent === 'swatch.ks' && !document.querySelector('#runButton').disabled", "Onboarding did not enter formal task");
     await assertTaskSet("knitscript", "knitscript-plain-v1");
     for (const [dsl, firstTask] of [["vega-lite", "vega-lite-bar-v1"], ["idyll", "idyll-calculator-v1"], ["penrose", "penrose-nested-v1"]]) {
