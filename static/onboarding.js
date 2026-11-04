@@ -17,7 +17,8 @@
     ];
     const steps = definitions.map(([selector, title, description]) => {
       let element = document.querySelector(selector);
-      if (selector === "#taskProgress" && (!element || element.hidden)) element = document.querySelector(".task-selectors");
+      if (selector === "#taskProgress" && (!element || element.hidden || !element.getClientRects().length)) element = document.querySelector(".task-title-row");
+      if (selector === "#submitButton" && element?.hidden) element = document.querySelector(".result-actions");
       return { element, title, intro: description, position: "bottom" };
     });
     if (steps.some(step => !step.element || step.element.hidden)) return Promise.resolve(false);

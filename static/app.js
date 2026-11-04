@@ -592,7 +592,7 @@ function clearResult() {
 function setStudyPhase(phase, sourceStorageScope) {
   currentStudyPhase = phase;
   const practice = phase === "practice";
-  document.querySelector("#howItWorksButton").hidden = practice || !pathTaskSet;
+  document.querySelector("#howItWorksButton").hidden = false;
   document.querySelector(".task-selectors").hidden = practice;
   languageSelect.value = language;
   taskSelect.replaceChildren(...(pathTaskSet ? pathTaskSet.tasks.map(task => {
@@ -1129,7 +1129,7 @@ function onboardingStorageKey() {
   return `coding-platform-onboarding:v1:${language}:${participantId}:${prolificRecruitment.study_id}:${prolificRecruitment.prolific_session_id}`;
 }
 
-async function beginFormalTask(transition) {
+async function beginFormalTask(transition, forceGuide = false) {
   if (enteringFormal || formalSessionReady || taskProgress?.completed) return;
   enteringFormal = true;
   const notice = document.querySelector("#onboardingNotice");
@@ -1137,7 +1137,7 @@ async function beginFormalTask(transition) {
     let seen = false;
     try { seen = localStorage.getItem(onboardingStorageKey()) === "completed"; } catch (_) {}
     const firstTask = pathTaskSet?.tasks[0].id === TASK_ID;
-    if (pathTaskSet && (forceOnboarding || (firstTask && !seen))) {
+    if ((pathTaskSet || forceGuide) && (forceGuide || forceOnboarding || (firstTask && !seen))) {
       onboardingActive = true;
       setStudyControlsEnabled(false);
       notice.hidden = true;
@@ -1170,8 +1170,11 @@ async function beginFormalTask(transition) {
 document.querySelector("#onboardingRetryButton").addEventListener("click", () => beginFormalTask("guide_retried"));
 document.querySelector("#howItWorksButton").addEventListener("click", async () => {
   if (onboardingActive || enteringFormal || replayingGuide) return;
-  if (!formalSessionReady && !taskProgress?.completed) return beginFormalTask("guide_reopened");
-  if (runButton.disabled && !taskProgress?.completed) return;
+  if (currentStudyPhase === "formal" && !formalSessionReady && !taskProgress?.completed) return beginFormalTask("guide_reopened", true);
+  if (runButton.disabled && !taskProgress?.completed) {
+    showToast("Please wait for the current operation to finish, then start the tutorial.");
+    return;
+  }
   if (!window.StudioOnboarding) {
     showToast("The guide could not load. Please reload to retry.");
     return;
