@@ -590,12 +590,17 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
 
             if path == "/api/progress":
                 progress = task_progress(get_trace_store(), request.get("participant_id"), request.get("dsl"), request.get("recruitment"))
-                self._send_json(HTTPStatus.OK, {"ok": True, "progress": progress})
+                response = {"ok": True, "progress": progress}
+                if progress["completed"]:
+                    response["completion_url"] = build_study_config()["prolific"]["completion_url"]
+                self._send_json(HTTPStatus.OK, response)
                 return
 
             if path == "/api/sessions":
                 if request.get("task_id") in TASK_DSL:
-                    assert_task_unlocked(get_trace_store(), request.get("participant_id"), request["task_id"], request.get("recruitment"))
+                    progress = assert_task_unlocked(get_trace_store(), request.get("participant_id"), request["task_id"], request.get("recruitment"))
+                    if next(task for task in progress["tasks"] if task["id"] == request["task_id"])["completed"]:
+                        raise ValueError("This task is already completed")
                 validate_task_dsl(request.get("task_id", "playground"), request.get("dsl"))
                 manifest = get_trace_store().create_session(
                     participant_id=request.get("participant_id"),
@@ -617,6 +622,16 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                 return
 
             if path == "/api/sessions/end":
+                saved_manifest = get_trace_store()._read_manifest(request.get("session_id"))
+                if saved_manifest["task_id"] in TASK_DSL:
+                    final_hash = "sha256:" + hashlib.sha256(request.get("final_source", "").encode("utf-8")).hexdigest() if isinstance(request.get("final_source", ""), str) else None
+                    accepted_id = saved_manifest.get("passed_submission_id")
+                    if accepted_id:
+                        accepted = json.loads((get_trace_store()._session_dir(request["session_id"]) / "submissions" / f"{accepted_id}.json").read_text())
+                        if accepted["code_state_id"] != final_hash:
+                            raise ValueError("Final source must match the accepted submission")
+                    if saved_manifest["status"] == "completed" and saved_manifest.get("final_code_state_id") != final_hash:
+                        raise ValueError("A completed task cannot be changed")
                 event_batches = request.get("event_batches")
                 if event_batches is not None:
                     if not isinstance(event_batches, list):
@@ -677,6 +692,8 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                     raise ValueError("Task does not match the study session")
                 if task_id in TASK_DSL:
                     assert_task_unlocked(get_trace_store(), manifest["participant_id"], task_id, manifest.get("recruitment"))
+                    if manifest["status"] == "completed":
+                        raise ValueError("This task session is completed and cannot be changed")
             status, result = evaluate_source(source, task_id) if task_id != TASK_ID else evaluate_source(source)
             stored = None
             if session_id and isinstance(source, str):

@@ -4,9 +4,9 @@ DSL_TASK_CATALOG = {
     "knitscript": {
         "label": "KnitScript",
         "tasks": [
-            {"id": "knitscript-plain-v1", "label": "Task 01 — Plain swatch", "description": "Write a KnitScript program from scratch that produces a 10-stitch-wide rectangular stockinette swatch with six complete fabric rows. Include a secure cast-on and the required machine setup and finishing operations."},
-            {"id": "knitscript-ribbed-v1", "label": "Task 02 — Ribbed swatch", "description": "Write a KnitScript program from scratch that produces a 10-stitch-wide, six-row ribbed swatch. Alternate front- and back-bed stitches across the width. Include the required cast-on, machine setup and finishing operations."},
-            {"id": "knitscript-striped-v1", "label": "Task 03 — Striped swatch", "description": "Write a KnitScript program from scratch that produces a 10-stitch-wide stockinette swatch with two horizontal color sections. Use one yarn carrier for three fabric rows and a second carrier for the following three rows, with the required setup and finishing operations."},
+            {"id": "knitscript-plain-v1", "label": "Task 01 — Plain swatch", "description": "Write a KnitScript program from scratch that produces a 10-stitch-wide rectangular stockinette swatch with six complete fabric rows. Use a ten-needle alternating-tuck cast-on followed by two securing knit rows, release the hook, then knit six fabric rows. Finish by taking the carrier out."},
+            {"id": "knitscript-ribbed-v1", "label": "Task 02 — Ribbed swatch", "description": "Write a KnitScript program from scratch that produces a 10-stitch-wide, six-row ribbed swatch. Alternate front- and back-bed stitches across the width. Begin with a ten-needle front-bed alternating-tuck cast-on and two securing rows before releasing the hook; transfer alternating stitches to the back bed for the six fabric rows and finish by taking the carrier out."},
+            {"id": "knitscript-striped-v1", "label": "Task 03 — Striped swatch", "description": "Write a KnitScript program from scratch that produces a 10-stitch-wide stockinette swatch with two horizontal color sections. Use one yarn carrier for three fabric rows and a second carrier for the following three rows, Begin with a ten-needle alternating-tuck cast-on and two securing rows before releasing the hook. Take each carrier out after its section; the second carrier must be released correctly."},
         ],
     },
     "vega-lite": {
