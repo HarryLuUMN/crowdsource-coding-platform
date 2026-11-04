@@ -25,6 +25,9 @@ from answer_checker import TASK_ID, check_stockinette_answer
 from vega_task import TASK_ID as VEGA_TASK_ID, SALES_DATA, evaluate_vega, evaluate_vega_runtime
 from dsl_runtime import RUNTIME_TASKS, evaluate_runtime
 from study_tasks import DSL_TASK_CATALOG, TASK_DSL, LEGACY_TASK_DSL, validate_task_dsl
+from study_progress import task_progress, assert_task_unlocked
+from catalog_checks import check_knit, check_vega
+from structured_checks import check_idyll, check_penrose
 from documentation import render_documentation
 from trace_admin import TraceAdminRepository
 from trace_store import TraceStore, utc_now
@@ -159,7 +162,14 @@ def evaluate_source(source: str, task_id: str = TASK_ID) -> tuple[int, dict[str,
                 status, result = HTTPStatus.OK, evaluate_vega_runtime(source)
             finally:
                 _compile_slots.release()
-        result["check"] = {"task_id": task_id, "passed": False, "passed_count": 0, "total_count": 0, "tests": []}
+        if dsl == "knitscript":
+            result["check"] = check_knit(result, task_id)
+        elif dsl == "vega-lite":
+            result["check"] = check_vega(result, task_id)
+        elif dsl == "idyll":
+            result["check"] = check_idyll(source, result, task_id)
+        else:
+            result["check"] = check_penrose(source, result, task_id)
         return status, result
     if task_id in RUNTIME_TASKS:
         if not isinstance(source, str) or not source.strip() or len(source) > MAX_SOURCE_CHARS:
@@ -492,6 +502,7 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
         supported_paths = {
+            "/api/progress",
             "/api/run",
             "/api/submit",
             "/api/sessions",
@@ -577,7 +588,14 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                 )
                 return
 
+            if path == "/api/progress":
+                progress = task_progress(get_trace_store(), request.get("participant_id"), request.get("dsl"), request.get("recruitment"))
+                self._send_json(HTTPStatus.OK, {"ok": True, "progress": progress})
+                return
+
             if path == "/api/sessions":
+                if request.get("task_id") in TASK_DSL:
+                    assert_task_unlocked(get_trace_store(), request.get("participant_id"), request["task_id"], request.get("recruitment"))
                 validate_task_dsl(request.get("task_id", "playground"), request.get("dsl"))
                 manifest = get_trace_store().create_session(
                     participant_id=request.get("participant_id"),
@@ -620,7 +638,13 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                             events=events,
                         )
                 manifest = get_trace_store().end_session(request.get("session_id"), request.get("final_source", ""))
-                self._send_json(HTTPStatus.OK, {"ok": True, "session": manifest})
+                response = {"ok": True, "session": manifest}
+                if manifest["task_id"] in TASK_DSL:
+                    progress = task_progress(get_trace_store(), manifest["participant_id"], TASK_DSL[manifest["task_id"]], manifest.get("recruitment"))
+                    response["progress"] = progress
+                    if progress["completed"]:
+                        response["completion_url"] = build_study_config()["prolific"]["completion_url"]
+                self._send_json(HTTPStatus.OK, response)
                 return
 
             source = request.get("source")
@@ -642,13 +666,17 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
             execution_id = str(uuid.uuid4())
             task_id = request.get("task_id", TASK_ID)
             validate_task_dsl(task_id, request.get("dsl"))
-            if is_submission and (task_id in RUNTIME_TASKS or task_id in TASK_DSL):
+            if is_submission and task_id in RUNTIME_TASKS:
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": {"message": "This language currently supports Run only; study task checks are not configured."}})
                 return
+            if task_id in TASK_DSL and not isinstance(session_id, str):
+                raise ValueError("A study session is required for this task")
             if session_id:
                 manifest = get_trace_store()._read_manifest(session_id)
                 if manifest["task_id"] in {*LEGACY_TASK_DSL, *TASK_DSL} and manifest["task_id"] != task_id:
                     raise ValueError("Task does not match the study session")
+                if task_id in TASK_DSL:
+                    assert_task_unlocked(get_trace_store(), manifest["participant_id"], task_id, manifest.get("recruitment"))
             status, result = evaluate_source(source, task_id) if task_id != TASK_ID else evaluate_source(source)
             stored = None
             if session_id and isinstance(source, str):
@@ -688,7 +716,7 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                     "passed": submission["passed"],
                     "submitted_at": submission["submitted_at"],
                 }
-                if submission["passed"]:
+                if submission["passed"] and task_id not in TASK_DSL:
                     result["completion_url"] = build_study_config()["prolific"]["completion_url"]
             self._send_json(status, result)
         except ValueError as error:
