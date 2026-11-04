@@ -78,3 +78,37 @@ def evaluate_vega(source):
             "stdout": "Vega-Lite chart compiled and evaluated." if error is None else "",
             "check": {"task_id": TASK_ID, "passed": error is None and bool(tests) and passed_count == len(tests),
                       "passed_count": passed_count, "total_count": len(tests), "tests": tests}}
+
+
+def evaluate_vega_runtime(source):
+    """Compile general study charts without imposing the legacy task rubric."""
+    try:
+        spec = json.loads(source)
+        if not isinstance(spec, dict):
+            raise ValueError("The specification must be a JSON object.")
+
+        def normalize(node):
+            if isinstance(node, list):
+                for child in node:
+                    normalize(child)
+            elif isinstance(node, dict):
+                if "url" in node:
+                    if node == {"url": "/sales-data.json"}:
+                        node.clear()
+                        node["values"] = SALES_DATA
+                    else:
+                        raise ValueError("External resources are disabled. Use /sales-data.json or inline data.")
+                for value in node.values():
+                    normalize(value)
+
+        normalize(spec)
+        completed = subprocess.run(
+            ["node", "--max-old-space-size=128", str(ROOT / "scripts/vega_compile.cjs")],
+            input=json.dumps({"spec": spec}), text=True, capture_output=True, timeout=10, check=False,
+        )
+        output = json.loads(completed.stdout)
+        if completed.returncode or not output.get("ok"):
+            raise ValueError(output.get("error", "Vega-Lite compilation failed."))
+        return {"ok": True, "spec": spec, "error": None, "stdout": "Vega-Lite compiled and evaluated."}
+    except (ValueError, TypeError, AttributeError, OSError, subprocess.TimeoutExpired) as error:
+        return {"ok": False, "spec": None, "error": {"type": type(error).__name__, "message": str(error)}}

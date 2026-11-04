@@ -22,8 +22,9 @@ from urllib.request import urlopen
 from urllib.error import URLError
 
 from answer_checker import TASK_ID, check_stockinette_answer
-from vega_task import TASK_ID as VEGA_TASK_ID, SALES_DATA, evaluate_vega
+from vega_task import TASK_ID as VEGA_TASK_ID, SALES_DATA, evaluate_vega, evaluate_vega_runtime
 from dsl_runtime import RUNTIME_TASKS, evaluate_runtime
+from study_tasks import DSL_TASK_CATALOG, TASK_DSL, LEGACY_TASK_DSL, validate_task_dsl
 from documentation import render_documentation
 from trace_admin import TraceAdminRepository
 from trace_store import TraceStore, utc_now
@@ -143,6 +144,23 @@ def compile_source(source: str) -> tuple[int, dict[str, Any]]:
 
 
 def evaluate_source(source: str, task_id: str = TASK_ID) -> tuple[int, dict[str, Any]]:
+    if task_id in TASK_DSL:
+        if not isinstance(source, str) or not source.strip() or len(source) > MAX_SOURCE_CHARS:
+            return HTTPStatus.BAD_REQUEST, {"ok": False, "error": {"message": "Provide nonempty source within the 100,000 character limit."}}
+        dsl = TASK_DSL[task_id]
+        if dsl == "knitscript":
+            status, result = compile_source(source)
+        elif dsl in {"idyll", "penrose"}:
+            status, result = evaluate_source(source, f"{dsl}-playground-v1")
+        else:
+            if not _compile_slots.acquire(blocking=False):
+                return HTTPStatus.TOO_MANY_REQUESTS, {"ok": False, "error": {"message": "Compiler busy; try again."}}
+            try:
+                status, result = HTTPStatus.OK, evaluate_vega_runtime(source)
+            finally:
+                _compile_slots.release()
+        result["check"] = {"task_id": task_id, "passed": False, "passed_count": 0, "total_count": 0, "tests": []}
+        return status, result
     if task_id in RUNTIME_TASKS:
         if not isinstance(source, str) or not source.strip() or len(source) > MAX_SOURCE_CHARS:
             return HTTPStatus.BAD_REQUEST, {"ok": False, "error": {"message": "Provide nonempty source within the 100,000 character limit."}}
@@ -309,9 +327,26 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
             return None
         return request
 
+    def translate_path(self, path: str) -> str:
+        if urlparse(path).path.strip("/") in DSL_TASK_CATALOG:
+            return str(STATIC_DIR / "index.html")
+        return super().translate_path(path)
+
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         path = parsed.path
+        if path == "/api/task-catalog":
+            self._send_json(HTTPStatus.OK, {"ok": True, "catalog": DSL_TASK_CATALOG})
+            return
+        if path == "/task-catalog.js":
+            body = ("window.DSL_TASK_CATALOG = " + json.dumps(DSL_TASK_CATALOG) + ";\n").encode("utf-8")
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/javascript; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if path == "/sales-data.json":
             self._send_json(HTTPStatus.OK, SALES_DATA)
             return
@@ -543,6 +578,7 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
                 return
 
             if path == "/api/sessions":
+                validate_task_dsl(request.get("task_id", "playground"), request.get("dsl"))
                 manifest = get_trace_store().create_session(
                     participant_id=request.get("participant_id"),
                     task_id=request.get("task_id", "playground"),
@@ -605,12 +641,13 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
             requested_at = utc_now()
             execution_id = str(uuid.uuid4())
             task_id = request.get("task_id", TASK_ID)
-            if is_submission and task_id in RUNTIME_TASKS:
+            validate_task_dsl(task_id, request.get("dsl"))
+            if is_submission and (task_id in RUNTIME_TASKS or task_id in TASK_DSL):
                 self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": {"message": "This language currently supports Run only; study task checks are not configured."}})
                 return
             if session_id:
                 manifest = get_trace_store()._read_manifest(session_id)
-                if manifest["task_id"] in {TASK_ID, VEGA_TASK_ID, *RUNTIME_TASKS} and manifest["task_id"] != task_id:
+                if manifest["task_id"] in {*LEGACY_TASK_DSL, *TASK_DSL} and manifest["task_id"] != task_id:
                     raise ValueError("Task does not match the study session")
             status, result = evaluate_source(source, task_id) if task_id != TASK_ID else evaluate_source(source)
             stored = None

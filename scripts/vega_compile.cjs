@@ -13,7 +13,7 @@ process.stdin.on("end", async () => {
   let view;
   try {
     const { spec, data } = JSON.parse(input);
-    spec.data = { values: data };
+    if (data !== undefined) spec.data = { values: data };
     const compiled = sandbox.vegaLite.compile(spec).spec;
     view = new sandbox.vega.View(sandbox.vega.parse(compiled), {
       renderer: "none", loader: { load: () => Promise.reject(new Error("External data is disabled")) },
