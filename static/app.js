@@ -1162,7 +1162,7 @@ async function beginFormalTask(transition) {
 document.querySelector("#onboardingRetryButton").addEventListener("click", () => beginFormalTask("guide_retried"));
 document.querySelector("#howItWorksButton").addEventListener("click", async () => {
   if (onboardingActive || enteringFormal) return;
-  if (!formalSessionReady) return beginFormalTask("guide_reopened");
+  if (!formalSessionReady && !taskProgress?.completed) return beginFormalTask("guide_reopened");
   if (runButton.disabled && !taskProgress?.completed) return;
   if (!window.StudioOnboarding) {
     showToast("The guide could not load. Please reload to retry.");
