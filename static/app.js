@@ -804,7 +804,6 @@ function showPracticeResult(result) {
 async function executePractice(mode) {
   clearToast();
   const isSubmission = mode === "submit";
-  if (isSubmission && isRuntimeTask) return;
   const activeButton = isSubmission ? submitButton : runButton;
   runButton.disabled = true;
   submitButton.disabled = true;
