@@ -1,5 +1,9 @@
 const queryParameters = new URLSearchParams(window.location.search);
-const TASK_ID = queryParameters.get("task") === "vega-lite-sales-v1" ? "vega-lite-sales-v1" : "stockinette-swatch-v1";
+const languageTasks = { knitscript: "stockinette-swatch-v1", "vega-lite": "vega-lite-sales-v1", idyll: "idyll-playground-v1", penrose: "penrose-playground-v1" };
+const requestedTask = queryParameters.get("task");
+const TASK_ID = Object.values(languageTasks).includes(requestedTask) ? requestedTask : "stockinette-swatch-v1";
+const language = Object.keys(languageTasks).find(key => languageTasks[key] === TASK_ID);
+const isRuntimeTask = language === "idyll" || language === "penrose";
 const isVegaTask = TASK_ID === "vega-lite-sales-v1";
 const languageSelect = document.querySelector("#languageSelect");
 const taskSelect = document.querySelector("#taskSelect");
@@ -375,7 +379,7 @@ async function createTelemetrySession(initialSource, eventType, eventPayload = {
         initial_source: initialSource,
         recruitment: hasProlificParticipant ? prolificRecruitment : { source: "direct" },
         client: {
-          programming_language: isVegaTask ? "vega-lite" : "knitscript",
+          programming_language: language,
           client_instance_id: clientInstanceId,
           locale: navigator.language,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -574,7 +578,7 @@ function setStudyPhase(phase, sourceStorageScope) {
   currentStudyPhase = phase;
   const practice = phase === "practice";
   document.querySelector(".task-selectors").hidden = practice;
-  languageSelect.value = isVegaTask ? "vega-lite" : "knitscript";
+  languageSelect.value = language;
   taskSelect.replaceChildren(new Option("Task 01", TASK_ID));
   sourceStorageKey = practice
     ? `coding-platform-practice-source:v1:${sourceStorageScope}`
@@ -598,7 +602,21 @@ function setStudyPhase(phase, sourceStorageScope) {
     documentationFrame.src = "/documentation/vega-lite/docs/";
     tutorialFrame.src = "/vega-guide.html";
   }
-  knitoutTab.textContent = !practice && isVegaTask ? "Specification" : "Knitout";
+  if (!practice && isRuntimeTask) {
+    const name = language === "idyll" ? "Idyll" : "Penrose";
+    taskDescription.textContent = language === "idyll"
+      ? "Write an Idyll article from scratch. Run to compile and preview interactive components, variables, and expressions. This runtime preview does not yet include study task checks."
+      : "Write a Penrose Substance program from scratch using Set and Point objects and the supplied relationships. Run to compile and lay out the diagram with the fixed Domain and Style. This runtime preview does not yet include study task checks.";
+    fileName.textContent = language === "idyll" ? "article.idyll" : "diagram.substance";
+    editorLanguage.textContent = name;
+    editor.setAttribute("aria-label", `${name} source code`);
+    documentationFrame.title = `${name} runtime guide`;
+    tutorialFrame.title = `${name} runtime guide`;
+    documentationFrame.src = `/dsl-guide.html#${language}`;
+    tutorialFrame.src = `/dsl-guide.html#${language}`;
+  }
+  submitButton.hidden = !practice && isRuntimeTask;
+  knitoutTab.textContent = !practice && isRuntimeTask ? "Compiled output" : !practice && isVegaTask ? "Specification" : "Knitout";
   emptyStateTitle.textContent = practice ? "Run your practice program" : "Run your code against the task";
   emptyStateMessage.textContent = practice
     ? "Use Run to check the output, then Submit when the practice test passes."
@@ -692,6 +710,29 @@ function showResult(result) {
     ? `<span class="summary-pill ${check.passed ? "success" : "error"}">${check.passed_count}/${check.total_count} tests passed</span>`
     : "";
 
+  if (isRuntimeTask) {
+    runSummary.textContent = result.ok ? "Compiled — preview below" : `${editorLanguage.textContent} execution failed`;
+    consoleOutput.textContent = [result.error?.message, result.stdout, result.stderr].filter(Boolean).join("\n");
+    knitoutOutput.textContent = result.svg || (result.ast ? JSON.stringify(result.ast, null, 2) : "");
+    visualizationOutput.replaceChildren();
+    if (result.ok) {
+      const frame = document.createElement("iframe");
+      frame.title = `${editorLanguage.textContent} preview`;
+      frame.setAttribute("sandbox", "allow-scripts");
+      if (language === "idyll") {
+        frame.src = "/idyll-preview.html";
+        frame.addEventListener("load", () => frame.contentWindow.postMessage({ type: "idyll.render", ast: result.ast }, "*"));
+      } else {
+        frame.setAttribute("sandbox", "");
+        frame.srcdoc = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">${result.svg}`;
+      }
+      visualizationOutput.append(frame);
+    }
+    renderCheck(null);
+    selectTab(result.ok ? "visualization" : "console");
+    return;
+  }
+
   if (isVegaTask) {
     runSummary.textContent = result.ok ? `${check?.passed_count || 0}/${check?.total_count || 0} checks passed` : "Vega-Lite evaluation failed";
     consoleOutput.textContent = result.error?.message || result.stdout || "";
@@ -763,6 +804,7 @@ function showPracticeResult(result) {
 async function executePractice(mode) {
   clearToast();
   const isSubmission = mode === "submit";
+  if (isSubmission && isRuntimeTask) return;
   const activeButton = isSubmission ? submitButton : runButton;
   runButton.disabled = true;
   submitButton.disabled = true;
@@ -819,6 +861,7 @@ async function executeSource(mode, trigger = "button") {
   if (currentStudyPhase === "practice") return executePractice(mode);
   clearToast();
   const isSubmission = mode === "submit";
+  if (isSubmission && isRuntimeTask) return;
   const activeButton = isSubmission ? submitButton : runButton;
   runButton.disabled = true;
   submitButton.disabled = true;
@@ -988,7 +1031,7 @@ function startStudy(identityMethod) {
 languageSelect.addEventListener("change", async () => {
   if (!localTaskSelection) return;
   if (runButton.disabled || submitButton.disabled) {
-    languageSelect.value = isVegaTask ? "vega-lite" : "knitscript";
+    languageSelect.value = language;
     return;
   }
   setStudyControlsEnabled(false);
@@ -999,14 +1042,22 @@ languageSelect.addEventListener("change", async () => {
     await flushEvents();
   } finally {
     const destination = new URL(window.location.href);
-    destination.searchParams.set("task", languageSelect.value === "vega-lite" ? "vega-lite-sales-v1" : "stockinette-swatch-v1");
+    destination.searchParams.set("task", languageTasks[languageSelect.value]);
     window.location.assign(destination.href);
   }
 });
 
 window.addEventListener("message", event => {
   const frame = visualizationOutput.querySelector("iframe");
-  if (!frame || event.source !== frame.contentWindow || event.origin !== window.location.origin) return;
+  if (!frame || event.source !== frame.contentWindow) return;
+  if (language === "idyll" && event.origin === "null" && event.data?.type === "idyll.render_error") {
+    consoleOutput.textContent = String(event.data.message || "Idyll preview failed");
+    runSummary.textContent = "Idyll preview failed";
+    recordEvent("output.render_failed", { language, message: consoleOutput.textContent });
+    selectTab("console");
+    return;
+  }
+  if (event.origin !== window.location.origin) return;
   if (event.data?.type === "vega.interaction") recordEvent("output.visualization_interacted", { interaction: event.data.interaction });
   if (event.data?.type === "vega.render_error") {
     showToast("Chart preview failed — see Console");
