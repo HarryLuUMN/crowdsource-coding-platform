@@ -713,7 +713,7 @@ function renderCheck(check) {
 function showResult(result) {
   emptyState.hidden = true;
   resultContent.hidden = false;
-  const check = result.check;
+  const check = runOnlyTask ? null : result.check;
   const checkPill = check
     ? `<span class="summary-pill ${check.passed ? "success" : "error"}">${check.passed_count}/${check.total_count} tests passed</span>`
     : "";
@@ -742,7 +742,7 @@ function showResult(result) {
   }
 
   if (isVegaTask) {
-    runSummary.textContent = result.ok ? `${check?.passed_count || 0}/${check?.total_count || 0} checks passed` : "Vega-Lite evaluation failed";
+    runSummary.textContent = result.ok ? (runOnlyTask ? "Compiled — preview below" : `${check?.passed_count || 0}/${check?.total_count || 0} checks passed`) : "Vega-Lite evaluation failed";
     consoleOutput.textContent = result.error?.message || result.stdout || "";
     knitoutOutput.textContent = result.spec ? JSON.stringify(result.spec, null, 2) : "";
     visualizationOutput.replaceChildren();
