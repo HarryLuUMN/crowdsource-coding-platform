@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 import unittest
 from unittest.mock import patch
 
@@ -49,6 +51,9 @@ class SequentialApiTests(unittest.TestCase):
         self.assertFalse(failure['submission']['passed'])
         self.assertTrue(failure['trace_saved'])
         self.assertEqual(self.progress()['current_task_id'], TASKS[0])
+        with patch.object(server.get_trace_store(), 'record_execution', side_effect=OSError('execution save unavailable')):
+            self.assertEqual(self.submit(0, first)[0], 500)
+        self.assertEqual(self.progress()['current_task_id'], TASKS[0])
         for index in range(3):
             sid = first if index == 0 else self.session(index)
             status, accepted = self.submit(index, sid)
@@ -70,6 +75,29 @@ class SequentialApiTests(unittest.TestCase):
         self.assertEqual(self.progress('another-study')['current_task_id'], TASKS[0])
         server._trace_store = TraceStore(server.get_trace_store().root)
         self.assertTrue(self.progress()['completed'], 'Progress must survive a fresh store instance')
+
+    def test_all_twelve_tasks_accept_real_solutions_in_order(self):
+        from study_tasks import DSL_TASK_CATALOG
+        from tests.test_catalog_checks import KNIT_SOURCES, VEGA_SPECS
+        sources = dict(KNIT_SOURCES)
+        sources.update({task: json.dumps(spec) for task, spec in VEGA_SPECS.items()})
+        sources.update(json.loads((Path(__file__).parent / 'fixtures/structured_solutions.json').read_text()))
+        for dsl, group in DSL_TASK_CATALOG.items():
+            identity = {**self.identity(), 'dsl': dsl, 'participant_id': 'all-solutions-user'}
+            for task in group['tasks']:
+                with self.subTest(task=task['id']):
+                    status, created = self.post_json('/api/sessions', {**identity, 'task_id': task['id'], 'initial_source': ''})
+                    self.assertEqual(status, 201, created)
+                    sid = created['session']['session_id']
+                    request = {'dsl': dsl, 'task_id': task['id'], 'session_id': sid, 'source': sources[task['id']]}
+                    status, accepted = self.post_json('/api/submit', request)
+                    self.assertEqual(status, 200, accepted)
+                    self.assertTrue(accepted['check']['passed'], accepted['check'])
+                    self.assertTrue(accepted['trace_saved'])
+                    status, finalized = self.post_json('/api/sessions/end', {'session_id': sid, 'final_source': request['source']})
+                    self.assertEqual(status, 200, finalized)
+                    self.assertTrue(next(item for item in finalized['progress']['tasks'] if item['id'] == task['id'])['completed'])
+            self.assertTrue(finalized['progress']['completed'])
 
 
 if __name__ == '__main__':
