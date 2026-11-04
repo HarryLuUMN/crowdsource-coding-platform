@@ -25,7 +25,7 @@ const modules = {
   h5: require("idyll-components/dist/cjs/h5"),
   h6: require("idyll-components/dist/cjs/h6")
 };
-names.forEach(name => { components[name] = modules[name].default; });
+names.forEach(name => { components[name] = modules[name].default || modules[name]; });
 components.checkbox = components.boolean;
 
 const container = document.getElementById("article");

@@ -86,6 +86,18 @@ async function main() {
     assert.match(await evaluate("document.querySelector('#article').textContent", preview), /12/, "Reactive expressions update");
     assert.equal(await evaluate("try { localStorage.getItem('test'); false } catch(e) { e.name === 'SecurityError' }", preview), true, "Preview has opaque origin");
     assert.equal(await evaluate("fetch('/api/health').then(()=>false).catch(()=>true)", preview), true, "Preview cannot fetch application APIs");
+    const conditionalSource = JSON.parse(fs.readFileSync(path.join(root, 'tests/fixtures/structured_solutions.json'), 'utf8'))['idyll-conditional-v1'];
+    const conditionalAst = compile(conditionalSource);
+    await evaluate(`document.querySelector('#smoke-frame').contentWindow.postMessage({type:'idyll.render',ast:${JSON.stringify(conditionalAst)}},'*')`);
+    await delay(300);
+    for (const [value, expected] of [[0, 'Low'], [29, 'Low'], [30, 'Medium'], [69, 'Medium'], [70, 'High'], [100, 'High']]) {
+      await evaluate(`(()=>{const slider=document.querySelector('input[type=range]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(slider,${JSON.stringify(String(value))}); slider.dispatchEvent(new Event('input',{bubbles:true})); slider.dispatchEvent(new Event('change',{bubbles:true}));})()`, preview);
+      await delay(100);
+      const visible = await evaluate("document.querySelector('#article').innerText", preview);
+      assert.match(visible, new RegExp(expected), 'Conditional preview displays the correct range label');
+      for (const other of ['Low', 'Medium', 'High'].filter(label => label !== expected)) assert.ok(!visible.includes(other), 'Inactive conditional labels stay hidden');
+      assert.ok(!visible.includes('Could not find an implementation'), 'Built-in components resolve regardless of module export style');
+    }
     const badAst = compile('[Display value:`missingVariable + 1` /]');
     await evaluate(`document.querySelector('#smoke-frame').contentWindow.postMessage({type:'idyll.render',ast:${JSON.stringify(badAst)}},'*')`);
     await delay(200);
