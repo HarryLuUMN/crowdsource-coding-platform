@@ -162,3 +162,11 @@ Regression commands:
 .venv/bin/python -m unittest discover -s tests -v
 STUDIO_URL=http://127.0.0.1:8000 node tests/sequential_browser.cjs
 ```
+
+## Participant interface guide
+
+Intro.js 8.6.0 provides a seven-step guide after practice and before the first formal task on each DSL path. It explains levels, task requirements, editing, supplied documentation, Run, passing checks and Submit/save/advance. Participants must finish the guide before formal controls and telemetry start. Closing or failing to load the guide leaves a retry notice. Completion is remembered locally by participant, DSL, study and session; later tasks do not repeat the guide automatically.
+
+“How it works” reopens the guide without changing source, running programs or submitting work. During replay, formal event recording pauses and client elapsed time excludes the guide duration; server wall-clock timestamps remain unchanged. Practice and required onboarding never create formal sessions through the periodic uploader. Intro.js is served locally, without a CDN; `npm run build` copies its JS, CSS and AGPL license into generated vendor assets. Editor CSP permits inline style attributes required for tooltip positioning while retaining same-origin scripts and no inline script execution.
+
+Run `STUDIO_URL=http://127.0.0.1:8000 node tests/onboarding_browser.cjs` for guide completion, cancel/retry, resource failure, replay isolation and reload tests. Existing browser regression tests also finish the real guide before exercising submissions.
