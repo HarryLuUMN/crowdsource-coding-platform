@@ -100,6 +100,11 @@ const hooks = `
       telemetryStorageKey = "knitscript-telemetry-outbox:test";
       persistTelemetryOutbox();
     },
+    editDraftBeforeSaveTimer(key, value) {
+      sourceStorageKey = key;
+      editor.value = value;
+      persistSource();
+    },
     simulateReload() {
       telemetrySessionId = null;
       telemetrySeq = 0;
@@ -157,6 +162,9 @@ async function run() {
   storedValues.delete(outboxKey);
 
   context.__telemetryTest.begin("session-pagehide-test");
+  context.__telemetryTest.editDraftBeforeSaveTimer(sourceKey, "last edit before an immediate refresh");
+  windowListeners.get("pagehide")({ persisted: false });
+  assert.equal(storedValues.get(sourceKey), "last edit before an immediate refresh", "pagehide must save the current draft before the debounce timer fires");
   context.__telemetryTest.recordEvent("editor.edit", { inserted_text: "x" });
   await context.__telemetryTest.flushEvents();
 

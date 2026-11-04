@@ -1044,6 +1044,10 @@ document.addEventListener("visibilitychange", () => {
 });
 
 window.addEventListener("pagehide", () => {
+  clearTimeout(saveTimer);
+  if (sourceStorageKey && !telemetryEnded && !taskProgress?.completed) {
+    try { localStorage.setItem(sourceStorageKey, editor.value); } catch (_) {}
+  }
   recordDocumentationView();
   recordTutorialView();
   if (!telemetrySessionId || telemetryEnded) return;
