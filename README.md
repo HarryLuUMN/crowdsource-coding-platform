@@ -132,3 +132,5 @@ node tests/idyll_runtime.cjs
 node tests/penrose_runtime.cjs
 .venv/bin/python -m unittest tests.test_dsl_runtime -v
 ```
+
+Dependency audit note: the pinned stable Idyll packages retain upstream advisories in legacy transitive packages (including charting, syntax-highlighting, CSV and tooltip dependencies). The preview bundles only selected components; CSV imports and networking are disabled. This does not constitute a clean dependency audit or a production sandbox review. Container changes have not been build-tested when Docker is unavailable.
