@@ -23,6 +23,7 @@ from urllib.error import URLError
 
 from answer_checker import TASK_ID, check_stockinette_answer
 from vega_task import TASK_ID as VEGA_TASK_ID, SALES_DATA, evaluate_vega
+from dsl_runtime import RUNTIME_TASKS, evaluate_runtime
 from documentation import render_documentation
 from trace_admin import TraceAdminRepository
 from trace_store import TraceStore, utc_now
@@ -142,6 +143,15 @@ def compile_source(source: str) -> tuple[int, dict[str, Any]]:
 
 
 def evaluate_source(source: str, task_id: str = TASK_ID) -> tuple[int, dict[str, Any]]:
+    if task_id in RUNTIME_TASKS:
+        if not isinstance(source, str) or not source.strip() or len(source) > MAX_SOURCE_CHARS:
+            return HTTPStatus.BAD_REQUEST, {"ok": False, "error": {"message": "Provide nonempty source within the 100,000 character limit."}}
+        if not _compile_slots.acquire(blocking=False):
+            return HTTPStatus.TOO_MANY_REQUESTS, {"ok": False, "error": {"message": "Compiler busy; try again."}}
+        try:
+            return evaluate_runtime(source, task_id)
+        finally:
+            _compile_slots.release()
     if task_id == VEGA_TASK_ID:
         if not isinstance(source, str) or len(source) > MAX_SOURCE_CHARS:
             return HTTPStatus.BAD_REQUEST, {"ok": False, "error": {"message": "Invalid source or source too large."}, "check": {"passed": False}}
@@ -185,7 +195,13 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
 
     def end_headers(self) -> None:
         path = urlparse(self.path).path
-        is_embeddable_guide = path.startswith("/documentation/") or path in {"/tutorial.html", "/vega-guide.html", "/vega-preview.html"}
+        if path == "/idyll-preview.html":
+            self.send_header("Content-Security-Policy", "default-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'; form-action 'none'; sandbox allow-scripts")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("X-Frame-Options", "SAMEORIGIN")
+            self.send_header("Referrer-Policy", "no-referrer")
+            return super().end_headers()
+        is_embeddable_guide = path.startswith("/documentation/") or path in {"/tutorial.html", "/vega-guide.html", "/vega-preview.html", "/dsl-guide.html"}
         self.send_header(
             "Content-Security-Policy",
             ("default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; " if path == "/vega-preview.html" else "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; ")
@@ -589,9 +605,12 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
             requested_at = utc_now()
             execution_id = str(uuid.uuid4())
             task_id = request.get("task_id", TASK_ID)
+            if is_submission and task_id in RUNTIME_TASKS:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"ok": False, "error": {"message": "This language currently supports Run only; study task checks are not configured."}})
+                return
             if session_id:
                 manifest = get_trace_store()._read_manifest(session_id)
-                if manifest["task_id"] in {TASK_ID, VEGA_TASK_ID} and manifest["task_id"] != task_id:
+                if manifest["task_id"] in {TASK_ID, VEGA_TASK_ID, *RUNTIME_TASKS} and manifest["task_id"] != task_id:
                     raise ValueError("Task does not match the study session")
             status, result = evaluate_source(source, task_id) if task_id != TASK_ID else evaluate_source(source)
             stored = None
