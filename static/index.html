@@ -23,7 +23,8 @@
             <h1>Task Description</h1>
             <div class="task-selectors">
               <label>Language <select id="languageSelect" disabled><option value="knitscript">KnitScript</option><option value="vega-lite">Vega-Lite</option><option value="idyll">Idyll</option><option value="penrose">Penrose</option></select></label>
-              <label>Task <select id="taskSelect" disabled><option value="stockinette-swatch-v1">Task 01</option></select></label>
+              <label id="taskDropdown">Task <select id="taskSelect" disabled><option value="stockinette-swatch-v1">Task 01</option></select></label>
+              <ol id="taskProgress" class="task-progress" aria-label="Task progress" hidden></ol>
             </div>
             <p id="taskDescription">Write a KnitScript program that produces a 10-stitch-wide stockinette swatch on the front bed. The swatch should begin with a secure cast-on, transition cleanly into the main fabric, and contain six complete stockinette rows. Keep the fabric within the intended width and avoid operations that alter its basic structure. Run your code to evaluate the result, then submit when all tests pass.</p>
             <p class="independent-work-warning" role="note"><strong>Independent work only.</strong> Do not use AI assistants, search engines, external documentation, code-generation tools, or help from other people. You may use only the Documentation and Tutorial provided in this platform.</p>
@@ -164,6 +165,6 @@
     <script src="/knitout-visualizer.js?v=1" defer></script>
     <script src="/practice-task.js?v=1" defer></script>
     <script src="/task-catalog.js" defer></script>
-    <script src="/app.js?v=28" defer></script>
+    <script src="/app.js?v=29" defer></script>
   </body>
 </html>

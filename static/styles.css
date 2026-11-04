@@ -266,3 +266,56 @@ button { color: inherit; }
   border: 0;
   background: #fff;
 }
+
+.task-progress {
+  display: flex;
+  align-items: flex-start;
+  width: min(100%, 330px);
+  margin: 0;
+  padding: 2px 0 0;
+  list-style: none;
+}
+.task-step {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+.task-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: calc(50% + 17px);
+  width: calc(100% - 34px);
+  height: 2px;
+  background: var(--line);
+}
+.task-step-dot {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid #63655c;
+  border-radius: 50%;
+  background: #4b4d45;
+  color: var(--panel);
+  font-size: 13px;
+  font-weight: 800;
+}
+.task-step.current { color: var(--warning); }
+.task-step.current .task-step-dot {
+  background: var(--warning);
+  border-color: var(--warning);
+  box-shadow: 0 0 0 4px rgba(246, 199, 109, 0.12);
+}
+.task-step.passed { color: var(--success); }
+.task-step.passed .task-step-dot {
+  background: var(--success);
+  border-color: var(--success);
+}
+.task-step.passed::after { background: var(--success); }

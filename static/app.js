@@ -594,6 +594,26 @@ function setStudyPhase(phase, sourceStorageScope) {
     option.disabled = Boolean(state && (state.completed || !state.unlocked));
     return option;
   }) : [new Option("Task 01", TASK_ID)]));
+  const progressBar = document.querySelector("#taskProgress");
+  progressBar.hidden = !pathTaskSet;
+  document.querySelector("#taskDropdown").hidden = Boolean(pathTaskSet);
+  progressBar.replaceChildren(...(pathTaskSet ? pathTaskSet.tasks.map((task, index) => {
+    const state = taskProgress?.tasks.find(item => item.id === task.id);
+    const status = state?.completed ? "passed" : task.id === taskProgress?.current_task_id ? "current" : "locked";
+    const step = document.createElement("li");
+    step.className = `task-step ${status}`;
+    step.title = `${task.label} — ${status === "passed" ? "Passed" : status === "current" ? "Current task" : "Locked"}`;
+    step.setAttribute("aria-label", `Level ${index + 1}: ${status}`);
+    if (status === "current") step.setAttribute("aria-current", "step");
+    const dot = document.createElement("span");
+    dot.className = "task-step-dot";
+    dot.setAttribute("aria-hidden", "true");
+    dot.textContent = status === "passed" ? "✓" : status === "locked" ? "" : "";
+    const label = document.createElement("span");
+    label.textContent = `Level ${index + 1}`;
+    step.append(dot, label);
+    return step;
+  }) : []));
   sourceStorageKey = practice
     ? `coding-platform-practice-source:v1:${sourceStorageScope}`
     : `knitscript-studio-source:${TASK_ID}:from-scratch-v1:${sourceStorageScope}`;
@@ -915,6 +935,15 @@ async function executeSource(mode, trigger = "button") {
         showToast("Submission passed, but saving is incomplete. Please retry Submit before continuing.");
       } else if (selectedTask && finalizationResult?.progress) {
         taskProgress = finalizationResult.progress;
+        if (!taskProgress.current_task_id) {
+          document.querySelectorAll("#taskProgress .task-step").forEach(step => {
+            step.className = "task-step passed";
+            step.removeAttribute("aria-current");
+            step.setAttribute("aria-label", `${step.lastElementChild.textContent}: passed`);
+            step.title = `${step.lastElementChild.textContent} — Passed`;
+            step.firstElementChild.textContent = "✓";
+          });
+        }
         if (taskProgress.current_task_id) {
           const destination = new URL(window.location.href);
           destination.searchParams.set("task", taskProgress.current_task_id);
