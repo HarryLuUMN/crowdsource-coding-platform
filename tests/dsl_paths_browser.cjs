@@ -69,7 +69,8 @@ async function main() {
       assert.equal(await evaluate("document.querySelector('#taskSelect').options.length"), 3);
       assert.equal(await evaluate("document.querySelector('#taskSelect').value"), firstTask);
       assert.equal(await evaluate("document.querySelector('#taskSelect').disabled"), false);
-      assert.equal(await evaluate("document.querySelector('#submitButton').hidden"), true, "Catalog tasks do not claim study acceptance");
+      assert.equal(await evaluate("document.querySelector('#submitButton').hidden"), false, "Catalog tasks support checked submission");
+      assert.equal(await evaluate("document.querySelector('#taskSelect').options[1].disabled && document.querySelector('#taskSelect').options[2].disabled"), true, "Later tasks stay locked");
     };
     await navigate(`${base}/knitscript${parameters}`);
     await enterSource('print("Hello, coding platform!")');
@@ -86,16 +87,15 @@ async function main() {
     const draft = '[var name:"quantity" value:2 /]\n[Display value:quantity /]';
     await enterSource(draft);
     await evaluate("document.querySelector('#taskSelect').value='idyll-converter-v1'; document.querySelector('#taskSelect').dispatchEvent(new Event('change',{bubbles:true}));");
-    await waitFor("location.search.includes('task=idyll-converter-v1') && document.querySelector('#taskSelect').value==='idyll-converter-v1' && !document.querySelector('#runButton').disabled", "Task switch did not load the selected task");
-    assert.equal(await evaluate("document.querySelector('#sourceEditor').value"), "", "Task source is isolated");
+    assert.equal(await evaluate("document.querySelector('#taskSelect').value"), "idyll-calculator-v1", "Task selector rejects skipping");
+    await evaluate("flushEvents()");
+    await delay(500);
+    await navigate(`${base}/idyll${parameters}&task=idyll-conditional-v1`);
+    await waitFor("document.querySelector('#taskSelect').value==='idyll-calculator-v1' && !document.querySelector('#runButton').disabled", "Direct URL did not restore current unlocked task");
+    assert.equal(await evaluate("document.querySelector('#sourceEditor').value"), draft, "Current task draft survives skip rejection and reload");
     for (const [key, value] of [["PROLIFIC_PID", "path-smoke-user"], ["STUDY_ID", "path-smoke-study"], ["SESSION_ID", "path-smoke-session"]]) {
-      assert.equal(await evaluate(`new URL(location.href).searchParams.get(${JSON.stringify(key)})`), value, "Recruitment parameters survive task switching");
+      assert.equal(await evaluate(`new URL(location.href).searchParams.get(${JSON.stringify(key)})`), value);
     }
-    await send("Page.reload", {}, sessionId);
-    await waitFor("document.readyState==='complete' && document.querySelector('#taskSelect')?.value==='idyll-converter-v1' && !document.querySelector('#runButton').disabled", "Reload did not retain task selection");
-    await evaluate("document.querySelector('#taskSelect').value='idyll-calculator-v1'; document.querySelector('#taskSelect').dispatchEvent(new Event('change',{bubbles:true}));");
-    await waitFor("location.search.includes('task=idyll-calculator-v1') && document.querySelector('#taskSelect').value==='idyll-calculator-v1' && !document.querySelector('#runButton').disabled", "Return task switch failed");
-    assert.equal(await evaluate("document.querySelector('#sourceEditor').value"), draft, "Returning to a task restores its saved source");
     await navigate(`${base}/vega-lite${parameters}`);
     const chart = { data: { url: "/sales-data.json" }, mark: "bar", encoding: { x: { field: "category", type: "nominal" }, y: { field: "sales", aggregate: "sum", type: "quantitative" } } };
     await enterSource(JSON.stringify(chart));
@@ -108,7 +108,7 @@ async function main() {
     await evaluate("document.querySelector('#runButton').click()");
     await waitFor("!document.querySelector('#runButton').disabled && !!document.querySelector('#visualizationOutput iframe')", "Penrose path did not render diagram", 25000);
     assert.equal(await evaluate("document.querySelector('#visualizationOutput iframe').getAttribute('sandbox')"), "", "Penrose SVG remains script-free");
-    console.log("DSL paths: four task sets, onboarding, language locks, task isolation/restoration, URL identity, Vega aggregation and Penrose rendering passed.");
+    console.log("DSL paths: four task sets, onboarding, language locks, sequential locks/draft restoration, URL identity, Vega aggregation and Penrose rendering passed.");
   } finally {
     socket?.close();
     browser.kill();

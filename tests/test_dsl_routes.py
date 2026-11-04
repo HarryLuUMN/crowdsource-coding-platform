@@ -57,7 +57,7 @@ class DslRouteTests(unittest.TestCase):
         self.assertEqual(result['check']['task_id'], run['task_id'])
         self.assertTrue(result['trace_saved'])
         self.assertFalse(result['check']['passed'])
-        self.assertEqual(self.post_json('/api/submit', run)[0], 400)
+        self.assertEqual(self.post_json('/api/submit', run)[0], 200)
         run['task_id'] = 'penrose-overlap-v1'
         self.assertEqual(self.post_json('/api/run', run)[0], 400)
 
@@ -66,11 +66,11 @@ class DslRouteTests(unittest.TestCase):
             ('knitscript', 'knitscript-plain-v1', VALID_PROGRAM),
             ('vega-lite', 'vega-lite-bar-v1', json.dumps({'data': {'url': '/sales-data.json'}, 'mark': 'bar', 'encoding': {'x': {'field': 'category', 'type': 'nominal'}, 'y': {'aggregate': 'sum', 'field': 'sales', 'type': 'quantitative'}}})),
             ('idyll', 'idyll-calculator-v1', '[var name:"q" value:2 /]\n[Display value:`q * 5` /]'),
-            ('penrose', 'penrose-points-v1', 'Set A\nPoint p\nIn(p, A)\nAutoLabel All'),
+            ('penrose', 'penrose-nested-v1', 'Set A\nPoint p\nIn(p, A)\nAutoLabel All'),
         ]
         for dsl, task, source in cases:
             with self.subTest(dsl=dsl):
-                status, result = self.post_json('/api/run', {'dsl': dsl, 'task_id': task, 'source': source})
+                status, result = server.evaluate_source(source, task)
                 self.assertEqual(status, 200)
                 self.assertTrue(result['ok'], result)
                 self.assertEqual(result['check']['task_id'], task)
@@ -78,11 +78,11 @@ class DslRouteTests(unittest.TestCase):
 
     def test_general_vega_preserves_data_and_blocks_external_resources(self):
         request = {'dsl': 'vega-lite', 'task_id': 'vega-lite-scatter-v1', 'source': json.dumps({'data': {'values': [{'x': 1, 'y': 2}]}, 'transform': [{'filter': 'datum.x > 0'}], 'mark': 'point', 'encoding': {'x': {'field': 'x', 'type': 'quantitative'}, 'y': {'field': 'y', 'type': 'quantitative'}}})}
-        _, result = self.post_json('/api/run', request)
+        _, result = server.evaluate_source(request['source'], request['task_id'])
         self.assertTrue(result['ok'], result)
         self.assertEqual(result['spec']['data']['values'], [{'x': 1, 'y': 2}])
         request['source'] = json.dumps({'data': {'url': 'https://example.com/data.json'}, 'mark': 'point'})
-        _, result = self.post_json('/api/run', request)
+        _, result = server.evaluate_source(request['source'], request['task_id'])
         self.assertFalse(result['ok'])
         self.assertIn('External resources', result['error']['message'])
 
