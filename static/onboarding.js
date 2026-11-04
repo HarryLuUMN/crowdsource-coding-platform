@@ -22,6 +22,12 @@
       return { element, title, intro: description, position: "bottom" };
     });
     if (steps.some(step => !step.element || step.element.hidden)) return Promise.resolve(false);
+    const highlightAction = target => {
+      document.querySelectorAll(".studio-onboarding-action").forEach(element => element.classList.remove("studio-onboarding-action"));
+      const isAction = target?.id === "runButton" || target?.id === "submitButton";
+      document.body.classList.toggle("studio-onboarding-action-step", Boolean(isAction));
+      if (isAction) target.classList.add("studio-onboarding-action");
+    };
     const previousFocus = document.activeElement;
     let completed = false;
     pendingTour = new Promise(resolve => {
@@ -29,6 +35,7 @@
       const finish = success => {
         if (settled) return;
         settled = true;
+        highlightAction(null);
         activeTour = null;
         pendingTour = null;
         if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus({ preventScroll: true });
@@ -55,6 +62,7 @@
           overlayOpacity: 0.65,
           helperElementPadding: 6
         });
+        activeTour.onAfterChange(highlightAction);
         activeTour.onComplete((_step, reason) => { completed = reason === "done" || reason === "end"; });
         activeTour.onExit(() => finish(completed));
         Promise.resolve(activeTour.start()).catch(() => finish(false));

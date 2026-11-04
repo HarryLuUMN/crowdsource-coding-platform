@@ -70,3 +70,18 @@
 .studio-onboarding-tooltip .introjs-arrow.left { border-right-color: var(--panel-raised); }
 .studio-onboarding-tooltip .introjs-arrow.right { border-left-color: var(--panel-raised); }
 .studio-onboarding-highlight { border-radius: 7px; }
+
+.studio-onboarding-action-step .introjs-helperLayer {
+  border: 3px solid var(--warning);
+  border-radius: 12px;
+  box-shadow: 0 0 0 6px rgba(246, 199, 109, 0.22), 0 0 28px rgba(246, 199, 109, 0.35);
+}
+#runButton.studio-onboarding-action,
+#submitButton.studio-onboarding-action {
+  opacity: 1;
+  outline: 2px solid var(--warning);
+  outline-offset: 2px;
+  background: var(--accent);
+  color: #171910;
+  box-shadow: 0 0 18px rgba(246, 199, 109, 0.3);
+}
