@@ -95,7 +95,7 @@ async function main() {
     await navigate(url);
     await waitFor("!document.querySelector('#submitButton').disabled", "Practice controls should load");
     assert.equal(await evaluate("document.querySelector('#howItWorksButton').hidden"), false);
-    assert.equal(await evaluate("document.querySelector('#howItWorksButton').textContent"), 'Start UI Tutorial');
+    assert.equal(await evaluate("document.querySelector('#howItWorksButton').textContent"), 'Launch User Onboarding');
     await evaluate("document.querySelector('#howItWorksButton').click()");
     await waitFor("onboardingActive && !!document.querySelector('.introjs-tooltip')", "Visible tutorial button must work during practice");
     assert.equal(await evaluate("currentStudyPhase"), 'practice');
