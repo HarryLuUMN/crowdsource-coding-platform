@@ -91,14 +91,18 @@ class ServerApiTests(unittest.TestCase):
         except HTTPError as error:
             return error.code, json.loads(error.read())
 
-    def test_studio_includes_a_tutorial_panel_and_official_documentation_link(self) -> None:
+    def test_studio_starts_with_embedded_python_practice_resources(self) -> None:
         status, html = self.get_text("/")
 
         self.assertEqual(200, status)
         self.assertIn('id="tutorialFrame"', html)
         self.assertIn('data-documentation-view="tutorial"', html)
         self.assertIn('id="documentationPanel"', html)
-        self.assertIn('src="/documentation/"', html)
+        self.assertIn('src="/python-guide.html"', html)
+        self.assertIn('src="/python-guide.html#practice-walkthrough"', html)
+        with urlopen(self.base_url + '/python-guide.html') as response:
+            self.assertEqual('SAMEORIGIN', response.headers['X-Frame-Options'])
+            self.assertIn(b'Python basics', response.read())
         self.assertIn('sandbox="allow-same-origin"', html)
         self.assertIn('data-documentation-view="documentation"', html)
 
