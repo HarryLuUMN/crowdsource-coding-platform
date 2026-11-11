@@ -229,7 +229,7 @@ class KnitScriptHandler(SimpleHTTPRequestHandler):
             self.send_header("X-Frame-Options", "SAMEORIGIN")
             self.send_header("Referrer-Policy", "no-referrer")
             return super().end_headers()
-        is_embeddable_guide = path.startswith("/documentation/") or path in {"/tutorial.html", "/vega-guide.html", "/vega-preview.html", "/dsl-guide.html"}
+        is_embeddable_guide = path.startswith("/documentation/") or path in {"/tutorial.html", "/python-guide.html", "/vega-guide.html", "/vega-preview.html", "/dsl-guide.html"}
         self.send_header(
             "Content-Security-Policy",
             ("default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; " if path == "/vega-preview.html" else "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; ")

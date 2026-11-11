@@ -86,7 +86,8 @@ button { color: inherit; }
 
 .guide-panel { min-width: 0; border: 1px solid var(--line); background: linear-gradient(105deg, rgba(229, 255, 111, 0.08), transparent 42%), var(--panel); display: flex; overflow: hidden; }
 .guide-view { flex: 1; min-width: 0; padding: 20px 24px; overflow: auto; }
-.task-guide { display: flex; align-items: center; }
+.task-guide { display: flex; align-items: flex-start; }
+#taskDescription { white-space: pre-line; }
 .task-phase-badge { display: inline-flex; margin-bottom: 9px; border: 1px solid rgba(246, 199, 109, .42); border-radius: 999px; padding: 5px 9px; color: var(--warning); background: rgba(246, 199, 109, .08); font-size: 10px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
 .task-copy h1 { margin: 0 0 8px; font-size: 20px; line-height: 1.2; font-weight: 700; }
 .task-copy p { max-width: 1040px; margin: 0; color: #c9c8c1; font-size: 14px; line-height: 1.62; font-weight: 450; }
@@ -140,8 +141,6 @@ button { color: inherit; }
 .line-numbers { margin: 0; min-width: 53px; padding: 19px 13px 24px 8px; color: #55574f; text-align: right; user-select: none; overflow: hidden; border-right: 1px solid #292a26; }
 #sourceEditor { flex: 1; min-width: 0; resize: none; border: 0; outline: 0; color: #e5e4de; caret-color: var(--accent); background: transparent; padding: 19px 20px 24px; white-space: pre; overflow: auto; }
 #sourceEditor::selection { background: rgba(229, 255, 111, 0.22); }
-.panel-footer { height: 31px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 17px; align-items: center; padding: 0 13px; color: var(--faint); font: 10px/1 ui-monospace, monospace; }
-.panel-footer span:first-child { margin-right: auto; }
 
 .result-heading { justify-content: space-between; }
 .result-actions { display: flex; align-items: center; gap: 7px; }

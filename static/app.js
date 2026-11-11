@@ -359,6 +359,7 @@ function initializeDocumentationTools() {
     recordEvent("guide.documentation_jumped_to_top", documentationEventPayload());
   });
   documentationFrame.addEventListener("load", () => {
+    documentationFrame.contentWindow?.scrollTo(0, 0);
     clearDocumentationHighlights();
     updateDocumentationSearchControls();
     if (documentationSearch.value.trim()) searchDocumentation();
@@ -626,8 +627,18 @@ function setStudyPhase(phase, sourceStorageScope) {
     : `knitscript-studio-source:${TASK_ID}:from-scratch-v1:${sourceStorageScope}`;
   taskPhaseBadge.hidden = !practice;
   taskDescription.textContent = practice
-    ? "This short practice task is only for learning how to use the coding platform. It is not part of the formal study, and the formal task may use a different programming language. Write a Python program that prints exactly: Hello, coding platform! Use Run to check your program, then Submit to continue to the formal task."
+    ? "This is a practice task to help you learn how to use the coding tool.\n\nFor this practice task, write a Python program that prints exactly:\n\nHello, coding platform!\n\nUse the \"Run\" button to test your program. When you are finished, click \"Submit.\""
     : "Write a KnitScript program that produces a 10-stitch-wide stockinette swatch on the front bed. The swatch should begin with a secure cast-on, transition cleanly into the main fabric, and contain six complete stockinette rows. Keep the fabric within the intended width and avoid operations that alter its basic structure. Run your code to evaluate the result, then submit when all tests pass.";
+  document.querySelector(".independent-work-warning").textContent = practice
+    ? 'As with all tasks, do not use AI assistants, search engines, external documentation, code generation tools, or help from other people. Use instead the "Documentation" and "Tutorial" tabs on the right.'
+    : 'Independent work only. Do not use AI assistants, search engines, external documentation, code-generation tools, or help from other people. You may use only the Documentation and Tutorial provided in this platform.';
+  document.querySelector(".task-guide").scrollTop = 0;
+  documentationSearch.value = "";
+  documentationFrame.title = practice ? "Python basics documentation" : "KnitScript documentation";
+  tutorialFrame.title = practice ? "Python practice tutorial" : "Knitting background tutorial";
+  documentationFrame.src = practice ? "/python-guide.html" : "/documentation/";
+  tutorialFrame.src = practice ? "/python-guide.html#practice-walkthrough" : "/tutorial.html";
+  document.querySelector("#documentationPanel").setAttribute("aria-label", practice ? "Python learning resources" : `${language} learning resources`);
   fileName.textContent = practice ? "practice.py" : "swatch.ks";
   editorLanguage.textContent = practice ? "Python" : "KnitScript";
   editor.setAttribute("aria-label", practice ? "Python practice source code" : "KnitScript source code");

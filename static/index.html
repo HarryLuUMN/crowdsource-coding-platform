@@ -7,13 +7,16 @@
     <title>CrowdCode</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/vendor/introjs.css" />
-    <link rel="stylesheet" href="/styles.css?v=25" />
+    <link rel="stylesheet" href="/styles.css?v=26" />
     <link rel="stylesheet" href="/onboarding.css?v=3" />
   </head>
   <body>
     <div hidden>
       <span id="compilerState"><i></i> Compiler ready</span>
       <span id="studyState">Preview mode</span>
+      <span id="saveState"></span>
+      <span id="cursorPosition"></span>
+      <span id="editorLanguage"></span>
       <button id="resetButton" type="button">Clear editor</button>
     </div>
 
@@ -40,7 +43,6 @@
         <div class="panel editor-panel">
           <div class="panel-heading">
             <div class="file-tab"><span class="file-dot"></span><span id="fileName">swatch.ks</span></div>
-            <span class="save-state" id="saveState">Saved locally</span>
           </div>
           <div class="editor-shell">
             <pre class="line-numbers" id="lineNumbers" aria-hidden="true">1</pre>
@@ -51,11 +53,6 @@
               autocapitalize="off"
               spellcheck="false"
             ></textarea>
-          </div>
-          <div class="panel-footer">
-            <span id="cursorPosition">Ln 1, Col 1</span>
-            <span id="editorLanguage">KnitScript</span>
-            <span>UTF-8</span>
           </div>
         </div>
 
@@ -113,7 +110,6 @@
                 <button class="documentation-view-tab active" data-documentation-view="documentation" role="tab" aria-selected="true" type="button">Documentation</button>
                 <button class="documentation-view-tab" data-documentation-view="tutorial" role="tab" aria-selected="false" type="button">Tutorial</button>
               </div>
-              <span class="save-state">Read only</span>
             </div>
             <div class="documentation-tools" role="search">
               <label class="documentation-search">
@@ -126,8 +122,8 @@
               <button class="documentation-top-button" id="documentationJumpTop" type="button" title="Jump to page top">↑ Top</button>
             </div>
           </div>
-          <iframe id="documentationFrame" title="KnitScript documentation" src="/documentation/" sandbox="allow-same-origin" referrerpolicy="no-referrer"></iframe>
-          <iframe id="tutorialFrame" title="Knitting background tutorial" src="/tutorial.html" sandbox="allow-same-origin" referrerpolicy="no-referrer" hidden></iframe>
+          <iframe id="documentationFrame" title="Python basics documentation" src="/python-guide.html" sandbox="allow-same-origin" referrerpolicy="no-referrer"></iframe>
+          <iframe id="tutorialFrame" title="Python practice tutorial" src="/python-guide.html#practice-walkthrough" sandbox="allow-same-origin" referrerpolicy="no-referrer" hidden></iframe>
         </aside>
       </section>
     </main>
@@ -170,6 +166,6 @@
     <script src="/task-catalog.js" defer></script>
     <script src="/vendor/introjs.js" defer></script>
     <script src="/onboarding.js?v=4" defer></script>
-    <script src="/app.js?v=33" defer></script>
+    <script src="/app.js?v=34" defer></script>
   </body>
 </html>

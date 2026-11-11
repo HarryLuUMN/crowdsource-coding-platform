@@ -96,6 +96,14 @@ async function main() {
     await waitFor("!document.querySelector('#submitButton').disabled", "Practice controls should load");
     assert.equal(await evaluate("document.querySelector('#howItWorksButton').hidden"), false);
     assert.equal(await evaluate("document.querySelector('#howItWorksButton').textContent"), 'Launch User Onboarding');
+    assert.equal(await evaluate("document.querySelector('#documentationFrame').getAttribute('src')"), '/python-guide.html');
+    await waitFor("document.querySelector('#documentationFrame').contentDocument?.querySelector('h1')?.textContent === 'Python basics'", "Python practice documentation must load inside the frame");
+    assert.equal(await evaluate("document.querySelector('#documentationFrame').contentWindow.scrollY"), 0);
+    assert.equal(await evaluate("document.querySelector('.task-guide').scrollTop"), 0);
+    assert.equal(await evaluate("document.querySelector('#taskDescription').getBoundingClientRect().top >= document.querySelector('.task-guide').getBoundingClientRect().top"), true);
+    assert.equal(await evaluate("!!document.querySelector('.panel-footer')"), false);
+    assert.equal(await evaluate("document.querySelector('#saveState').getClientRects().length"), 0);
+    await screenshot('practice-layout');
     await evaluate("document.querySelector('#howItWorksButton').click()");
     await waitFor("onboardingActive && !!document.querySelector('.introjs-tooltip')", "Visible tutorial button must work during practice");
     assert.equal(await evaluate("currentStudyPhase"), 'practice');
