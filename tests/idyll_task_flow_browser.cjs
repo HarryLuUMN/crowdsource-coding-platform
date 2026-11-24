@@ -89,7 +89,7 @@ async function main() {
     };
     const screenshot = async name => {
       await delay(300);
-      const shot = await send('Page.captureScreenshot', {format:'png',captureBeyondViewport:true}, sessionId);
+      const shot = await send('Page.captureScreenshot', {format:'png',captureBeyondViewport:false}, sessionId);
       fs.writeFileSync(`/tmp/intro-${name}.png`, Buffer.from(shot.data,'base64'));
     };
     const enterSource = async source => {
@@ -117,7 +117,8 @@ async function main() {
       assert.equal(await evaluate("document.querySelector('#taskArticleText').textContent === selectedTask.article"), true);
       await evaluate("window.copiedTaskArticle = null; navigator.clipboard.writeText = async text => { window.copiedTaskArticle = text; }; document.querySelector('#copyTaskArticle').click()");
       await waitFor("window.copiedTaskArticle === selectedTask.article", "Copy article must copy only the supplied Markdown");
-      await evaluate("document.querySelector('#taskArticle').scrollIntoView({block:'center'})");
+      await evaluate("document.querySelector('#taskArticle').scrollIntoView({block:'start'})");
+      assert.equal(await evaluate("(() => {const guide=document.querySelector('.task-guide').getBoundingClientRect(),button=document.querySelector('#copyTaskArticle').getBoundingClientRect();return button.top >= guide.top && button.bottom <= guide.bottom;})()"), true, 'Copy article must be reachable and visible in the scrollable task panel');
       await screenshot(`article-${task}`);
       await enterSource(advanced[task]);
       await evaluate("document.querySelector('[data-tab=visualization]').click(); document.querySelector('#runButton').click()");

@@ -43,6 +43,7 @@ Move the slider to explore the value.
 [Range value:length min:0 max:12 step:1 /]
 Length: [Display value:length /]
 Twice the length: [Display value:doubleLength /]</code></pre>
+        <p>Declare input variables first. Define each derived value after the variables or derived values it depends on; do not initialize a var from a derived value. The preview evaluates declarations in dependency order as written.</p>
         <p>A derived value is a formula, rather than a fixed initial number. Use the same variable name consistently in the control, formula, and displayed output.</p>
         <h3>Arithmetic and comparisons</h3>
         <p>Arithmetic supports <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code>, and parentheses. Write multiplication explicitly, such as <code>length * 2</code>. Parentheses control which part is evaluated first.</p>
