@@ -8,12 +8,29 @@
     body { margin: 0; padding: 24px; font: 16px/1.6 system-ui, sans-serif; color: #172033; background: white; }
     input, button, select { font: inherit; }
     input[type="range"] { width: 220px; max-width: 100%; }
+    .idyll-table-wrapper { overflow-x: auto; }
+    .idyll-sales-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    .idyll-sales-table th, .idyll-sales-table td { padding: 6px 9px; border-bottom: 1px solid #dbe3ed; text-align: left; }
+    .idyll-sales-table th { background: #f1f5f9; }
+    .idyll-sales-chart { margin: 16px 0; min-width: 0; }
+    .idyll-sales-chart svg { display: block; width: 100%; height: auto; }
+    .idyll-chart-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; }
+    .idyll-chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .idyll-chart-legend i { width: 10px; height: 10px; border-radius: 50%; }
+    .idyll-empty-data { color: #64748b; }
+    .idyll-scroller { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 0 24px; align-items: start; }
+    .idyll-story-step { grid-column: 1; min-height: 70vh; padding: 20px 0; border-top: 1px solid #dbe3ed; }
+    .idyll-story-step:last-of-type { min-height: 100vh; }
+    .idyll-story-step[data-active="true"] { border-top-color: #2563eb; }
+    .idyll-pinned { grid-column: 2; grid-row: 1 / span var(--story-steps); position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow: auto; padding: 14px; border: 1px solid #dbe3ed; border-radius: 8px; background: white; }
+    .idyll-pinned input[type="range"], .idyll-pinned select { max-width: 100%; }
+    @media (max-width: 560px) { body { padding: 12px; } .idyll-scroller { gap: 0 10px; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); } .idyll-pinned { padding: 8px; } }
     .idyll-document-error, #preview-error { color: #b42318; white-space: pre-wrap; }
   </style>
 </head>
 <body>
   <main id="article"></main>
   <pre id="preview-error" role="alert" hidden></pre>
-  <script src="/vendor/idyll-preview.bundle.js?v=2"></script>
+  <script src="/vendor/idyll-preview.bundle.js?v=3"></script>
 </body>
 </html>
