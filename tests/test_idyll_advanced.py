@@ -183,6 +183,19 @@ class AdvancedIdyllChecksTests(unittest.TestCase):
         self.assertEqual(0, completed.returncode, completed.stderr)
         self.assertEqual([3, {'month':'2025-01-01','sales':12}, [2,4]], json.loads(completed.stdout))
 
+    def test_derived_dependencies_must_be_declared_before_use(self):
+        task = 'idyll-explorer-v2'
+        source = SOLUTIONS[task]
+        total = '[derived name:"total" value:`rows.reduce((sum, row) => sum + row.sales, 0)` /]'
+        average = '[derived name:"average" value:`rows.length ? total / rows.length : "—"` /]'
+        result = self.assert_rejected(task, source.replace(total + '\n' + average, average + '\n' + total))
+        self.assertIn('Declare dependencies before derived expressions', result['error'])
+        for declaration in ['[var name:"snapshot" value:total /]', '[var name:"first" value:second /]\n[var name:"second" value:1 /]']:
+            result = self.assert_rejected(task, source + '\n' + declaration)
+            self.assertIn('Declare dependencies before derived expressions', result['error'])
+        allowed = source + '\n[var name:"first" value:1 /]\n[var name:"second" value:`first + 1` /]'
+        self.assertTrue(self.evaluate(task, allowed)['passed'])
+
     def test_expression_size_and_operation_limits_fail_closed(self):
         task = 'idyll-explorer-v2'
         source = SOLUTIONS[task]

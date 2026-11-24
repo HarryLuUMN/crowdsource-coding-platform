@@ -43,14 +43,16 @@ function check(ast, taskId, data) {
     let evaluateExpression;
     const resolve = name => {
       accessed.add(name);
+      const declaration = definitions.get(name);
+      if (!declaration) throw Error(`Unknown variable: ${name}`);
+      const owner = active.size ? definitions.get(active.values().next().value) : null;
+      if (owner && ((owner.type === 'var' && declaration.type === 'derived') || (!cache.has(name) && !Object.hasOwn(overrides, name) && declaration.type !== 'data'))) throw Error('Declare dependencies before derived expressions; initialize variables before using them and do not initialize a variable from a derived value.');
       if (Object.hasOwn(overrides, name)) return overrides[name];
       if (cache.has(name)) {
         const result = cache.get(name);
         result.accessed.forEach(item => accessed.add(item));
         return result.value;
       }
-      const declaration = definitions.get(name);
-      if (!declaration) throw Error(`Unknown variable: ${name}`);
       if (active.has(name)) throw Error('Circular variable definitions.');
       active.add(name);
       const prior = accessed;
@@ -76,6 +78,7 @@ function check(ast, taskId, data) {
       const value = property(item);
       return {value, accessed: new Set(accessed)};
     };
+    for (const name of definitions.keys()) resolve(name);
     const evaluated = new Map();
     const validRows = (value, reference = false) => Array.isArray(value) && value.length <= 500 && value.every(row => row && typeof row === 'object' && typeof row.month === 'string' && Number.isFinite(Date.parse(row.month)) && Number.isFinite(row.sales) && (reference || typeof row.category === 'string'));
     for (const {node} of nodes) {
@@ -132,7 +135,6 @@ function check(ast, taskId, data) {
       }
       for (const child of node.children || []) render(child, [...ancestors, node]);
     };
-    for (const name of definitions.keys()) resolve(name);
     render(ast);
     return {visible, text, read};
   };
