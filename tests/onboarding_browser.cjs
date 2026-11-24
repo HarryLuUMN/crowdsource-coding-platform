@@ -104,7 +104,8 @@ async function main() {
     assert.equal(await evaluate("!!document.querySelector('.panel-footer')"), false);
     assert.equal(await evaluate("document.querySelector('#saveState').getClientRects().length"), 0);
     assert.equal(await evaluate("activeTab"), 'console');
-    assert.match(await evaluate("document.querySelector('#taskDescription').textContent"), /First.*Console.*Then.*Test Results/);
+    assert.deepEqual(await evaluate("[...document.querySelectorAll('.tabs [role=tab]')].filter(tab => !tab.hidden).map(tab => tab.textContent)"), ['Console output', 'Checks']);
+    assert.match(await evaluate("document.querySelector('#taskDescription').textContent"), /First.*Console output.*Then.*Checks/);
     for (const output of ['Hello, world!', 'Hello, coding platform!']) {
       await evaluate(`document.querySelector('#sourceEditor').value = ${JSON.stringify(`print(${JSON.stringify(output)})`)}; document.querySelector('#runButton').click()`);
       await waitFor("!document.querySelector('#runButton').disabled", "Practice run must finish");
@@ -235,6 +236,19 @@ async function main() {
         if (width === 2200) await screenshot(`task-width-${dsl}`);
       }
       await send('Emulation.clearDeviceMetricsOverride', {}, sessionId);
+      const expectedTabs = {
+        knitscript: ['Console output', 'Knitout', 'Visualization', 'Checks'],
+        'vega-lite': ['Console output', 'Specification', 'Visualization', 'Checks'],
+        idyll: ['Console output', 'Compiled Article', 'Compiled JSON', 'Checks'],
+        penrose: ['Console output', 'Compiled output', 'Visualization', 'Checks'],
+      };
+      assert.deepEqual(await evaluate("[...document.querySelectorAll('.tabs [role=tab]')].map(tab => tab.textContent)"), expectedTabs[dsl]);
+      for (const name of ['console', 'visualization', 'knitout', 'tests']) {
+        await evaluate(`document.querySelector('[data-tab=${name}]').click()`);
+        assert.equal(await evaluate("activeTab"), name, `${dsl} ${name} tab must remain functional`);
+        assert.equal(await evaluate(`document.querySelector('#${{console:'consoleOutput',visualization:'visualizationOutput',knitout:'knitoutOutput',tests:'testOutput'}[name]}').hidden`), false);
+      }
+      await evaluate("document.querySelector('[data-tab=console]').click()");
       const tutorialPaths = {knitscript:'/tutorial.html', 'vega-lite':'/vega-guide.html', idyll:'/idyll-tutorial.html', penrose:'/penrose-tutorial.html'};
       const tutorialTitles = {knitscript:'KnitScript tutorial', 'vega-lite':'Vega-Lite tutorial', idyll:'Idyll tutorial', penrose:'Penrose tutorial'};
       await evaluate("document.querySelector('[data-documentation-view=tutorial]').click()");

@@ -627,7 +627,7 @@ function setStudyPhase(phase, sourceStorageScope) {
     : `knitscript-studio-source:${TASK_ID}:from-scratch-v1:${sourceStorageScope}`;
   taskPhaseBadge.hidden = !practice;
   taskDescription.textContent = practice
-    ? "This is a practice task to help you learn how to use the coding tool.\n\nFor this practice task, write a Python program that prints exactly:\n\nHello, coding platform!\n\nUse the \"Run\" button to test your program. First, open the \"Console\" tab and verify that the output matches the requested text exactly. Then open \"Test Results\" to check that the test passes. When both are correct, click \"Submit.\""
+    ? "This is a practice task to help you learn how to use the coding tool.\n\nFor this practice task, write a Python program that prints exactly:\n\nHello, coding platform!\n\nUse the \"Run\" button to test your program. First, open the \"Console output\" tab and verify that the output matches the requested text exactly. Then open \"Checks\" to check that the test passes. When both are correct, click \"Submit.\""
     : "Write a KnitScript program that produces a 10-stitch-wide stockinette swatch on the front bed. The swatch should begin with a secure cast-on, transition cleanly into the main fabric, and contain six complete stockinette rows. Keep the fabric within the intended width and avoid operations that alter its basic structure. Run your code to evaluate the result, then submit when all tests pass.";
   document.querySelector(".independent-work-warning").textContent = practice
     ? 'As with all tasks, do not use AI assistants, search engines, external documentation, code generation tools, or help from other people. Use instead the "Documentation" and "Tutorial" tabs on the right.'
@@ -669,10 +669,15 @@ function setStudyPhase(phase, sourceStorageScope) {
   }
   if (!practice && selectedTask) taskDescription.textContent = selectedTask.description;
   submitButton.hidden = !practice && runOnlyTask;
-  knitoutTab.textContent = !practice && isRuntimeTask ? "Compiled output" : !practice && isVegaTask ? "Specification" : "Knitout";
+  knitoutTab.textContent = !practice && language === "idyll" ? "Compiled JSON" : !practice && isRuntimeTask ? "Compiled output" : !practice && isVegaTask ? "Specification" : "Knitout";
+  visualizationTab.textContent = !practice && language === "idyll" ? "Compiled Article" : "Visualization";
+  const tabOrder = !practice && language === "idyll"
+    ? ["console", "visualization", "knitout", "tests"]
+    : ["console", "knitout", "visualization", "tests"];
+  document.querySelector(".tabs").append(...tabOrder.map(name => tabs.find(tab => tab.dataset.tab === name)));
   emptyStateTitle.textContent = practice ? "Run your practice program" : "Run your code against the task";
   emptyStateMessage.textContent = practice
-    ? "Use Run, verify the output in Console, then check Test Results before submitting."
+    ? "Use Run, verify the output in Console output, then check Checks before submitting."
     : "You will see a result for each requirement here before submitting.";
   setInitialSource();
   if (!practice) telemetryInitialSource = editor.value;
@@ -1264,7 +1269,7 @@ window.addEventListener("message", event => {
   if (event.origin !== window.location.origin) return;
   if (event.data?.type === "vega.interaction") recordEvent("output.visualization_interacted", { interaction: event.data.interaction });
   if (event.data?.type === "vega.render_error") {
-    showToast("Chart preview failed — see Console");
+    showToast("Chart preview failed — see Console output");
     consoleOutput.textContent = event.data.message;
     recordEvent("output.visualization_failed", { message: event.data.message });
   }

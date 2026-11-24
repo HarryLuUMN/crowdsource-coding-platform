@@ -6,12 +6,13 @@
     if (pendingTour) return pendingTour;
     const intro = window.introJs;
     if (!intro || typeof intro.tour !== "function") return Promise.resolve(false);
+    const previewLabel = document.querySelector("#visualizationTab").textContent;
     const definitions = [
       ["#taskProgress", "Complete three tasks in order", "Start at Level 1. Passing and submitting each task unlocks the next level. Yellow indicates your current task, gray indicates a locked task, and green indicates a passed task."],
       ["#taskDescription", "Read the task requirements", "Build your program from scratch to satisfy the requirements shown here. Each task is expected to take about 20 minutes."],
       ["#sourceEditor", "Write your program here", "You can edit and run your code as many times as needed before submitting."],
       [".documentation-panel", "Use the provided learning materials", "Consult the Documentation and Tutorial while programming. Follow the independent-work rules shown above the editor."],
-      ["#runButton", "Run to check your work", "Run executes your program and displays feedback. Review the Visualization, Test Results, and Console to identify what needs revision. Running does not submit your answer."],
+      ["#runButton", "Run to check your work", `Run executes your program and displays feedback. Read Console output, review ${previewLabel}, and open Checks to identify what needs revision. Running does not submit your answer.`],
       ["[data-tab='tests']", "Check every requirement", "A program can run successfully without satisfying the task. Your solution passes when all task checks pass. If a check fails, revise your program and run it again."],
       ["#submitButton", "Submit when you are ready", "Submit checks your current program again. If it passes, your code and trace are saved before the next task opens. If it fails, stay on the current task and keep revising. After Level 3, follow the completion instructions."]
     ];
