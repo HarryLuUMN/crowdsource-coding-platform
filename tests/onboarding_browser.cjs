@@ -225,6 +225,18 @@ async function main() {
       }
       await completeTour();
       await waitFor("formalSessionReady && !document.querySelector('#runButton').disabled", `${dsl} formal task must become ready`);
+      const tutorialPaths = {knitscript:'/tutorial.html', 'vega-lite':'/vega-guide.html', idyll:'/idyll-tutorial.html', penrose:'/penrose-tutorial.html'};
+      const tutorialTitles = {knitscript:'KnitScript tutorial', 'vega-lite':'Vega-Lite tutorial', idyll:'Idyll tutorial', penrose:'Penrose tutorial'};
+      await evaluate("document.querySelector('[data-documentation-view=tutorial]').click()");
+      await waitFor(`document.querySelector('#tutorialFrame').contentDocument?.title === ${JSON.stringify(tutorialTitles[dsl])}`, `${dsl} tutorial must load in the frame`);
+      assert.equal(await evaluate("document.querySelector('#tutorialFrame').getAttribute('src')"), tutorialPaths[dsl]);
+      assert.equal(await evaluate("document.querySelector('#tutorialFrame').hidden"), false);
+      assert.equal(await evaluate("document.querySelector('#documentationFrame').hidden"), true);
+      assert.equal(await evaluate("documentationReadingSnapshot(document.querySelector('#tutorialFrame')).guide_kind"), 'tutorial');
+      assert.equal(await evaluate("document.querySelector('#tutorialFrame').contentDocument.querySelectorAll('h2').length >= 5"), true);
+      await screenshot(`tutorial-${dsl}`);
+      await evaluate("document.querySelector('[data-documentation-view=documentation]').click()");
+      assert.equal(await evaluate("document.querySelector('#documentationFrame').hidden"), false);
       await evaluate("document.querySelector('#runButton').click()");
       await waitFor("!document.querySelector('#runButton').disabled && !document.querySelector('#resultContent').hidden", `${dsl} actual run must finish`, 60000);
       assert.equal(await evaluate("activeTab"), 'console', `${dsl} actual run must open Console`);

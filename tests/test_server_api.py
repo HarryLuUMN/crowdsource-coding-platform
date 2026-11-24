@@ -114,6 +114,13 @@ class ServerApiTests(unittest.TestCase):
         for section in ['variables', 'inputs', 'display', 'conditions', 'workflow']:
             self.assertIn(f'id="{section}"', html)
 
+    def test_all_dsl_tutorials_are_embeddable(self) -> None:
+        for path, title in [('/tutorial.html', 'KnitScript tutorial'), ('/vega-guide.html', 'Vega-Lite tutorial'), ('/idyll-tutorial.html', 'Idyll tutorial'), ('/penrose-tutorial.html', 'Penrose tutorial')]:
+            with self.subTest(path=path), urlopen(self.base_url + path) as response:
+                self.assertEqual('SAMEORIGIN', response.headers['X-Frame-Options'])
+                self.assertIn("frame-ancestors 'self'", response.headers['Content-Security-Policy'])
+                self.assertIn(f'<title>{title}</title>', response.read().decode())
+
     def test_studio_starts_with_an_empty_editor(self) -> None:
         html_status, html = self.get_text("/")
         script_status, script = self.get_text("/app.js")

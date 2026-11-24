@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Idyll tutorial</title>
+  <link rel="stylesheet" href="/documentation.css" />
+</head>
+<body>
+<main>
+  <h1>Idyll tutorial</h1>
+  <p>Build a small interactive article one step at a time. These examples demonstrate the language; adapt the ideas to the requirements in your current task.</p>
+  <h2>1. Write an article</h2>
+  <p>Idyll combines Markdown text with components inside square brackets. Start with a heading and a sentence in the editor.</p>
+  <pre><code># Exploring a level
+
+Move the slider to explore how a value changes.</code></pre>
+  <h2>2. Add a variable and a slider</h2>
+  <p>A variable stores a value. Binding a Range component to that variable lets the reader change it. Display shows the current value in the article.</p>
+  <pre><code>[var name:"level" value:3 /]
+# Exploring a level
+[Range value:level min:0 max:12 step:1 /]
+Current level: [Display value:level /]</code></pre>
+  <p>Choose Run, read Console, then open Visualization. Drag the slider: the displayed level should change with it. Try both endpoints.</p>
+  <h2>3. Make a calculation reactive</h2>
+  <p>Use a derived value to calculate from the input. Backticks mark an expression to evaluate. Insert the declaration below your variable and the display below your slider.</p>
+  <pre><code>[derived name:"doubled" value:`level * 2` /]
+Doubled level: [Display value:doubled /]</code></pre>
+  <p>Run again and move the slider. Both the current level and its doubled value should update. If one stays fixed, check the variable name and expression.</p>
+  <h2>4. Add a changing explanation</h2>
+  <p>A Conditional block shows its text when its condition is true. Add these two blocks below the displays, then test levels 5, 6, and 7.</p>
+  <pre><code>[Conditional if:`level &lt; 6`]Below the midpoint[/Conditional]
+[Conditional if:`level &gt;= 6`]At or above the midpoint[/Conditional]</code></pre>
+  <p>Exactly one message should appear at each value. For your task, use its specified intervals and messages rather than these demonstration boundaries.</p>
+  <h2>5. Try numeric input</h2>
+  <p>When a task calls for a numeric field rather than a slider, bind TextInput to your variable. For example, replace the Range above with:</p>
+  <pre><code>[TextInput value:level type:"number" min:0 max:12 step:1 /]</code></pre>
+  <p>Type a number and check the reactive outputs. Multiplication and division handle numeric text in calculations. Keep a Range when the task explicitly requires a slider.</p>
+  <h2>6. Check your work</h2>
+  <ol>
+    <li>Use Run and read Console for errors.</li>
+    <li>Use Visualization to test the controls, calculations, and boundary values.</li>
+    <li>Use Test Results to check the current task's requirements.</li>
+    <li>Revise and run again; Submit when your task passes.</li>
+  </ol>
+  <p>The Documentation tab provides the full in-platform syntax reference and supported features. Python practice has its own Python tutorial; this tutorial applies to the formal Idyll tasks.</p>
+</main>
+</body>
+</html>

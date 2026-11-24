@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Penrose tutorial</title>
+  <link rel="stylesheet" href="/documentation.css" />
+</head>
+<body>
+<main>
+  <h1>Penrose tutorial</h1>
+  <p>Describe objects and their relationships in Substance. The platform supplies the Penrose Domain and Style that turn those statements into a diagram.</p>
+  <h2>1. Declare the objects</h2>
+  <p>Set declares sets and Point declares points. Give each object a distinct name. Object names in a relationship must match a declaration.</p>
+  <h2>2. State a relationship</h2>
+  <p>Subset places the first set inside the second. Start with this two-set example:</p>
+  <pre><code>Set Inner, Outer
+Subset(Inner, Outer)
+AutoLabel All</code></pre>
+  <p>Choose Run and read Console. Then open Visualization: Inner should be inside Outer, and both should have labels. AutoLabel All asks Penrose to label the declared objects.</p>
+  <h2>3. Add a point</h2>
+  <p>In specifies membership; NotIn specifies exclusion. Try a point inside the outer set but outside the inner set:</p>
+  <pre><code>Set Inner, Outer
+Point marker
+Subset(Inner, Outer)
+In(marker, Outer)
+NotIn(marker, Inner)
+AutoLabel All</code></pre>
+  <p>Run again and inspect the point's position. The first argument of In and NotIn is a Point, and the second is a Set.</p>
+  <h2>4. Choose the right relationship</h2>
+  <ul>
+    <li><code>Subset(X, Y)</code>: X is contained in Y. Argument order matters.</li>
+    <li><code>Disjoint(X, Y)</code>: the sets have no overlap.</li>
+    <li><code>Intersecting(X, Y)</code>: the sets overlap.</li>
+    <li><code>In(p, X)</code>: point p belongs to set X.</li>
+    <li><code>NotIn(p, X)</code>: point p lies outside set X.</li>
+  </ul>
+  <p>Use only the relationships requested by your task, and avoid contradictory requirements such as making the same pair both disjoint and intersecting. These are all supplied by this platform's Domain.</p>
+  <h2>5. Inspect and revise</h2>
+  <ol>
+    <li>Use Run, then Console to review syntax or execution errors.</li>
+    <li>Open Visualization and check containment, overlap, point placement, and labels.</li>
+    <li>Open Test Results to check the formal requirements. A rendered diagram alone does not establish that every requirement passes.</li>
+    <li>Correct declarations or relationships, run again, and Submit when the task passes.</li>
+  </ol>
+  <p>If compilation fails, check spelling, declared names, argument types, commas, and parentheses. You edit only Substance here; the Domain and Style are already provided. The Documentation tab contains the runtime reference.</p>
+</main>
+</body>
+</html>

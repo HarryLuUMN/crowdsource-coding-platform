@@ -635,7 +635,7 @@ function setStudyPhase(phase, sourceStorageScope) {
   document.querySelector(".task-guide").scrollTop = 0;
   documentationSearch.value = "";
   documentationFrame.title = practice ? "Python basics documentation" : "KnitScript documentation";
-  tutorialFrame.title = practice ? "Python practice tutorial" : "Knitting background tutorial";
+  tutorialFrame.title = practice ? "Python practice tutorial" : "KnitScript tutorial";
   documentationFrame.src = practice ? "/python-guide.html" : "/documentation/";
   tutorialFrame.src = practice ? "/python-guide.html#practice-walkthrough" : "/tutorial.html";
   document.querySelector("#documentationPanel").setAttribute("aria-label", practice ? "Python learning resources" : `${language} learning resources`);
@@ -650,7 +650,7 @@ function setStudyPhase(phase, sourceStorageScope) {
     editorLanguage.textContent = "Vega-Lite";
     editor.setAttribute("aria-label", "Vega-Lite JSON specification");
     documentationFrame.title = "Vega-Lite documentation";
-    tutorialFrame.title = "Visualization background tutorial";
+    tutorialFrame.title = "Vega-Lite tutorial";
     documentationFrame.src = "/documentation/vega-lite/docs/";
     tutorialFrame.src = "/vega-guide.html";
   }
@@ -663,9 +663,9 @@ function setStudyPhase(phase, sourceStorageScope) {
     editorLanguage.textContent = name;
     editor.setAttribute("aria-label", `${name} source code`);
     documentationFrame.title = language === "idyll" ? "Idyll documentation" : `${name} runtime guide`;
-    tutorialFrame.title = `${name} runtime guide`;
+    tutorialFrame.title = `${name} tutorial`;
     documentationFrame.src = language === "idyll" ? "/idyll-guide.html" : `/dsl-guide.html#${language}`;
-    tutorialFrame.src = `/dsl-guide.html#${language}`;
+    tutorialFrame.src = `/${language}-tutorial.html`;
   }
   if (!practice && selectedTask) taskDescription.textContent = selectedTask.description;
   submitButton.hidden = !practice && runOnlyTask;
