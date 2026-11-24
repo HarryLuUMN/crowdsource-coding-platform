@@ -225,6 +225,16 @@ async function main() {
       }
       await completeTour();
       await waitFor("formalSessionReady && !document.querySelector('#runButton').disabled", `${dsl} formal task must become ready`);
+      for (const width of [2200, 1100, 700]) {
+        await send('Emulation.setDeviceMetricsOverride', {width,height:1000,deviceScaleFactor:1,mobile:false}, sessionId);
+        assert.equal(await evaluate(`(() => {
+          const guide = document.querySelector('.task-guide');
+          const right = guide.getBoundingClientRect().right - parseFloat(getComputedStyle(guide).paddingRight);
+          return ['.task-copy', '.task-title-row', '#taskDescription', '.independent-work-warning'].every(selector => Math.abs(document.querySelector(selector).getBoundingClientRect().right - right) < 2);
+        })()`), true, `${dsl} task content must fill the panel at ${width}px`);
+        if (width === 2200) await screenshot(`task-width-${dsl}`);
+      }
+      await send('Emulation.clearDeviceMetricsOverride', {}, sessionId);
       const tutorialPaths = {knitscript:'/tutorial.html', 'vega-lite':'/vega-guide.html', idyll:'/idyll-tutorial.html', penrose:'/penrose-tutorial.html'};
       const tutorialTitles = {knitscript:'KnitScript tutorial', 'vega-lite':'Vega-Lite tutorial', idyll:'Idyll tutorial', penrose:'Penrose tutorial'};
       await evaluate("document.querySelector('[data-documentation-view=tutorial]').click()");
