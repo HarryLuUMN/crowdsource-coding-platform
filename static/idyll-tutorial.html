@@ -36,6 +36,10 @@ Doubled level: [Display value:doubled /]</code></pre>
   <p>When a task calls for a numeric field rather than a slider, bind TextInput to your variable. For example, replace the Range above with:</p>
   <pre><code>[TextInput value:level type:"number" min:0 max:12 step:1 /]</code></pre>
   <p>Type a number and check the reactive outputs. Multiplication and division handle numeric text in calculations. Keep a Range when the task explicitly requires a slider.</p>
+  <h2>Working on the later study levels</h2>
+  <p>Levels 2 and 3 supply complete article text in Task Description. Use Copy article, paste it into the editor, and add controls and reactive components around the supplied sections. Writing new prose is not required.</p>
+  <p>For linked views, derive a shared filtered array and pass it to both Table and Chart. Calculate summaries from the same array. Test different control combinations and the empty-result case. Documentation includes the fixed data declaration and array-expression examples.</p>
+  <p>For a scrolling story, wrap the numbered article sections in Step components under Scroller, with the shared chart and controls inside Pinned. Bind the current step to a variable and derive chart properties from that step. Test downward and upward scrolling, then change controls at each stage to confirm selections persist.</p>
   <h2>6. Check your work</h2>
   <ol>
     <li>Use Run and read Console output for errors.</li>

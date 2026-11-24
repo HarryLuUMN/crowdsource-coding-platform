@@ -668,6 +668,9 @@ function setStudyPhase(phase, sourceStorageScope) {
     tutorialFrame.src = `/${language}-tutorial.html`;
   }
   if (!practice && selectedTask) taskDescription.textContent = selectedTask.description;
+  const article = !practice ? selectedTask?.article : "";
+  document.querySelector("#taskArticle").hidden = !article;
+  document.querySelector("#taskArticleText").textContent = article || "";
   submitButton.hidden = !practice && runOnlyTask;
   knitoutTab.textContent = !practice && language === "idyll" ? "Compiled JSON" : !practice && isRuntimeTask ? "Compiled output" : !practice && isVegaTask ? "Specification" : "Knitout";
   visualizationTab.textContent = !practice && language === "idyll" ? "Compiled Article" : "Visualization";
@@ -779,7 +782,7 @@ function showResult(result) {
       frame.setAttribute("sandbox", "allow-scripts");
       if (language === "idyll") {
         frame.src = "/idyll-preview.html";
-        frame.addEventListener("load", () => frame.contentWindow.postMessage({ type: "idyll.render", ast: result.ast }, "*"));
+        frame.addEventListener("load", () => frame.contentWindow.postMessage({ type: "idyll.render", ast: result.ast, datasets: result.datasets }, "*"));
       } else {
         frame.setAttribute("sandbox", "");
         frame.srcdoc = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">${result.svg}`;
@@ -1029,6 +1032,16 @@ copyButton.addEventListener("click", async () => {
   recordEvent("output.knitout_copied", { character_count: knitoutOutput.textContent.length });
   showToast("Knitout copied");
 });
+document.querySelector("#copyTaskArticle").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(document.querySelector("#taskArticleText").textContent);
+    recordEvent("task.article_copied", { task_id: TASK_ID });
+    showToast("Article copied. Paste it into the editor and add your interactions.");
+  } catch (_) {
+    showToast("Select the article text and copy it manually.");
+  }
+});
+
 tabs.forEach((tab) => tab.addEventListener("click", () => selectTab(tab.dataset.tab, true)));
 initializeDocumentationTools();
 documentationViewTabs.forEach((tab) => tab.addEventListener("click", () => selectDocumentationView(tab.dataset.documentationView, true)));

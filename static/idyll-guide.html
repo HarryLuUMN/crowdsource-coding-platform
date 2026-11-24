@@ -17,6 +17,8 @@
           <li><a href="#inputs">Sliders and numeric input</a></li>
           <li><a href="#display">Displaying values</a></li>
           <li><a href="#conditions">Conditional text</a></li>
+          <li><a href="#data-views">Data and linked views</a></li>
+          <li><a href="#scrolling">Scroll-driven articles</a></li>
           <li><a href="#workflow">Running and checking your article</a></li>
           <li><a href="#supported">Supported features</a></li>
         </ul>
@@ -79,6 +81,56 @@ Level: [Display value:level /]
 [Conditional if:`level &gt;= 6`]At or above the midpoint[/Conditional]</code></pre>
         <p>For several intervals, choose inclusive and exclusive endpoints carefully so messages neither overlap nor leave gaps. Test the values immediately below, at, and above each boundary.</p>
       </section>
+      <section id="data-views">
+        <h2>Data and linked views</h2>
+        <p>Levels 2 and 3 provide a fixed local sales dataset with month, category, and sales fields. Copy the supplied article from Task Description; you only need to add interaction code. Load the data using exactly this declaration:</p>
+        <pre><code>[data name:"sales" source:"sales-data.json" /]</code></pre>
+        <p>Use array expressions to derive new views of the data. <code>filter</code> keeps matching rows, <code>map</code> creates a value for each row, and <code>reduce</code> combines rows. Arrow callbacks use a local parameter such as <code>row =&gt; row.sales &gt;= minimum</code>. These expressions update when referenced controls change.</p>
+        <pre><code>[data name:"sales" source:"sales-data.json" /]
+[var name:"minimum" value:100 /]
+[derived name:"matches" value:`sales.filter(row =&gt; row.sales &gt;= minimum)` /]
+[Range value:minimum min:0 max:500 step:10 /]
+[Table data:matches /]
+[Chart data:matches type:"point" x:"month" y:"sales" color:"category" /]</code></pre>
+        <p>This demonstrates a single filter, rather than a complete study solution. Table displays the supplied rows; Chart renders the supplied data. Neither component automatically applies task filters or calculates summaries.</p>
+        <h3>Choosing categories</h3>
+        <pre><code>[var name:"category" value:"All" /]
+[Select value:category options:`["All", "Books", "Games", "Music"]` /]</code></pre>
+        <p>Bind Select to a mutable variable just like Range. Combine conditions with <code>&amp;&amp;</code> and <code>||</code>. A filter compares each row's category and sales with the current control values.</p>
+        <h3>Totals, means, and empty results</h3>
+        <p><code>matches.length</code> gives the row count. <code>matches.reduce((sum, row) =&gt; sum + row.sales, 0)</code> gives the total. Guard division when calculating an average: <code>count ? total / count : '—'</code>. A conditional message can explain why no rows are shown.</p>
+        <p>For the explorer's summaries, identify Display components with <code>role:"count"</code>, <code>role:"total"</code>, and <code>role:"average"</code>. Use <code>format:".0f"</code> for integer counts or <code>format:".2f"</code> for a mean. Pass an empty array to Table and Chart when nothing matches.</p>
+        <h3>Chart properties</h3>
+        <ul>
+          <li><code>data</code>: the rows to render; <code>type</code>: <code>"point"</code> or <code>"line"</code>.</li>
+          <li><code>x:"month" y:"sales" color:"category"</code>: the fields used by the chart.</li>
+          <li><code>focus</code>: a category to emphasize while fading other categories; use an empty string for no emphasis.</li>
+          <li><code>reference</code>: a separate array of objects with month and sales values, rendered as a reference line.</li>
+          <li><code>highlight</code>: an array of data rows to mark as highlighted observations.</li>
+        </ul>
+        <p>Calculate reference and highlighted rows yourself using derived expressions. Use empty arrays when those layers are not needed. For a monthly reference, group by the month field and calculate the mean over the full dataset for that month, rather than over only the selected category.</p>
+      </section>
+      <section id="scrolling">
+        <h2>Scroll-driven articles</h2>
+        <p>Scroller binds the active section to a mutable step variable. Step wraps a narrative section with a zero-based index. Pinned holds a shared chart and controls on the right. These layout components do not select chart data or calculate averages.</p>
+        <pre><code>[var name:"page" value:0 /]
+[Scroller step:page]
+[Step index:0]
+## First perspective
+Paste the first supplied section here.
+[/Step]
+[Step index:1]
+## Second perspective
+Paste the second supplied section here.
+[/Step]
+[Pinned]
+Current section: [Display value:page /]
+[/Pinned]
+[/Scroller]</code></pre>
+        <p>For the study story, include all four Step sections and place the category control, threshold control, stage display, and shared Chart inside one Pinned block. Put the article title and introduction before Scroller, and the closing section after it.</p>
+        <p>The active step changes when a section's top crosses 40% of the preview viewport, including while scrolling upward. Build derived expressions that map this step and the current controls to the chart's data, focus, reference, and highlight properties. Changing one control should not reset the other control or the current step.</p>
+        <p>Identify the stage display with <code>role:"stage"</code> and compute the stage name from the bound step. Use the exact stage names listed in Task Description.</p>
+      </section>
       <section id="workflow">
         <h2>Running and checking your article</h2>
         <ol>
@@ -92,8 +144,8 @@ Level: [Display value:level /]
       </section>
       <section id="supported">
         <h2>Supported features in this platform</h2>
-        <p>The task checker supports unstyled built-in <code>Range</code> and <code>TextInput</code> controls bound to variables, derived values, arithmetic, comparisons, logical and conditional expressions, and selected Math helpers. The examples above use this supported subset.</p>
-        <p>Custom components, data imports, and front matter are unavailable. Custom functions, arbitrary JavaScript calls, and custom styles cannot be verified by task checks, even if a preview renders them. Prefer the simple controls and expressions shown here.</p>
+        <p>The task checker supports unstyled bound controls, derived values, arithmetic, comparisons, conditional expressions, selected Math helpers, and bounded array operations for the advanced tasks. Use the supplied Table, Chart, Scroller, Step, and Pinned components for linked views and scroll narratives.</p>
+        <p>Only the fixed sales dataset is available; external or asynchronous data imports and front matter are unavailable. Array callbacks must be simple expressions. Arbitrary function calls, statements, side effects, custom components, and custom styles are outside the checker’s supported subset. Keep your task logic in derived expressions.</p>
       </section>
     </main>
   </body>

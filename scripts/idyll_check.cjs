@@ -148,7 +148,9 @@ function check(ast, task) {
 }
 try {
   const input = JSON.parse(fs.readFileSync(0,'utf8'));
-  const tests = check(input.ast,input.task_id);
+  const tests = ['idyll-explorer-v2', 'idyll-story-v2'].includes(input.task_id)
+    ? require('./idyll_advanced_check.cjs').check(input.ast, input.task_id, input.data)
+    : check(input.ast,input.task_id);
   process.stdout.write(JSON.stringify({tests}));
 } catch(error) {
   process.stdout.write(JSON.stringify({tests:[{id:'safe-evaluation',label:'Supported reactive program',passed:false,message:error.message}]}));

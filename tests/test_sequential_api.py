@@ -87,6 +87,7 @@ class SequentialApiTests(unittest.TestCase):
         sources = dict(KNIT_SOURCES)
         sources.update({task: json.dumps(spec) for task, spec in VEGA_SPECS.items()})
         sources.update(json.loads((Path(__file__).parent / 'fixtures/structured_solutions.json').read_text()))
+        sources.update(json.loads((Path(__file__).parent / 'fixtures/idyll_advanced_solutions.json').read_text()))
         for dsl, group in DSL_TASK_CATALOG.items():
             identity = {**self.identity(), 'dsl': dsl, 'participant_id': 'all-solutions-user'}
             for task in group['tasks']:

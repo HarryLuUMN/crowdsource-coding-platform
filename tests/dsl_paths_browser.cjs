@@ -99,11 +99,11 @@ async function main() {
     await assertTaskSet("idyll", "idyll-calculator-v1");
     const draft = '[var name:"quantity" value:2 /]\n[Display value:quantity /]';
     await enterSource(draft);
-    await evaluate("document.querySelector('#taskSelect').value='idyll-converter-v1'; document.querySelector('#taskSelect').dispatchEvent(new Event('change',{bubbles:true}));");
+    await evaluate("document.querySelector('#taskSelect').value='idyll-explorer-v2'; document.querySelector('#taskSelect').dispatchEvent(new Event('change',{bubbles:true}));");
     assert.equal(await evaluate("document.querySelector('#taskSelect').value"), "idyll-calculator-v1", "Task selector rejects skipping");
     await evaluate("flushEvents()");
     await delay(500);
-    await navigate(`${base}/idyll${parameters}&task=idyll-conditional-v1`);
+    await navigate(`${base}/idyll${parameters}&task=idyll-story-v2`);
     await waitFor("document.querySelector('#taskSelect').value==='idyll-calculator-v1' && !document.querySelector('#runButton').disabled", "Direct URL did not restore current unlocked task");
     assert.equal(await evaluate("document.querySelector('#sourceEditor').value"), draft, "Current task draft survives skip rejection and reload");
     for (const [key, value] of [["PROLIFIC_PID", "path-smoke-user"], ["STUDY_ID", "path-smoke-study"], ["SESSION_ID", "path-smoke-session"]]) {

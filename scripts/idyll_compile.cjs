@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const compile = require("idyll-compiler");
 
 const components = new Set([
-  "root", "var", "derived", "range", "display", "dynamic", "conditional",
+  "root", "var", "derived", "table", "chart", "scroller", "step", "pinned", "range", "display", "dynamic", "conditional",
   "button", "boolean", "checkbox", "select", "textinput", "switch", "case",
   "default", "inline", "textcontainer", "h1", "h2", "h3", "h4", "h5", "h6",
   "p", "div", "span", "strong", "em", "b", "i", "ul", "ol", "li", "br",
@@ -15,7 +15,12 @@ function validate(node) {
     node.forEach(validate);
     return;
   }
-  if (node.type === "data") throw new Error("Data imports are not supported in this coding environment.");
+  if (node.type === "data") {
+    const props = node.properties || {};
+    if (Object.keys(props).some(key => !["name", "source"].includes(key)) || props.name?.type !== "value" || props.name.value !== "sales" || props.source?.type !== "value" || props.source.value !== "sales-data.json") {
+      throw new Error('Only the fixed dataset [data name:"sales" source:"sales-data.json" /] is supported. Remote, async, and other data imports are unavailable.');
+    }
+  }
   if (node.name && !components.has(node.name.toLowerCase().replace(/-/g, ""))) {
     throw new Error(`Unsupported component: ${node.name}. Use the provided built-in components.`);
   }

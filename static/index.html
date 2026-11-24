@@ -7,7 +7,7 @@
     <title>CrowdCode</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/vendor/introjs.css" />
-    <link rel="stylesheet" href="/styles.css?v=27" />
+    <link rel="stylesheet" href="/styles.css?v=28" />
     <link rel="stylesheet" href="/onboarding.css?v=3" />
   </head>
   <body>
@@ -33,6 +33,11 @@
               <ol id="taskProgress" class="task-progress" aria-label="Task progress" hidden></ol>
             </div>
             <p id="taskDescription">Write a KnitScript program that produces a 10-stitch-wide stockinette swatch on the front bed. The swatch should begin with a secure cast-on, transition cleanly into the main fabric, and contain six complete stockinette rows. Keep the fabric within the intended width and avoid operations that alter its basic structure. Run your code to evaluate the result, then submit when all tests pass.</p>
+            <section id="taskArticle" class="task-article" aria-label="Provided article" hidden>
+              <div class="task-article-heading"><h2>Provided article</h2><button id="copyTaskArticle" class="ghost-button" type="button">Copy article</button></div>
+              <p>Copy this Markdown into the editor, then add the required interactions. You do not need to write new article text.</p>
+              <pre id="taskArticleText" tabindex="0" aria-label="Article text to copy"></pre>
+            </section>
             <p class="independent-work-warning" role="note"><strong>Independent work only.</strong> Do not use AI assistants, search engines, external documentation, code-generation tools, or help from other people. You may use only the Documentation and Tutorial provided in this platform.</p>
           </div>
         </div>
@@ -166,6 +171,6 @@
     <script src="/task-catalog.js" defer></script>
     <script src="/vendor/introjs.js" defer></script>
     <script src="/onboarding.js?v=5" defer></script>
-    <script src="/app.js?v=41" defer></script>
+    <script src="/app.js?v=42" defer></script>
   </body>
 </html>

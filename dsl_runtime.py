@@ -6,6 +6,8 @@ import time
 from http import HTTPStatus
 from pathlib import Path
 
+from vega_task import SALES_DATA
+
 ROOT = Path(__file__).resolve().parent
 RUNTIME_TASKS = {"idyll-playground-v1": "idyll_compile.cjs", "penrose-playground-v1": "penrose_compile.mjs"}
 
@@ -32,6 +34,8 @@ def evaluate_runtime(source, task_id):
     except (OSError, ValueError, RuntimeError) as error:
         status = HTTPStatus.INTERNAL_SERVER_ERROR
         result = {"ok": False, "error": {"type": "RunnerError", "message": str(error)}}
+    if task_id == "idyll-playground-v1" and result.get("ok"):
+        result["datasets"] = {"sales": SALES_DATA}
     result["duration_ms"] = round((time.monotonic() - started) * 1000)
     result["check"] = {"task_id": task_id, "passed": False, "passed_count": 0, "total_count": 0, "tests": []}
     return status, result

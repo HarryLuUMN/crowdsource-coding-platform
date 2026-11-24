@@ -119,7 +119,7 @@ The local language selector now includes KnitScript, Vega-Lite, Idyll and Penros
 - Idyll: `/?preview=1&task=idyll-playground-v1`
 - Penrose: `/?preview=1&task=penrose-playground-v1`
 
-Idyll uses the official compiler and a browser runtime with selected built-in controls, variables and reactive expressions. Its preview runs in an opaque sandbox without network access. Custom components, front matter and dataset imports are excluded. Compilation checks markup; JavaScript expression failures are reported by the browser preview. As with other browser programming environments, nonterminating expressions can stall the preview; this is intended for controlled research use.
+Idyll uses the official compiler and a browser runtime with selected built-in controls, variables and reactive expressions. Its preview runs in an opaque sandbox without network access. Custom components and front matter are excluded; data declarations are restricted to the fixed sales dataset supplied by the server. Compilation checks markup; JavaScript expression failures are reported by the browser preview. As with other browser programming environments, nonterminating expressions can stall the preview; this is intended for controlled research use.
 
 Penrose accepts Substance programs against the versioned `static/penrose-domain.dsl` and `static/penrose-style.sty`. They support sets, points, containment, intersection, disjointness and membership. The official engine compiles and optimizes diagrams with a fixed variation, rendering SVG inside a script-free sandbox. Successful rendering is not proof that every visual constraint is satisfied.
 
@@ -154,7 +154,7 @@ Verify path assignment, task navigation, independent drafts, participant query p
 
 Every DSL task set now enforces Task 01 → Task 02 → Task 03 on the server. Progress is reconstructed from saved passing submissions, linked successful executions and finalized source snapshots, scoped by participant, study and Prolific session. A passing submission alone does not unlock the next task until trace finalization succeeds. Failed attempts remain saved. Exact-source retries reuse the accepted submission; finalized source cannot be replaced. Only completion of all three tasks exposes the Prolific completion link.
 
-KnitScript rubrics inspect compiled stitches, securing rows, bed patterns and carrier use. Vega-Lite checks executed chart marks, values, colors and titles; it verifies output semantics, not source-data provenance. Penrose checks compiled declarations/relations, labels and optimized geometric relationships. Idyll checks bound controls and reactive outputs over all integer inputs using a bounded AST interpreter, never server-side participant JavaScript evaluation. Its accepted checking subset is documented in the runtime guide; custom functions/styles and arbitrary calls are not supported by task checking even if the preview can render them. Pilot these rubrics with participants before formal collection.
+KnitScript rubrics inspect compiled stitches, securing rows, bed patterns and carrier use. Vega-Lite checks executed chart marks, values, colors and titles; it verifies output semantics, not source-data provenance. Penrose checks compiled declarations/relations, labels and optimized geometric relationships. Idyll checks bound controls and reactive outputs using bounded AST interpretation, never server-side participant JavaScript evaluation. The advanced tasks also check linked table/chart data and scroll-stage mappings across category and threshold combinations. Its accepted checking subset is documented in the runtime guide; custom functions/styles and arbitrary calls are not supported by task checking even if the preview can render them. Pilot these rubrics with participants before formal collection.
 
 Regression commands:
 
@@ -172,3 +172,12 @@ Intro.js 8.6.0 provides a seven-step guide after practice and before the first f
 Run `STUDIO_URL=http://127.0.0.1:8000 node tests/onboarding_browser.cjs` for guide completion, cancel/retry, resource failure, replay isolation and reload tests. Existing browser regression tests also finish the real guide before exercising submissions.
 
 For testing, append `onboarding=1` to a DSL URL, for example `/knitscript?preview=1&onboarding=1`. This forces the guide even if it was already completed, including on later or completed task sets. It does not reset progress or bypass unfinished practice; a new participant still completes practice before the guide. Remove the parameter to restore normal one-time onboarding.
+
+
+## Advanced Idyll task versions
+
+The current Idyll path keeps `idyll-calculator-v1` as Level 1 and uses `idyll-explorer-v2` (linked sales explorer) and `idyll-story-v2` (scroll-driven sales story) for Levels 2 and 3. Old converter/conditional traces keep their original task IDs; they are not treated as completion of the replacement tasks. Participants who finished the existing calculator can proceed to the new explorer.
+
+Both new tasks supply a copyable Markdown article in Task Description. Editors still start empty. Participants implement data dependencies, filtering, summaries, and stage mapping rather than writing prose. The only dataset import is `[data name:"sales" source:"sales-data.json" /]`; the server supplies the same fixed rows to the safe checker and isolated preview. No new network capability is granted to previews.
+
+Advanced checks use bounded AST interpretation rather than executing participant JavaScript on the server. Component props are checked across category/threshold combinations and story stages. Generic Scroller/Pinned behavior, reverse scrolling, and control persistence are separately exercised in the browser tests; model checks alone are not evidence of browser layout correctness.

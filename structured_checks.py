@@ -4,6 +4,8 @@ import math
 from pathlib import Path
 import subprocess
 
+from vega_task import SALES_DATA
+
 ROOT = Path(__file__).resolve().parent
 
 
@@ -20,7 +22,7 @@ def check_idyll(source, result, task_id):
     if not result.get('ok'):
         return _check(task_id, [_test('compile', 'Valid Idyll program', False, 'Resolve the compiler error first.')])
     try:
-        child = subprocess.run(['node', '--max-old-space-size=128', str(ROOT / 'scripts/idyll_check.cjs')], input=json.dumps({'ast': result.get('ast'), 'task_id': task_id}), text=True, capture_output=True, timeout=10, check=False)
+        child = subprocess.run(['node', '--max-old-space-size=128', str(ROOT / 'scripts/idyll_check.cjs')], input=json.dumps({'ast': result.get('ast'), 'task_id': task_id, 'data': SALES_DATA}), text=True, capture_output=True, timeout=10, check=False)
         if child.returncode:
             raise ValueError('The safe expression checker could not run.')
         tests = json.loads(child.stdout)['tests']
