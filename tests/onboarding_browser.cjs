@@ -92,6 +92,18 @@ async function main() {
       const shot = await send('Page.captureScreenshot', {format:'png',captureBeyondViewport:true}, sessionId);
       fs.writeFileSync(`/tmp/intro-${name}.png`, Buffer.from(shot.data,'base64'));
     };
+    const checkPythonTutorial = async () => {
+      assert.equal(await evaluate("document.querySelector('#documentationFrame').getAttribute('src')"), '/python-guide.html');
+      assert.equal(await evaluate("document.querySelector('#tutorialFrame').getAttribute('src')"), '/python-tutorial.html');
+      await evaluate("document.querySelector('[data-documentation-view=tutorial]').click()");
+      await waitFor("document.querySelector('#tutorialFrame').contentDocument?.querySelector('h1')?.textContent === 'Python practice tutorial'", "Practice must show its own step-by-step Python tutorial");
+      assert.equal(await evaluate("document.querySelector('#tutorialFrame').hidden"), false);
+      assert.equal(await evaluate("document.querySelector('#documentationFrame').hidden"), true);
+      assert.equal(await evaluate("documentationReadingSnapshot(document.querySelector('#tutorialFrame')).guide_kind"), 'tutorial');
+      assert.equal(await evaluate("document.querySelector('#tutorialFrame').contentDocument.querySelectorAll('h2').length"), 6);
+      await evaluate("document.querySelector('[data-documentation-view=documentation]').click()");
+      assert.equal(await evaluate("document.querySelector('#documentationFrame').hidden"), false);
+    };
     await navigate(url);
     await waitFor("!document.querySelector('#submitButton').disabled", "Practice controls should load");
     assert.equal(await evaluate("document.querySelector('#howItWorksButton').hidden"), false);
@@ -114,6 +126,7 @@ async function main() {
         assert.equal(await evaluate("document.querySelector('#consoleOutput').textContent"), output);
       }
     }
+    await checkPythonTutorial();
     await screenshot('practice-layout');
     await evaluate("document.querySelector('#howItWorksButton').click()");
     await waitFor("onboardingActive && !!document.querySelector('.introjs-tooltip')", "Visible tutorial button must work during practice");
@@ -215,6 +228,7 @@ async function main() {
       await navigate(`${base}/${dsl}?preview=1&PROLIFIC_PID=console-${dsl}-${Date.now()}`);
       await waitFor("!document.querySelector('#runButton').disabled", "Practice must initialize");
       assert.equal(await evaluate("activeTab"), 'console', `${dsl} practice must default to Console`);
+      await checkPythonTutorial();
       await enterPractice();
       await waitFor("!!document.querySelector('.introjs-tooltip')", `${dsl} formal onboarding must open`);
       assert.equal(await evaluate("activeTab"), 'console', `${dsl} transition must default to Console`);

@@ -637,7 +637,7 @@ function setStudyPhase(phase, sourceStorageScope) {
   documentationFrame.title = practice ? "Python basics documentation" : "KnitScript documentation";
   tutorialFrame.title = practice ? "Python practice tutorial" : "KnitScript tutorial";
   documentationFrame.src = practice ? "/python-guide.html" : "/documentation/";
-  tutorialFrame.src = practice ? "/python-guide.html#practice-walkthrough" : "/tutorial.html";
+  tutorialFrame.src = practice ? "/python-tutorial.html" : "/tutorial.html";
   document.querySelector("#documentationPanel").setAttribute("aria-label", practice ? "Python learning resources" : `${language} learning resources`);
   fileName.textContent = practice ? "practice.py" : "swatch.ks";
   editorLanguage.textContent = practice ? "Python" : "KnitScript";

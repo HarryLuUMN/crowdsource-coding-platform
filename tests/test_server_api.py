@@ -99,10 +99,14 @@ class ServerApiTests(unittest.TestCase):
         self.assertIn('data-documentation-view="tutorial"', html)
         self.assertIn('id="documentationPanel"', html)
         self.assertIn('src="/python-guide.html"', html)
-        self.assertIn('src="/python-guide.html#practice-walkthrough"', html)
+        self.assertIn('src="/python-tutorial.html"', html)
         with urlopen(self.base_url + '/python-guide.html') as response:
             self.assertEqual('SAMEORIGIN', response.headers['X-Frame-Options'])
             self.assertIn(b'Python basics', response.read())
+        with urlopen(self.base_url + '/python-tutorial.html') as response:
+            self.assertEqual('SAMEORIGIN', response.headers['X-Frame-Options'])
+            self.assertIn("frame-ancestors 'self'", response.headers['Content-Security-Policy'])
+            self.assertIn(b'Python practice tutorial', response.read())
         self.assertIn('sandbox="allow-same-origin"', html)
         self.assertIn('data-documentation-view="documentation"', html)
 
