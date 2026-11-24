@@ -1,5 +1,23 @@
 """Shared study task sets selected by a DSL URL path."""
 
+IDYLL_CALCULATOR_ARTICLE = """# A Simple Shopping Calculator
+
+Each item costs $5. Use this calculator to see how the total changes when you choose a different quantity.
+
+## Choose Your Quantity
+
+Choose how many items you would like to buy, from 0 to 10.
+
+## Review Your Total
+
+The selected quantity and total cost are shown below. Adjust the quantity to see both values update."""
+
+IDYLL_CALCULATOR_DESCRIPTION = """Use the supplied article below to build an interactive calculator. Copy the article into the editor and add the interaction components; do not write new article prose.
+
+Add a quantity slider ranging from 0 to 10. Each item costs $5. Display the selected quantity and the total cost, and update both values whenever the slider changes.
+
+Place the slider in Choose Your Quantity and the quantity and total cost in Review Your Total. Use Run to test different quantities, inspect Compiled Article and Checks, and Submit when all requirements pass."""
+
 IDYLL_EXPLORER_ARTICLE = """# Exploring Sales Across Categories
 
 Monthly sales can vary considerably across product categories. A useful comparison starts by choosing which records to examine.
@@ -85,7 +103,7 @@ DSL_TASK_CATALOG = {
     "idyll": {
         "label": "Idyll",
         "tasks": [
-            {"id": "idyll-calculator-v1", "label": "Task 01 — Interactive calculator", "description": "Write an Idyll article from scratch with a quantity slider ranging from 0 to 10. Each item costs 5 dollars. Display the quantity and total cost, updating both when the slider changes."},
+            {"id": "idyll-calculator-v1", "label": "Task 01 — Interactive calculator", "description": IDYLL_CALCULATOR_DESCRIPTION, "article": IDYLL_CALCULATOR_ARTICLE},
             {"id": "idyll-explorer-v2", "label": "Task 02 — Linked sales explorer", "description": IDYLL_EXPLORER_DESCRIPTION, "article": IDYLL_EXPLORER_ARTICLE},
             {"id": "idyll-story-v2", "label": "Task 03 — Scroll-driven sales story", "description": IDYLL_STORY_DESCRIPTION, "article": IDYLL_STORY_ARTICLE},
         ],
