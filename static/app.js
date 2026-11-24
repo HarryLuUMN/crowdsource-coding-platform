@@ -662,9 +662,9 @@ function setStudyPhase(phase, sourceStorageScope) {
     fileName.textContent = language === "idyll" ? "article.idyll" : "diagram.substance";
     editorLanguage.textContent = name;
     editor.setAttribute("aria-label", `${name} source code`);
-    documentationFrame.title = `${name} runtime guide`;
+    documentationFrame.title = language === "idyll" ? "Idyll documentation" : `${name} runtime guide`;
     tutorialFrame.title = `${name} runtime guide`;
-    documentationFrame.src = `/dsl-guide.html#${language}`;
+    documentationFrame.src = language === "idyll" ? "/idyll-guide.html" : `/dsl-guide.html#${language}`;
     tutorialFrame.src = `/dsl-guide.html#${language}`;
   }
   if (!practice && selectedTask) taskDescription.textContent = selectedTask.description;

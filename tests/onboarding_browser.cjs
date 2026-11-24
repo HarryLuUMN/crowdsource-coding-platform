@@ -217,6 +217,12 @@ async function main() {
       await enterPractice();
       await waitFor("!!document.querySelector('.introjs-tooltip')", `${dsl} formal onboarding must open`);
       assert.equal(await evaluate("activeTab"), 'console', `${dsl} transition must default to Console`);
+      if (dsl === 'idyll') {
+        await waitFor("document.querySelector('#documentationFrame').contentDocument?.querySelector('h1')?.textContent === 'Idyll documentation'", "Formal Idyll tasks must embed the dedicated documentation");
+        assert.equal(await evaluate("document.querySelector('#documentationFrame').getAttribute('src')"), '/idyll-guide.html');
+        await evaluate("document.querySelector('#documentationSearch').value = 'TextInput'; searchDocumentation()");
+        assert.equal(await evaluate("documentationMatches.length > 0"), true, 'Idyll documentation must be searchable');
+      }
       await completeTour();
       await waitFor("formalSessionReady && !document.querySelector('#runButton').disabled", `${dsl} formal task must become ready`);
       await evaluate("document.querySelector('#runButton').click()");

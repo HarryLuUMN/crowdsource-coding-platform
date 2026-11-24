@@ -106,6 +106,14 @@ class ServerApiTests(unittest.TestCase):
         self.assertIn('sandbox="allow-same-origin"', html)
         self.assertIn('data-documentation-view="documentation"', html)
 
+    def test_idyll_documentation_is_embeddable(self) -> None:
+        with urlopen(self.base_url + '/idyll-guide.html') as response:
+            self.assertEqual('SAMEORIGIN', response.headers['X-Frame-Options'])
+            self.assertIn("frame-ancestors 'self'", response.headers['Content-Security-Policy'])
+            html = response.read().decode()
+        for section in ['variables', 'inputs', 'display', 'conditions', 'workflow']:
+            self.assertIn(f'id="{section}"', html)
+
     def test_studio_starts_with_an_empty_editor(self) -> None:
         html_status, html = self.get_text("/")
         script_status, script = self.get_text("/app.js")

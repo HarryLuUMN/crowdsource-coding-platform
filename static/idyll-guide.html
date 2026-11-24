@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Idyll documentation</title>
+    <link rel="stylesheet" href="/documentation.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Idyll documentation</h1>
+      <p>Idyll combines written explanations with interactive controls and values that update when the reader changes an input. Use this reference throughout the Idyll tasks.</p>
+      <nav aria-label="Documentation contents">
+        <ul>
+          <li><a href="#syntax">Text and component syntax</a></li>
+          <li><a href="#variables">Variables and derived values</a></li>
+          <li><a href="#inputs">Sliders and numeric input</a></li>
+          <li><a href="#display">Displaying values</a></li>
+          <li><a href="#conditions">Conditional text</a></li>
+          <li><a href="#workflow">Running and checking your article</a></li>
+          <li><a href="#supported">Supported features</a></li>
+        </ul>
+      </nav>
+      <section id="syntax">
+        <h2>Text and component syntax</h2>
+        <p>Write ordinary paragraphs directly. Use <code># Heading</code> for a heading, <code>**bold**</code> for emphasis, and blank lines to separate paragraphs.</p>
+        <p>Components use square brackets. A property has the form <code>name:value</code>. A component without body text ends with <code>/]</code>; a component containing text needs a matching closing tag.</p>
+        <pre><code># An interactive article
+
+Move the slider to explore the value.
+
+[var name:"level" value:3 /]
+[Range value:level min:0 max:12 step:1 /]</code></pre>
+        <p>Put text literals in quotes. Use numbers without quotes. Use an unquoted variable name to bind a component to that variable. Enclose evaluated expressions in backticks.</p>
+      </section>
+      <section id="variables">
+        <h2>Variables and derived values</h2>
+        <p><code>var</code> defines a named value. Bind an input to that name so interaction can change it. Use <code>derived</code> for a calculation that must update whenever its inputs change.</p>
+        <pre><code>[var name:"length" value:3 /]
+[derived name:"doubleLength" value:`length * 2` /]
+[Range value:length min:0 max:12 step:1 /]
+Length: [Display value:length /]
+Twice the length: [Display value:doubleLength /]</code></pre>
+        <p>A derived value is a formula, rather than a fixed initial number. Use the same variable name consistently in the control, formula, and displayed output.</p>
+        <h3>Arithmetic and comparisons</h3>
+        <p>Arithmetic supports <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code>, and parentheses. Write multiplication explicitly, such as <code>length * 2</code>. Parentheses control which part is evaluated first.</p>
+        <p>Comparisons include <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>===</code>, and <code>!==</code>. Combine comparisons with <code>&amp;&amp;</code> (and) or <code>||</code> (or).</p>
+      </section>
+      <section id="inputs">
+        <h2>Sliders and numeric input</h2>
+        <h3>Range</h3>
+        <p><code>Range</code> creates a slider. Bind <code>value</code> to a variable, set <code>min</code> and <code>max</code> to the required bounds, and use <code>step:1</code> for integer steps.</p>
+        <pre><code>[var name:"level" value:3 /]
+[Range value:level min:0 max:12 step:1 /]
+Level: [Display value:level /]</code></pre>
+        <h3>TextInput</h3>
+        <p><code>TextInput</code> provides an editable field. For numeric entry use <code>type:"number"</code>, the required bounds, and <code>step:1</code>. Its value can arrive as text; multiplication or division coerces numeric text when calculating a numeric result.</p>
+        <pre><code>[var name:"distance" value:4 /]
+[TextInput value:distance type:"number" min:0 max:20 step:1 /]
+[derived name:"scaledDistance" value:`distance * 2` /]
+Scaled distance: [Display value:scaledDistance /]</code></pre>
+        <p>Use a slider when the task explicitly asks for one. The task requirements determine the appropriate control and bounds.</p>
+      </section>
+      <section id="display">
+        <h2>Displaying values</h2>
+        <p><code>Display</code> inserts a value into the article and updates it when the value changes. Add surrounding text to identify the quantity and its units. A fixed number typed into a paragraph will not update.</p>
+        <pre><code>[var name:"level" value:3 /]
+[Range value:level min:0 max:12 step:1 /]
+Current level: [Display value:level /]
+Doubled level: [Display value:`level * 2` /]</code></pre>
+      </section>
+      <section id="conditions">
+        <h2>Conditional text</h2>
+        <p><code>Conditional</code> shows its body only when its <code>if</code> expression is true. Close each block with <code>[/Conditional]</code>. Use separate conditions for separate messages.</p>
+        <pre><code>[var name:"level" value:3 /]
+[Range value:level min:0 max:12 step:1 /]
+Level: [Display value:level /]
+[Conditional if:`level &lt; 6`]Below the midpoint[/Conditional]
+[Conditional if:`level &gt;= 6`]At or above the midpoint[/Conditional]</code></pre>
+        <p>For several intervals, choose inclusive and exclusive endpoints carefully so messages neither overlap nor leave gaps. Test the values immediately below, at, and above each boundary.</p>
+      </section>
+      <section id="workflow">
+        <h2>Running and checking your article</h2>
+        <ol>
+          <li>Write the article in the editor and choose <strong>Run</strong>.</li>
+          <li>Read <strong>Console</strong> for compiler or execution errors.</li>
+          <li>Open <strong>Visualization</strong> and change the inputs. Confirm displayed calculations and messages update correctly, including at the endpoints.</li>
+          <li>Open <strong>Test Results</strong> to review each requirement. Revise and run again as needed.</li>
+          <li>Choose <strong>Submit</strong> when the requirements pass. A successful submission unlocks the next task.</li>
+        </ol>
+        <p>If the article does not compile, check matching brackets, quotes, backticks, and closing tags. If a value stays fixed, check its binding and use a derived expression rather than a constant.</p>
+      </section>
+      <section id="supported">
+        <h2>Supported features in this platform</h2>
+        <p>The task checker supports unstyled built-in <code>Range</code> and <code>TextInput</code> controls bound to variables, derived values, arithmetic, comparisons, logical and conditional expressions, and selected Math helpers. The examples above use this supported subset.</p>
+        <p>Custom components, data imports, and front matter are unavailable. Custom functions, arbitrary JavaScript calls, and custom styles cannot be verified by task checks, even if a preview renders them. Prefer the simple controls and expressions shown here.</p>
+      </section>
+    </main>
+  </body>
+</html>
