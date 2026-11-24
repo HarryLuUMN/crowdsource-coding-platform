@@ -103,6 +103,16 @@ async function main() {
     assert.equal(await evaluate("document.querySelector('#taskDescription').getBoundingClientRect().top >= document.querySelector('.task-guide').getBoundingClientRect().top"), true);
     assert.equal(await evaluate("!!document.querySelector('.panel-footer')"), false);
     assert.equal(await evaluate("document.querySelector('#saveState').getClientRects().length"), 0);
+    assert.equal(await evaluate("activeTab"), 'console');
+    assert.match(await evaluate("document.querySelector('#taskDescription').textContent"), /First.*Console.*Then.*Test Results/);
+    for (const output of ['Hello, world!', 'Hello, coding platform!']) {
+      await evaluate(`document.querySelector('#sourceEditor').value = ${JSON.stringify(`print(${JSON.stringify(output)})`)}; document.querySelector('#runButton').click()`);
+      await waitFor("!document.querySelector('#runButton').disabled", "Practice run must finish");
+      assert.equal(await evaluate("activeTab"), 'console');
+      assert.equal(await evaluate("document.querySelector('#consoleOutput').textContent"), output);
+      await evaluate("document.querySelector('[data-tab=tests]').click()");
+      assert.equal(await evaluate("activeTab"), 'tests');
+    }
     await screenshot('practice-layout');
     await evaluate("document.querySelector('#howItWorksButton').click()");
     await waitFor("onboardingActive && !!document.querySelector('.introjs-tooltip')", "Visible tutorial button must work during practice");

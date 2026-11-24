@@ -627,7 +627,7 @@ function setStudyPhase(phase, sourceStorageScope) {
     : `knitscript-studio-source:${TASK_ID}:from-scratch-v1:${sourceStorageScope}`;
   taskPhaseBadge.hidden = !practice;
   taskDescription.textContent = practice
-    ? "This is a practice task to help you learn how to use the coding tool.\n\nFor this practice task, write a Python program that prints exactly:\n\nHello, coding platform!\n\nUse the \"Run\" button to test your program. When you are finished, click \"Submit.\""
+    ? "This is a practice task to help you learn how to use the coding tool.\n\nFor this practice task, write a Python program that prints exactly:\n\nHello, coding platform!\n\nUse the \"Run\" button to test your program. First, open the \"Console\" tab and verify that the output matches the requested text exactly. Then open \"Test Results\" to check that the test passes. When both are correct, click \"Submit.\""
     : "Write a KnitScript program that produces a 10-stitch-wide stockinette swatch on the front bed. The swatch should begin with a secure cast-on, transition cleanly into the main fabric, and contain six complete stockinette rows. Keep the fabric within the intended width and avoid operations that alter its basic structure. Run your code to evaluate the result, then submit when all tests pass.";
   document.querySelector(".independent-work-warning").textContent = practice
     ? 'As with all tasks, do not use AI assistants, search engines, external documentation, code generation tools, or help from other people. Use instead the "Documentation" and "Tutorial" tabs on the right.'
@@ -672,13 +672,13 @@ function setStudyPhase(phase, sourceStorageScope) {
   knitoutTab.textContent = !practice && isRuntimeTask ? "Compiled output" : !practice && isVegaTask ? "Specification" : "Knitout";
   emptyStateTitle.textContent = practice ? "Run your practice program" : "Run your code against the task";
   emptyStateMessage.textContent = practice
-    ? "Use Run to check the output, then Submit when the practice test passes."
+    ? "Use Run, verify the output in Console, then check Test Results before submitting."
     : "You will see a result for each requirement here before submitting.";
   setInitialSource();
   if (!practice) telemetryInitialSource = editor.value;
   previousSource = editor.value;
   clearResult();
-  selectTab(practice ? "tests" : "knitout");
+  selectTab(practice ? "console" : "knitout");
 }
 
 function updateLineNumbers() {
@@ -849,9 +849,9 @@ function showPracticeResult(result) {
       message: result.message,
     }],
   });
-  consoleOutput.textContent = result.passed ? result.output : "No output yet.";
+  consoleOutput.textContent = result.output || (result.passed ? "No output." : result.message);
   consoleOutput.classList.toggle("error", !result.passed);
-  selectTab("tests");
+  selectTab("console");
 }
 
 async function executePractice(mode) {

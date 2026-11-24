@@ -16,7 +16,7 @@
     const passed = Boolean(match && match[2] === expectedOutput);
     return {
       passed,
-      output: passed ? expectedOutput : "",
+      output: match ? match[2] : "",
       message: passed
         ? "Your program prints the requested message."
         : "Write one Python print statement that outputs the requested message exactly.",
