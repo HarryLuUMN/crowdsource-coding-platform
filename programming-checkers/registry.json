@@ -1,0 +1,14 @@
+{
+  "knitscript-plain-v1": "knitscript/task1_checker.py",
+  "knitscript-ribbed-v1": "knitscript/task2_checker.py",
+  "knitscript-striped-v1": "knitscript/task3_checker.py",
+  "vega-lite-bar-v1": "vegalite/task1_checker.py",
+  "vega-lite-line-v1": "vegalite/task2_checker.py",
+  "vega-lite-scatter-v1": "vegalite/task3_checker.py",
+  "idyll-calculator-v1": "idyll/task1_checker.cjs",
+  "idyll-explorer-v2": "idyll/task2_checker.cjs",
+  "idyll-story-v2": "idyll/task3_checker.cjs",
+  "penrose-nested-v1": "penrose/task1_checker.py",
+  "penrose-overlap-v1": "penrose/task2_checker.py",
+  "penrose-points-v1": "penrose/task3_checker.py"
+}
