@@ -18,3 +18,14 @@ Capture exact check payloads for all twelve real reference answers, one incorrec
 ## Constraints
 
 No new dependencies, task changes, grading changes, frontend layout changes, or modifications to saved research data. The hyphenated directory is loaded through an explicit Python registry; shared Python modules use a real package prefix to avoid duplicate module identities. Existing subprocess timeout and memory limits remain.
+
+## Completed verification
+
+- Baseline: all 146 existing/contract tests passed before extracting the existing implementations.
+- Integrated result: all 149 tests passed, including exact equality of all 28 recorded payloads, negative/safety tests, registry coverage, and accepted sequential submissions for all twelve tasks.
+- All twelve files in the example-answer repository passed against committed platform `309749b` (57 of 57 check units).
+- Real Chrome tests `tests/idyll_task_flow_browser.cjs` and `tests/idyll_advanced_browser.cjs` passed, covering practice, onboarding, advanced Run/Checks, sequential completion, linked views, reverse scrolling, pinned geometry and persistent controls.
+- `npm run build`, Python byte compilation, CommonJS syntax checks and `git diff --check` passed. There are no separate lint/typecheck commands configured in `package.json`.
+- The bounded advanced Idyll expression interpreter was moved byte-for-byte; the original script is a compatibility export. Docker's existing `COPY . .` includes the new checker directory.
+
+This verification locks the existing behavior; it does not establish that the pre-existing rubrics accept every valid alternative solution. No grading improvements are included in this structural refactor.
