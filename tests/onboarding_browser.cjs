@@ -210,6 +210,19 @@ async function main() {
     await waitFor("!!document.querySelector('.introjs-tooltip')", "Required guide can be retried after closing");
     for(let step=0;step<7;step++) await next();
     await waitFor("formalSessionReady && !onboardingActive && !document.querySelector('#runButton').disabled", "Retried guide must unlock task");
+    for (const dsl of ['knitscript', 'vega-lite', 'idyll', 'penrose']) {
+      await navigate(`${base}/${dsl}?preview=1&PROLIFIC_PID=console-${dsl}-${Date.now()}`);
+      await waitFor("!document.querySelector('#runButton').disabled", "Practice must initialize");
+      await evaluate("setStudyPhase('formal', 'console-regression')");
+      assert.equal(await evaluate("activeTab"), 'console', `${dsl} must default to Console`);
+      for (const ok of [true, false]) {
+        await evaluate(`selectTab('tests'); showResult({ok:${ok}, stdout:'Console regression', knitout:'', check:{passed:false, tests:[]}})`);
+        assert.equal(await evaluate("activeTab"), 'console', `${dsl} result must open Console`);
+        assert.equal(await evaluate("document.querySelector('#consoleOutput').hidden"), false);
+        await evaluate("document.querySelector('[data-tab=tests]').click()");
+        assert.equal(await evaluate("activeTab"), 'tests', 'Manual tab selection must remain available');
+      }
+    }
     console.log('Intro.js browser: seven-step onboarding, keyboard navigation, isolated traces/timing, replay, reload, cancellation and missing-library recovery passed.');
   } finally {
     socket?.close();

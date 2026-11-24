@@ -84,7 +84,7 @@ const visualizationTab = document.querySelector("#visualizationTab");
 const emptyStateTitle = document.querySelector("#emptyStateTitle");
 const emptyStateMessage = document.querySelector("#emptyStateMessage");
 
-let activeTab = "knitout";
+let activeTab = "console";
 let saveTimer;
 let toastTimer;
 let previousSource = "";
@@ -678,7 +678,7 @@ function setStudyPhase(phase, sourceStorageScope) {
   if (!practice) telemetryInitialSource = editor.value;
   previousSource = editor.value;
   clearResult();
-  selectTab(practice ? "console" : "knitout");
+  selectTab("console");
 }
 
 function updateLineNumbers() {
@@ -782,7 +782,7 @@ function showResult(result) {
       visualizationOutput.append(frame);
     }
     renderCheck(check);
-    selectTab(result.ok ? (check && !check.passed ? "tests" : "visualization") : "console");
+    selectTab("console");
     return;
   }
 
@@ -800,7 +800,7 @@ function showResult(result) {
       visualizationOutput.append(frame);
     }
     renderCheck(check);
-    selectTab(result.ok ? (check && !check.passed ? "tests" : "visualization") : "console");
+    selectTab("console");
     return;
   }
 
@@ -835,7 +835,7 @@ function showResult(result) {
     KnitoutVisualizer.render(visualizationOutput, result.partial_knitout || "", result.metrics || {});
   }
   renderCheck(check);
-  selectTab(result.ok ? "knitout" : "console");
+  selectTab("console");
 }
 
 function showPracticeResult(result) {
