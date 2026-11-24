@@ -107,12 +107,12 @@ async function main() {
     assert.deepEqual(await evaluate("[...document.querySelectorAll('.tabs [role=tab]')].filter(tab => !tab.hidden).map(tab => tab.textContent)"), ['Console output', 'Checks']);
     assert.match(await evaluate("document.querySelector('#taskDescription').textContent"), /First.*Console output.*Then.*Checks/);
     for (const output of ['Hello, world!', 'Hello, coding platform!']) {
-      await evaluate(`document.querySelector('#sourceEditor').value = ${JSON.stringify(`print(${JSON.stringify(output)})`)}; document.querySelector('#runButton').click()`);
-      await waitFor("!document.querySelector('#runButton').disabled", "Practice run must finish");
-      assert.equal(await evaluate("activeTab"), 'console');
-      assert.equal(await evaluate("document.querySelector('#consoleOutput').textContent"), output);
-      await evaluate("document.querySelector('[data-tab=tests]').click()");
-      assert.equal(await evaluate("activeTab"), 'tests');
+      for (const tab of ['console', 'tests']) {
+        await evaluate(`document.querySelector('[data-tab=${tab}]').click(); document.querySelector('#sourceEditor').value = ${JSON.stringify(`print(${JSON.stringify(output)})`)}; document.querySelector('#runButton').click()`);
+        await waitFor("!document.querySelector('#runButton').disabled", "Practice run must finish");
+        assert.equal(await evaluate("activeTab"), tab, 'Practice Run must retain the selected output tab');
+        assert.equal(await evaluate("document.querySelector('#consoleOutput').textContent"), output);
+      }
     }
     await screenshot('practice-layout');
     await evaluate("document.querySelector('#howItWorksButton').click()");
@@ -261,18 +261,24 @@ async function main() {
       await screenshot(`tutorial-${dsl}`);
       await evaluate("document.querySelector('[data-documentation-view=documentation]').click()");
       assert.equal(await evaluate("document.querySelector('#documentationFrame').hidden"), false);
-      await evaluate("document.querySelector('#runButton').click()");
-      await waitFor("!document.querySelector('#runButton').disabled && !document.querySelector('#resultContent').hidden", `${dsl} actual run must finish`, 60000);
-      assert.equal(await evaluate("activeTab"), 'console', `${dsl} actual run must open Console`);
-      await screenshot(`console-${dsl}`);
-      assert.equal(await evaluate("activeTab"), 'console', `${dsl} must default to Console`);
-      for (const ok of [true, false]) {
-        await evaluate(`selectTab('tests'); showResult({ok:${ok}, stdout:'Console regression', knitout:'', check:{passed:false, tests:[]}})`);
-        assert.equal(await evaluate("activeTab"), 'console', `${dsl} result must open Console`);
-        assert.equal(await evaluate("document.querySelector('#consoleOutput').hidden"), false);
-        await evaluate("document.querySelector('[data-tab=tests]').click()");
-        assert.equal(await evaluate("activeTab"), 'tests', 'Manual tab selection must remain available');
+      for (const tab of ['console', 'visualization', 'knitout', 'tests']) {
+        await evaluate(`document.querySelector('[data-tab=${tab}]').click(); document.querySelector('#runButton').click()`);
+        await waitFor("!document.querySelector('#runButton').disabled && !document.querySelector('#resultContent').hidden", `${dsl} actual run must finish`, 60000);
+        assert.equal(await evaluate("activeTab"), tab, `${dsl} actual Run must retain ${tab}`);
+        for (const ok of [true, false]) {
+          await evaluate(`showResult({ok:${ok}, stdout:'Retained-tab regression', knitout:'', check:{passed:false, tests:[]}})`);
+          assert.equal(await evaluate("activeTab"), tab, `${dsl} success/failure must retain ${tab}`);
+        }
       }
+      if (dsl === 'idyll') {
+        await evaluate("showResult({ok:true}); document.querySelector('[data-tab=tests]').click(); window.dispatchEvent(new MessageEvent('message',{origin:'null',source:document.querySelector('#visualizationOutput iframe').contentWindow,data:{type:'idyll.render_error',message:'Preview regression'}}))");
+        assert.equal(await evaluate("activeTab"), 'tests', 'Asynchronous Idyll errors must retain the selected tab');
+        assert.equal(await evaluate("document.querySelector('#consoleOutput').textContent"), 'Preview regression');
+      }
+      await evaluate("(async () => { const originalFetch = window.fetch; window.fetch = (input, options) => String(input) === '/api/run' ? Promise.reject(new Error('Network regression')) : originalFetch(input, options); try { await executeSource('run'); } finally { window.fetch = originalFetch; } })()");
+      assert.equal(await evaluate("activeTab"), 'tests', `${dsl} network errors must retain the selected tab`);
+      assert.equal(await evaluate("document.querySelector('#consoleOutput').textContent.includes('Network regression')"), true);
+      await screenshot(`retained-tab-${dsl}`);
     }
     console.log('Intro.js browser: seven-step onboarding, keyboard navigation, isolated traces/timing, replay, reload, cancellation and missing-library recovery passed.');
   } finally {

@@ -787,7 +787,6 @@ function showResult(result) {
       visualizationOutput.append(frame);
     }
     renderCheck(check);
-    selectTab("console");
     return;
   }
 
@@ -805,7 +804,6 @@ function showResult(result) {
       visualizationOutput.append(frame);
     }
     renderCheck(check);
-    selectTab("console");
     return;
   }
 
@@ -840,7 +838,6 @@ function showResult(result) {
     KnitoutVisualizer.render(visualizationOutput, result.partial_knitout || "", result.metrics || {});
   }
   renderCheck(check);
-  selectTab("console");
 }
 
 function showPracticeResult(result) {
@@ -856,7 +853,6 @@ function showPracticeResult(result) {
   });
   consoleOutput.textContent = result.output || (result.passed ? "No output." : result.message);
   consoleOutput.classList.toggle("error", !result.passed);
-  selectTab("console");
 }
 
 async function executePractice(mode) {
@@ -1263,7 +1259,7 @@ window.addEventListener("message", event => {
     consoleOutput.textContent = String(event.data.message || "Idyll preview failed");
     runSummary.textContent = "Idyll preview failed";
     recordEvent("output.render_failed", { language, message: consoleOutput.textContent });
-    selectTab("console");
+    showToast("Article preview failed — see Console output");
     return;
   }
   if (event.origin !== window.location.origin) return;
