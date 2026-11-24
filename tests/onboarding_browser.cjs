@@ -213,7 +213,16 @@ async function main() {
     for (const dsl of ['knitscript', 'vega-lite', 'idyll', 'penrose']) {
       await navigate(`${base}/${dsl}?preview=1&PROLIFIC_PID=console-${dsl}-${Date.now()}`);
       await waitFor("!document.querySelector('#runButton').disabled", "Practice must initialize");
-      await evaluate("setStudyPhase('formal', 'console-regression')");
+      assert.equal(await evaluate("activeTab"), 'console', `${dsl} practice must default to Console`);
+      await enterPractice();
+      await waitFor("!!document.querySelector('.introjs-tooltip')", `${dsl} formal onboarding must open`);
+      assert.equal(await evaluate("activeTab"), 'console', `${dsl} transition must default to Console`);
+      await completeTour();
+      await waitFor("formalSessionReady && !document.querySelector('#runButton').disabled", `${dsl} formal task must become ready`);
+      await evaluate("document.querySelector('#runButton').click()");
+      await waitFor("!document.querySelector('#runButton').disabled && !document.querySelector('#resultContent').hidden", `${dsl} actual run must finish`, 60000);
+      assert.equal(await evaluate("activeTab"), 'console', `${dsl} actual run must open Console`);
+      await screenshot(`console-${dsl}`);
       assert.equal(await evaluate("activeTab"), 'console', `${dsl} must default to Console`);
       for (const ok of [true, false]) {
         await evaluate(`selectTab('tests'); showResult({ok:${ok}, stdout:'Console regression', knitout:'', check:{passed:false, tests:[]}})`);
