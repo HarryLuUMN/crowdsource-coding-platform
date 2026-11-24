@@ -36,7 +36,7 @@ class ProgrammingCheckerRegistryTests(unittest.TestCase):
                 checker.assert_called_once_with(result, task_id)
 
     def test_idyll_modules_export_callable_checkers(self):
-        script = "const fs=require('fs');const path=require('path');const entries=JSON.parse(fs.readFileSync('programming-checkers/registry.json','utf8'));for(const file of Object.values(entries).filter(file=>file.endsWith('.cjs'))){if(typeof require(path.resolve('programming-checkers',file)).check!=='function')throw Error(file);}" 
+        script = "const fs=require('fs');const path=require('path');const entries=JSON.parse(fs.readFileSync('programming-checkers/registry.json','utf8'));for(const file of Object.values(entries).filter(file=>file.endsWith('.cjs'))){if(typeof require(path.resolve('programming-checkers',file)).check!=='function')throw Error(file);}"
         child = subprocess.run(['node', '-e', script], cwd=ROOT, text=True, capture_output=True, timeout=10)
         self.assertEqual(0, child.returncode, child.stdout + child.stderr)
 

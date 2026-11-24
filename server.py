@@ -26,8 +26,7 @@ from vega_task import TASK_ID as VEGA_TASK_ID, SALES_DATA, evaluate_vega, evalua
 from dsl_runtime import RUNTIME_TASKS, evaluate_runtime
 from study_tasks import DSL_TASK_CATALOG, TASK_DSL, LEGACY_TASK_DSL, validate_task_dsl
 from study_progress import task_progress, assert_task_unlocked
-from catalog_checks import check_knit, check_vega
-from structured_checks import check_idyll, check_penrose
+from programming_checkers import check_task
 from documentation import render_documentation
 from trace_admin import TraceAdminRepository
 from trace_store import TraceStore, utc_now
@@ -162,14 +161,7 @@ def evaluate_source(source: str, task_id: str = TASK_ID) -> tuple[int, dict[str,
                 status, result = HTTPStatus.OK, evaluate_vega_runtime(source)
             finally:
                 _compile_slots.release()
-        if dsl == "knitscript":
-            result["check"] = check_knit(result, task_id)
-        elif dsl == "vega-lite":
-            result["check"] = check_vega(result, task_id)
-        elif dsl == "idyll":
-            result["check"] = check_idyll(source, result, task_id)
-        else:
-            result["check"] = check_penrose(source, result, task_id)
+        result["check"] = check_task(task_id, result)
         return status, result
     if task_id in RUNTIME_TASKS:
         if not isinstance(source, str) or not source.strip() or len(source) > MAX_SOURCE_CHARS:

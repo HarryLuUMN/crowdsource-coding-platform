@@ -70,6 +70,8 @@ The dashboard shows Prolific identifiers, session status, event totals, the orde
 
 ## Test
 
+The twelve DSL task rubrics live in [`programming-checkers/`](programming-checkers/README.md), with one checker file per task and shared parsing/evaluation helpers. `registry.json` maps catalog task IDs to their checker files; the server uses that registry for both Run and Submit.
+
 ```bash
 .venv/bin/python -m unittest discover -s tests -v
 ```
