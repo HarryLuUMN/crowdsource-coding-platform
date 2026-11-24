@@ -1,0 +1,1196 @@
+[
+  {
+    "name": "knitscript-plain-v1:reference",
+    "task_id": "knitscript-plain-v1",
+    "source": "pattern_width = 10;\npattern_height = 6;\nc = 1;\nwith Carrier as c:{\n  in Leftward direction:{ tuck Front_Needles[1:pattern_width:2]; }\n  in reverse direction:{ tuck Front_Needles[0:pattern_width:2]; }\n  in reverse direction:{ knit Loops; }\n  in reverse direction:{ knit Loops; }\n  releasehook;\n  for row in range(pattern_height):{\n    in reverse direction:{ knit Loops; }\n  }\n}\n",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "knitscript-plain-v1",
+      "passed": true,
+      "passed_count": 6,
+      "total_count": 6,
+      "tests": [
+        {
+          "id": "compiles",
+          "label": "Program compiles",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "cast-on",
+          "label": "Secure cast-on",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "rows",
+          "label": "Six complete ten-stitch fabric rows",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "beds",
+          "label": "Required stitch-bed pattern",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "carriers",
+          "label": "Required yarn sections",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "finish",
+          "label": "Carrier setup and finishing",
+          "passed": true,
+          "message": "Requirement satisfied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "knitscript-plain-v1:incorrect",
+    "task_id": "knitscript-plain-v1",
+    "source": "pattern_width = 8;\npattern_height = 6;\nc = 1;\nwith Carrier as c:{\n  in Leftward direction:{ tuck Front_Needles[1:pattern_width:2]; }\n  in reverse direction:{ tuck Front_Needles[0:pattern_width:2]; }\n  in reverse direction:{ knit Loops; }\n  in reverse direction:{ knit Loops; }\n  releasehook;\n  for row in range(pattern_height):{\n    in reverse direction:{ knit Loops; }\n  }\n}\n",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "knitscript-plain-v1",
+      "passed": false,
+      "passed_count": 3,
+      "total_count": 6,
+      "tests": [
+        {
+          "id": "compiles",
+          "label": "Program compiles",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "cast-on",
+          "label": "Secure cast-on",
+          "passed": false,
+          "message": "Tuck each of the ten stitch positions once, then knit two full securing rows before the first releasehook."
+        },
+        {
+          "id": "rows",
+          "label": "Six complete ten-stitch fabric rows",
+          "passed": false,
+          "message": "After the first releasehook, knit six complete alternating-direction rows across ten consecutive positions without extra stitch operations."
+        },
+        {
+          "id": "beds",
+          "label": "Required stitch-bed pattern",
+          "passed": false,
+          "message": "Use alternating front/back beds consistently for ribbing, or front-bed stitches for stockinette."
+        },
+        {
+          "id": "carriers",
+          "label": "Required yarn sections",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "finish",
+          "label": "Carrier setup and finishing",
+          "passed": true,
+          "message": "Requirement satisfied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "knitscript-ribbed-v1:reference",
+    "task_id": "knitscript-ribbed-v1",
+    "source": "pattern_width = 10;\npattern_height = 6;\nc = 1;\nwith Carrier as c:{\n  in Leftward direction:{ tuck Front_Needles[1:pattern_width:2]; }\n  in reverse direction:{ tuck Front_Needles[0:pattern_width:2]; }\n  in reverse direction:{ knit Loops; }\n  in reverse direction:{ knit Loops; }\n  releasehook;\n  xfer Front_Needles[1:10:2] across;\n  for row in range(pattern_height):{\n    in reverse direction:{ knit Loops; }\n  }\n}\n",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "knitscript-ribbed-v1",
+      "passed": true,
+      "passed_count": 6,
+      "total_count": 6,
+      "tests": [
+        {
+          "id": "compiles",
+          "label": "Program compiles",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "cast-on",
+          "label": "Secure cast-on",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "rows",
+          "label": "Six complete ten-stitch fabric rows",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "beds",
+          "label": "Required stitch-bed pattern",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "carriers",
+          "label": "Required yarn sections",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "finish",
+          "label": "Carrier setup and finishing",
+          "passed": true,
+          "message": "Requirement satisfied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "knitscript-ribbed-v1:incorrect",
+    "task_id": "knitscript-ribbed-v1",
+    "source": "pattern_width = 8;\npattern_height = 6;\nc = 1;\nwith Carrier as c:{\n  in Leftward direction:{ tuck Front_Needles[1:pattern_width:2]; }\n  in reverse direction:{ tuck Front_Needles[0:pattern_width:2]; }\n  in reverse direction:{ knit Loops; }\n  in reverse direction:{ knit Loops; }\n  releasehook;\n  xfer Front_Needles[1:10:2] across;\n  for row in range(pattern_height):{\n    in reverse direction:{ knit Loops; }\n  }\n}\n",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "knitscript-ribbed-v1",
+      "passed": false,
+      "passed_count": 3,
+      "total_count": 6,
+      "tests": [
+        {
+          "id": "compiles",
+          "label": "Program compiles",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "cast-on",
+          "label": "Secure cast-on",
+          "passed": false,
+          "message": "Tuck each of the ten stitch positions once, then knit two full securing rows before the first releasehook."
+        },
+        {
+          "id": "rows",
+          "label": "Six complete ten-stitch fabric rows",
+          "passed": false,
+          "message": "After the first releasehook, knit six complete alternating-direction rows across ten consecutive positions without extra stitch operations."
+        },
+        {
+          "id": "beds",
+          "label": "Required stitch-bed pattern",
+          "passed": false,
+          "message": "Use alternating front/back beds consistently for ribbing, or front-bed stitches for stockinette."
+        },
+        {
+          "id": "carriers",
+          "label": "Required yarn sections",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "finish",
+          "label": "Carrier setup and finishing",
+          "passed": true,
+          "message": "Requirement satisfied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "knitscript-striped-v1:reference",
+    "task_id": "knitscript-striped-v1",
+    "source": "pattern_width = 10;\npattern_height = 3;\nc = 1;\nwith Carrier as c:{\n  in Leftward direction:{ tuck Front_Needles[1:pattern_width:2]; }\n  in reverse direction:{ tuck Front_Needles[0:pattern_width:2]; }\n  in reverse direction:{ knit Loops; }\n  in reverse direction:{ knit Loops; }\n  releasehook;\n  for row in range(pattern_height):{\n    in reverse direction:{ knit Loops; }\n  }\n}\nwith Carrier as 2:{\n  in Leftward direction:{ knit Loops; }\n  in reverse direction:{ knit Loops; }\n  releasehook;\n  in reverse direction:{ knit Loops; }\n}\n",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "knitscript-striped-v1",
+      "passed": true,
+      "passed_count": 6,
+      "total_count": 6,
+      "tests": [
+        {
+          "id": "compiles",
+          "label": "Program compiles",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "cast-on",
+          "label": "Secure cast-on",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "rows",
+          "label": "Six complete ten-stitch fabric rows",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "beds",
+          "label": "Required stitch-bed pattern",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "carriers",
+          "label": "Required yarn sections",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "finish",
+          "label": "Carrier setup and finishing",
+          "passed": true,
+          "message": "Requirement satisfied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "knitscript-striped-v1:incorrect",
+    "task_id": "knitscript-striped-v1",
+    "source": "pattern_width = 8;\npattern_height = 3;\nc = 1;\nwith Carrier as c:{\n  in Leftward direction:{ tuck Front_Needles[1:pattern_width:2]; }\n  in reverse direction:{ tuck Front_Needles[0:pattern_width:2]; }\n  in reverse direction:{ knit Loops; }\n  in reverse direction:{ knit Loops; }\n  releasehook;\n  for row in range(pattern_height):{\n    in reverse direction:{ knit Loops; }\n  }\n}\nwith Carrier as 2:{\n  in Leftward direction:{ knit Loops; }\n  in reverse direction:{ knit Loops; }\n  releasehook;\n  in reverse direction:{ knit Loops; }\n}\n",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "knitscript-striped-v1",
+      "passed": false,
+      "passed_count": 3,
+      "total_count": 6,
+      "tests": [
+        {
+          "id": "compiles",
+          "label": "Program compiles",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "cast-on",
+          "label": "Secure cast-on",
+          "passed": false,
+          "message": "Tuck each of the ten stitch positions once, then knit two full securing rows before the first releasehook."
+        },
+        {
+          "id": "rows",
+          "label": "Six complete ten-stitch fabric rows",
+          "passed": false,
+          "message": "After the first releasehook, knit six complete alternating-direction rows across ten consecutive positions without extra stitch operations."
+        },
+        {
+          "id": "beds",
+          "label": "Required stitch-bed pattern",
+          "passed": false,
+          "message": "Use alternating front/back beds consistently for ribbing, or front-bed stitches for stockinette."
+        },
+        {
+          "id": "carriers",
+          "label": "Required yarn sections",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "finish",
+          "label": "Carrier setup and finishing",
+          "passed": true,
+          "message": "Requirement satisfied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "knitscript-plain-v1:compile-failure",
+    "task_id": "knitscript-plain-v1",
+    "source": "invalid syntax {",
+    "status": 200,
+    "compiled": false,
+    "check": {
+      "task_id": "knitscript-plain-v1",
+      "passed": false,
+      "passed_count": 0,
+      "total_count": 6,
+      "tests": [
+        {
+          "id": "compiles",
+          "label": "Program compiles",
+          "passed": false,
+          "message": "Fix compiler errors before checking the fabric."
+        },
+        {
+          "id": "cast-on",
+          "label": "Secure cast-on",
+          "passed": false,
+          "message": "Tuck each of the ten stitch positions once, then knit two full securing rows before the first releasehook."
+        },
+        {
+          "id": "rows",
+          "label": "Six complete ten-stitch fabric rows",
+          "passed": false,
+          "message": "After the first releasehook, knit six complete alternating-direction rows across ten consecutive positions without extra stitch operations."
+        },
+        {
+          "id": "beds",
+          "label": "Required stitch-bed pattern",
+          "passed": false,
+          "message": "Use alternating front/back beds consistently for ribbing, or front-bed stitches for stockinette."
+        },
+        {
+          "id": "carriers",
+          "label": "Required yarn sections",
+          "passed": false,
+          "message": "Use one carrier throughout, or two distinct single carriers for three rows each in the striped task."
+        },
+        {
+          "id": "finish",
+          "label": "Carrier setup and finishing",
+          "passed": false,
+          "message": "Activate, release and outhook every carrier used in the fabric."
+        }
+      ]
+    }
+  },
+  {
+    "name": "vega-lite-bar-v1:reference",
+    "task_id": "vega-lite-bar-v1",
+    "source": "{\"data\": {\"url\": \"/sales-data.json\"}, \"title\": \"Sales by category\", \"mark\": \"bar\", \"encoding\": {\"x\": {\"field\": \"category\", \"type\": \"nominal\", \"title\": \"Category\"}, \"y\": {\"aggregate\": \"sum\", \"field\": \"sales\", \"type\": \"quantitative\", \"title\": \"Total sales\"}}}",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "vega-lite-bar-v1",
+      "passed": true,
+      "passed_count": 4,
+      "total_count": 4,
+      "tests": [
+        {
+          "id": "compiles",
+          "label": "Chart compiles and executes",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "mark",
+          "label": "Required chart type",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "data",
+          "label": "Required data and visual encodings",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "titles",
+          "label": "Chart and axis titles",
+          "passed": true,
+          "message": "Requirement satisfied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "vega-lite-bar-v1:incorrect",
+    "task_id": "vega-lite-bar-v1",
+    "source": "{\"data\": {\"url\": \"/sales-data.json\"}, \"mark\": \"bar\", \"encoding\": {\"x\": {\"field\": \"category\", \"type\": \"nominal\", \"title\": \"Category\"}, \"y\": {\"aggregate\": \"sum\", \"field\": \"sales\", \"type\": \"quantitative\", \"title\": \"Total sales\"}}}",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "vega-lite-bar-v1",
+      "passed": false,
+      "passed_count": 3,
+      "total_count": 4,
+      "tests": [
+        {
+          "id": "compiles",
+          "label": "Chart compiles and executes",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "mark",
+          "label": "Required chart type",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "data",
+          "label": "Required data and visual encodings",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "titles",
+          "label": "Chart and axis titles",
+          "passed": false,
+          "message": "Include a chart title and titles for both axes."
+        }
+      ]
+    }
+  },
+  {
+    "name": "vega-lite-line-v1:reference",
+    "task_id": "vega-lite-line-v1",
+    "source": "{\"data\": {\"url\": \"/sales-data.json\"}, \"title\": \"Sales over time\", \"transform\": [{\"filter\": {\"field\": \"category\", \"oneOf\": [\"Books\", \"Games\"]}}], \"mark\": \"line\", \"encoding\": {\"x\": {\"field\": \"month\", \"type\": \"temporal\", \"title\": \"Month\"}, \"y\": {\"field\": \"sales\", \"type\": \"quantitative\", \"title\": \"Sales\"}, \"color\": {\"field\": \"category\", \"type\": \"nominal\"}}}",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "vega-lite-line-v1",
+      "passed": true,
+      "passed_count": 4,
+      "total_count": 4,
+      "tests": [
+        {
+          "id": "compiles",
+          "label": "Chart compiles and executes",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "mark",
+          "label": "Required chart type",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "data",
+          "label": "Required data and visual encodings",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "titles",
+          "label": "Chart and axis titles",
+          "passed": true,
+          "message": "Requirement satisfied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "vega-lite-line-v1:incorrect",
+    "task_id": "vega-lite-line-v1",
+    "source": "{\"data\": {\"url\": \"/sales-data.json\"}, \"transform\": [{\"filter\": {\"field\": \"category\", \"oneOf\": [\"Books\", \"Games\"]}}], \"mark\": \"line\", \"encoding\": {\"x\": {\"field\": \"month\", \"type\": \"temporal\", \"title\": \"Month\"}, \"y\": {\"field\": \"sales\", \"type\": \"quantitative\", \"title\": \"Sales\"}, \"color\": {\"field\": \"category\", \"type\": \"nominal\"}}}",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "vega-lite-line-v1",
+      "passed": false,
+      "passed_count": 3,
+      "total_count": 4,
+      "tests": [
+        {
+          "id": "compiles",
+          "label": "Chart compiles and executes",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "mark",
+          "label": "Required chart type",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "data",
+          "label": "Required data and visual encodings",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "titles",
+          "label": "Chart and axis titles",
+          "passed": false,
+          "message": "Include a chart title and titles for both axes."
+        }
+      ]
+    }
+  },
+  {
+    "name": "vega-lite-scatter-v1:reference",
+    "task_id": "vega-lite-scatter-v1",
+    "source": "{\"data\": {\"url\": \"/sales-data.json\"}, \"title\": \"Monthly sales\", \"transform\": [{\"filter\": \"datum.sales >= 120\"}, {\"calculate\": \"utcmonth(toDate(datum.month)) + 1\", \"as\": \"month_number\"}], \"mark\": \"point\", \"encoding\": {\"x\": {\"field\": \"month_number\", \"type\": \"quantitative\", \"title\": \"Month number\"}, \"y\": {\"field\": \"sales\", \"type\": \"quantitative\", \"title\": \"Sales\"}, \"color\": {\"field\": \"category\", \"type\": \"nominal\"}}}",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "vega-lite-scatter-v1",
+      "passed": true,
+      "passed_count": 4,
+      "total_count": 4,
+      "tests": [
+        {
+          "id": "compiles",
+          "label": "Chart compiles and executes",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "mark",
+          "label": "Required chart type",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "data",
+          "label": "Required data and visual encodings",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "titles",
+          "label": "Chart and axis titles",
+          "passed": true,
+          "message": "Requirement satisfied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "vega-lite-scatter-v1:incorrect",
+    "task_id": "vega-lite-scatter-v1",
+    "source": "{\"data\": {\"url\": \"/sales-data.json\"}, \"transform\": [{\"filter\": \"datum.sales >= 120\"}, {\"calculate\": \"utcmonth(toDate(datum.month)) + 1\", \"as\": \"month_number\"}], \"mark\": \"point\", \"encoding\": {\"x\": {\"field\": \"month_number\", \"type\": \"quantitative\", \"title\": \"Month number\"}, \"y\": {\"field\": \"sales\", \"type\": \"quantitative\", \"title\": \"Sales\"}, \"color\": {\"field\": \"category\", \"type\": \"nominal\"}}}",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "vega-lite-scatter-v1",
+      "passed": false,
+      "passed_count": 3,
+      "total_count": 4,
+      "tests": [
+        {
+          "id": "compiles",
+          "label": "Chart compiles and executes",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "mark",
+          "label": "Required chart type",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "data",
+          "label": "Required data and visual encodings",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "titles",
+          "label": "Chart and axis titles",
+          "passed": false,
+          "message": "Include a chart title and titles for both axes."
+        }
+      ]
+    }
+  },
+  {
+    "name": "vega-lite-bar-v1:compile-failure",
+    "task_id": "vega-lite-bar-v1",
+    "source": "{",
+    "status": 200,
+    "compiled": false,
+    "check": {
+      "task_id": "vega-lite-bar-v1",
+      "passed": false,
+      "passed_count": 0,
+      "total_count": 4,
+      "tests": [
+        {
+          "id": "compiles",
+          "label": "Chart compiles and executes",
+          "passed": false,
+          "message": "Fix the Vega-Lite execution error."
+        },
+        {
+          "id": "mark",
+          "label": "Required chart type",
+          "passed": false,
+          "message": "Use only the required bar, line or point marks."
+        },
+        {
+          "id": "data",
+          "label": "Required data and visual encodings",
+          "passed": false,
+          "message": "Encode all and only the required category totals or filtered records, with the requested x/y values and category colors."
+        },
+        {
+          "id": "titles",
+          "label": "Chart and axis titles",
+          "passed": false,
+          "message": "Include a chart title and titles for both axes."
+        }
+      ]
+    }
+  },
+  {
+    "name": "idyll-calculator-v1:reference",
+    "task_id": "idyll-calculator-v1",
+    "source": "[var name:\"quantity\" value:2 /]\n# Cost calculator\n[Range value:quantity min:0 max:10 /]\nQuantity: [Display value:quantity /]\nTotal: [Display value:`quantity * 5` /]",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "idyll-calculator-v1",
+      "passed": true,
+      "passed_count": 2,
+      "total_count": 2,
+      "tests": [
+        {
+          "id": "control",
+          "label": "Input control and range",
+          "passed": true,
+          "message": "Bind a control to a declared variable with the requested minimum and maximum."
+        },
+        {
+          "id": "reactive-output",
+          "label": "Reactive output across the input range",
+          "passed": true,
+          "message": "Required output verified at every integer input in the specified range."
+        }
+      ]
+    }
+  },
+  {
+    "name": "idyll-calculator-v1:incorrect",
+    "task_id": "idyll-calculator-v1",
+    "source": "[var name:\"quantity\" value:2 /]\n# Cost calculator\n[Range value:quantity min:0 max:10 /]\nQuantity: [Display value:quantity /]\nTotal: [Display value:`quantity * 3` /]",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "idyll-calculator-v1",
+      "passed": false,
+      "passed_count": 1,
+      "total_count": 2,
+      "tests": [
+        {
+          "id": "control",
+          "label": "Input control and range",
+          "passed": true,
+          "message": "Bind a control to a declared variable with the requested minimum and maximum."
+        },
+        {
+          "id": "reactive-output",
+          "label": "Reactive output across the input range",
+          "passed": false,
+          "message": "Display the required reactive result for every input value."
+        }
+      ]
+    }
+  },
+  {
+    "name": "idyll-explorer-v2:reference",
+    "task_id": "idyll-explorer-v2",
+    "source": "[data name:\"sales\" source:\"sales-data.json\" /]\n[var name:\"category\" value:\"All\" /]\n[var name:\"minimum\" value:0 /]\n[derived name:\"rows\" value:`sales.filter(row => (category === \"All\" || row.category === category) && row.sales >= minimum)` /]\n[derived name:\"total\" value:`rows.reduce((sum, row) => sum + row.sales, 0)` /]\n[derived name:\"average\" value:`rows.length ? total / rows.length : \"\u2014\"` /]\n# Exploring Sales Across Categories\n\nMonthly sales can vary considerably across product categories. A useful comparison starts by choosing which records to examine.\n\n## Choose Your View\n\nSelect a product category and a minimum sales value. A record should appear only when it matches both selections.\n\n[Select value:category options:`[\"All\", \"Books\", \"Games\", \"Music\"]` /]\n[Range value:minimum min:0 max:500 step:10 /]\n\n## Inspect the Records\n\nThe table shows the records included in the current selection. The chart presents those same records over time, making individual observations easier to compare.\n\n[Table data:rows /]\n[Chart data:rows type:\"point\" x:\"month\" y:\"sales\" color:\"category\" /]\n\n## Summarize the Selection\n\nThe number of matching records, total sales, and average sales describe the current selection. These summaries should change whenever either control changes.\n\nMatching records: [Display role:\"count\" value:`rows.length` format:\".0f\" /]\nTotal sales: [Display role:\"total\" value:total format:\".2f\" /]\nAverage sales: [Display role:\"average\" value:average format:\".2f\" /]\n\n## When Nothing Matches\n\nSome combinations of category and minimum sales may produce no matching records. In that case, the article should clearly explain that there are no results.\n\n[Conditional if:`rows.length === 0`]No matching records.[/Conditional]\n",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "idyll-explorer-v2",
+      "passed": true,
+      "passed_count": 5,
+      "total_count": 5,
+      "tests": [
+        {
+          "id": "controls",
+          "label": "Bound category and sales-threshold controls",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "views",
+          "label": "Linked table and point chart",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "filtered-views",
+          "label": "Table and chart apply both filters for every control combination",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "summary",
+          "label": "Reactive record count, total, and average",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "empty-state",
+          "label": "Empty results clear both views and show the required message",
+          "passed": true,
+          "message": "Requirement satisfied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "idyll-explorer-v2:incorrect",
+    "task_id": "idyll-explorer-v2",
+    "source": "[data name:\"sales\" source:\"sales-data.json\" /]\n[var name:\"category\" value:\"All\" /]\n[var name:\"minimum\" value:0 /]\n[derived name:\"rows\" value:`sales.filter(row => (category === \"All\" || row.category === category) && row.sales > minimum)` /]\n[derived name:\"total\" value:`rows.reduce((sum, row) => sum + row.sales, 0)` /]\n[derived name:\"average\" value:`rows.length ? total / rows.length : \"\u2014\"` /]\n# Exploring Sales Across Categories\n\nMonthly sales can vary considerably across product categories. A useful comparison starts by choosing which records to examine.\n\n## Choose Your View\n\nSelect a product category and a minimum sales value. A record should appear only when it matches both selections.\n\n[Select value:category options:`[\"All\", \"Books\", \"Games\", \"Music\"]` /]\n[Range value:minimum min:0 max:500 step:10 /]\n\n## Inspect the Records\n\nThe table shows the records included in the current selection. The chart presents those same records over time, making individual observations easier to compare.\n\n[Table data:rows /]\n[Chart data:rows type:\"point\" x:\"month\" y:\"sales\" color:\"category\" /]\n\n## Summarize the Selection\n\nThe number of matching records, total sales, and average sales describe the current selection. These summaries should change whenever either control changes.\n\nMatching records: [Display role:\"count\" value:`rows.length` format:\".0f\" /]\nTotal sales: [Display role:\"total\" value:total format:\".2f\" /]\nAverage sales: [Display role:\"average\" value:average format:\".2f\" /]\n\n## When Nothing Matches\n\nSome combinations of category and minimum sales may produce no matching records. In that case, the article should clearly explain that there are no results.\n\n[Conditional if:`rows.length === 0`]No matching records.[/Conditional]\n",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "idyll-explorer-v2",
+      "passed": false,
+      "passed_count": 2,
+      "total_count": 5,
+      "tests": [
+        {
+          "id": "controls",
+          "label": "Bound category and sales-threshold controls",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "views",
+          "label": "Linked table and point chart",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "filtered-views",
+          "label": "Table and chart apply both filters for every control combination",
+          "passed": false,
+          "message": "Use the same doubly-filtered sales data for the table, chart, and summary."
+        },
+        {
+          "id": "summary",
+          "label": "Reactive record count, total, and average",
+          "passed": false,
+          "message": "Use Display role:\"count\", role:\"total\", and role:\"average\" with the filtered data; use \u2014 for the empty average."
+        },
+        {
+          "id": "empty-state",
+          "label": "Empty results clear both views and show the required message",
+          "passed": false,
+          "message": "Show exactly No matching records. only for empty results, with empty table/chart data."
+        }
+      ]
+    }
+  },
+  {
+    "name": "idyll-story-v2:reference",
+    "task_id": "idyll-story-v2",
+    "source": "[data name:\"sales\" source:\"sales-data.json\" /]\n[var name:\"category\" value:\"Books\" /]\n[var name:\"threshold\" value:150 /]\n[var name:\"stage\" value:0 /]\n[derived name:\"selected\" value:`sales.filter(row => row.category === category)` /]\n[derived name:\"chartRows\" value:`stage < 2 ? sales : selected` /]\n[derived name:\"reference\" value:`stage === 2 ? sales.filter(row => row.category === \"Books\").map(row => ({month:row.month, sales:sales.filter(item => item.month === row.month).reduce((sum,item) => sum + item.sales,0) / sales.filter(item => item.month === row.month).length})) : []` /]\n[derived name:\"highlighted\" value:`stage === 3 ? selected.filter(row => row.sales > threshold) : []` /]\n[derived name:\"focus\" value:`stage === 1 ? category : \"\"` /]\n[derived name:\"stageName\" value:`[\"Overview\", \"Focus\", \"Average\", \"Threshold\"][stage]` /]\n# A Closer Look at Monthly Sales\n\nA single chart can answer different questions depending on what we choose to emphasize. Scroll through this article to examine the same sales data from four perspectives.\n\n[Scroller step:stage]\n[Step index:0]\n## 1. See the Whole Picture\n\nBegin with the monthly sales trends for all product categories. Comparing the lines reveals how the categories change over the same period.\n[/Step]\n[Step index:1]\n## 2. Focus on One Category\n\nChoose a category to examine more closely. Emphasize its sales trend while keeping the other categories visible as context.\n[/Step]\n[Step index:2]\n## 3. Compare with the Monthly Average\n\nCompare the selected category with the average sales across all categories in each month. The average provides a reference for identifying months when the selected category performs above or below the broader pattern.\n[/Step]\n[Step index:3]\n## 4. Find Months Above a Threshold\n\nChoose a sales threshold and identify the selected category\u2019s months that exceed it. Changing the category or threshold should immediately update the highlighted observations.\n[/Step]\n[Pinned]\n[Select value:category options:`[\"Books\", \"Games\", \"Music\"]` /]\n[Range value:threshold min:0 max:500 step:10 /]\n[Display role:\"stage\" value:stageName /]\n[Chart data:chartRows type:\"line\" x:\"month\" y:\"sales\" color:\"category\" focus:focus reference:reference highlight:highlighted /]\n[/Pinned]\n[/Scroller]\n\n## Revisit the Story\n\nScroll back to an earlier section to revisit that perspective. Your category and threshold selections should remain available throughout the article.\n",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "idyll-story-v2",
+      "passed": true,
+      "passed_count": 4,
+      "total_count": 4,
+      "tests": [
+        {
+          "id": "controls",
+          "label": "Bound category and sales-threshold controls",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "story-layout",
+          "label": "Four scroll steps with a pinned interactive chart",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "stage-display",
+          "label": "Reactive stage name in the pinned region",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "story-states",
+          "label": "Chart behavior across categories, thresholds, and forward/reverse stages",
+          "passed": true,
+          "message": "Requirement satisfied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "idyll-story-v2:incorrect",
+    "task_id": "idyll-story-v2",
+    "source": "[data name:\"sales\" source:\"sales-data.json\" /]\n[var name:\"category\" value:\"Books\" /]\n[var name:\"threshold\" value:150 /]\n[var name:\"stage\" value:0 /]\n[derived name:\"selected\" value:`sales.filter(row => row.category === category)` /]\n[derived name:\"chartRows\" value:`stage < 2 ? sales : selected` /]\n[derived name:\"reference\" value:`stage === 2 ? sales.filter(row => row.category === \"Books\").map(row => ({month:row.month, sales:sales.filter(item => item.month === row.month).reduce((sum,item) => sum + item.sales,0) / sales.filter(item => item.month === row.month).length})) : []` /]\n[derived name:\"highlighted\" value:`stage === 3 ? selected.filter(row => row.sales >= threshold) : []` /]\n[derived name:\"focus\" value:`stage === 1 ? category : \"\"` /]\n[derived name:\"stageName\" value:`[\"Overview\", \"Focus\", \"Average\", \"Threshold\"][stage]` /]\n# A Closer Look at Monthly Sales\n\nA single chart can answer different questions depending on what we choose to emphasize. Scroll through this article to examine the same sales data from four perspectives.\n\n[Scroller step:stage]\n[Step index:0]\n## 1. See the Whole Picture\n\nBegin with the monthly sales trends for all product categories. Comparing the lines reveals how the categories change over the same period.\n[/Step]\n[Step index:1]\n## 2. Focus on One Category\n\nChoose a category to examine more closely. Emphasize its sales trend while keeping the other categories visible as context.\n[/Step]\n[Step index:2]\n## 3. Compare with the Monthly Average\n\nCompare the selected category with the average sales across all categories in each month. The average provides a reference for identifying months when the selected category performs above or below the broader pattern.\n[/Step]\n[Step index:3]\n## 4. Find Months Above a Threshold\n\nChoose a sales threshold and identify the selected category\u2019s months that exceed it. Changing the category or threshold should immediately update the highlighted observations.\n[/Step]\n[Pinned]\n[Select value:category options:`[\"Books\", \"Games\", \"Music\"]` /]\n[Range value:threshold min:0 max:500 step:10 /]\n[Display role:\"stage\" value:stageName /]\n[Chart data:chartRows type:\"line\" x:\"month\" y:\"sales\" color:\"category\" focus:focus reference:reference highlight:highlighted /]\n[/Pinned]\n[/Scroller]\n\n## Revisit the Story\n\nScroll back to an earlier section to revisit that perspective. Your category and threshold selections should remain available throughout the article.\n",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "idyll-story-v2",
+      "passed": false,
+      "passed_count": 3,
+      "total_count": 4,
+      "tests": [
+        {
+          "id": "controls",
+          "label": "Bound category and sales-threshold controls",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "story-layout",
+          "label": "Four scroll steps with a pinned interactive chart",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "stage-display",
+          "label": "Reactive stage name in the pinned region",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "story-states",
+          "label": "Chart behavior across categories, thresholds, and forward/reverse stages",
+          "passed": false,
+          "message": "Each stage must map to the required chart data, focus, monthly reference averages, and strict-threshold highlights."
+        }
+      ]
+    }
+  },
+  {
+    "name": "idyll-calculator-v1:compile-failure",
+    "task_id": "idyll-calculator-v1",
+    "source": "[Range value:",
+    "status": 200,
+    "compiled": false,
+    "check": {
+      "task_id": "idyll-calculator-v1",
+      "passed": false,
+      "passed_count": 0,
+      "total_count": 1,
+      "tests": [
+        {
+          "id": "compile",
+          "label": "Valid Idyll program",
+          "passed": false,
+          "message": "Resolve the compiler error first."
+        }
+      ]
+    }
+  },
+  {
+    "name": "penrose-nested-v1:reference",
+    "task_id": "penrose-nested-v1",
+    "source": "Set A, B, C\nSubset(A, B)\nSubset(B, C)\nAutoLabel All",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "penrose-nested-v1",
+      "passed": true,
+      "passed_count": 4,
+      "total_count": 4,
+      "tests": [
+        {
+          "id": "objects",
+          "label": "Required typed objects",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "labels",
+          "label": "Labels on all requested objects",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "Subset-A-B",
+          "label": "Subset(A, B)",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "Subset-B-C",
+          "label": "Subset(B, C)",
+          "passed": true,
+          "message": "Requirement satisfied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "penrose-nested-v1:incorrect",
+    "task_id": "penrose-nested-v1",
+    "source": "Set A, B, C\nSubset(A, B)\nSubset(B, C)\n",
+    "status": 200,
+    "compiled": false,
+    "check": {
+      "task_id": "penrose-nested-v1",
+      "passed": false,
+      "passed_count": 0,
+      "total_count": 4,
+      "tests": [
+        {
+          "id": "objects",
+          "label": "Required typed objects",
+          "passed": false,
+          "message": "Declare all requested sets and points with the required names."
+        },
+        {
+          "id": "labels",
+          "label": "Labels on all requested objects",
+          "passed": false,
+          "message": "Label every requested object."
+        },
+        {
+          "id": "Subset-A-B",
+          "label": "Subset(A, B)",
+          "passed": false,
+          "message": "Specify this relationship and ensure the rendered diagram satisfies it; remove conflicting relationships if necessary."
+        },
+        {
+          "id": "Subset-B-C",
+          "label": "Subset(B, C)",
+          "passed": false,
+          "message": "Specify this relationship and ensure the rendered diagram satisfies it; remove conflicting relationships if necessary."
+        }
+      ]
+    }
+  },
+  {
+    "name": "penrose-overlap-v1:reference",
+    "task_id": "penrose-overlap-v1",
+    "source": "Set A, B, C\nIntersecting(A, B)\nDisjoint(A, C)\nDisjoint(B, C)\nAutoLabel All",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "penrose-overlap-v1",
+      "passed": true,
+      "passed_count": 5,
+      "total_count": 5,
+      "tests": [
+        {
+          "id": "objects",
+          "label": "Required typed objects",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "labels",
+          "label": "Labels on all requested objects",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "Intersecting-A-B",
+          "label": "Intersecting(A, B)",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "Disjoint-A-C",
+          "label": "Disjoint(A, C)",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "Disjoint-B-C",
+          "label": "Disjoint(B, C)",
+          "passed": true,
+          "message": "Requirement satisfied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "penrose-overlap-v1:incorrect",
+    "task_id": "penrose-overlap-v1",
+    "source": "Set A, B, C\nIntersecting(A, B)\nDisjoint(A, C)\nDisjoint(B, C)\n",
+    "status": 200,
+    "compiled": false,
+    "check": {
+      "task_id": "penrose-overlap-v1",
+      "passed": false,
+      "passed_count": 0,
+      "total_count": 5,
+      "tests": [
+        {
+          "id": "objects",
+          "label": "Required typed objects",
+          "passed": false,
+          "message": "Declare all requested sets and points with the required names."
+        },
+        {
+          "id": "labels",
+          "label": "Labels on all requested objects",
+          "passed": false,
+          "message": "Label every requested object."
+        },
+        {
+          "id": "Intersecting-A-B",
+          "label": "Intersecting(A, B)",
+          "passed": false,
+          "message": "Specify this relationship and ensure the rendered diagram satisfies it; remove conflicting relationships if necessary."
+        },
+        {
+          "id": "Disjoint-A-C",
+          "label": "Disjoint(A, C)",
+          "passed": false,
+          "message": "Specify this relationship and ensure the rendered diagram satisfies it; remove conflicting relationships if necessary."
+        },
+        {
+          "id": "Disjoint-B-C",
+          "label": "Disjoint(B, C)",
+          "passed": false,
+          "message": "Specify this relationship and ensure the rendered diagram satisfies it; remove conflicting relationships if necessary."
+        }
+      ]
+    }
+  },
+  {
+    "name": "penrose-points-v1:reference",
+    "task_id": "penrose-points-v1",
+    "source": "Set A, B\nPoint p, q\nDisjoint(A, B)\nIn(p, A)\nNotIn(p, B)\nIn(q, B)\nNotIn(q, A)\nAutoLabel All",
+    "status": 200,
+    "compiled": true,
+    "check": {
+      "task_id": "penrose-points-v1",
+      "passed": true,
+      "passed_count": 7,
+      "total_count": 7,
+      "tests": [
+        {
+          "id": "objects",
+          "label": "Required typed objects",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "labels",
+          "label": "Labels on all requested objects",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "Disjoint-A-B",
+          "label": "Disjoint(A, B)",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "In-p-A",
+          "label": "In(p, A)",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "NotIn-p-B",
+          "label": "NotIn(p, B)",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "In-q-B",
+          "label": "In(q, B)",
+          "passed": true,
+          "message": "Requirement satisfied."
+        },
+        {
+          "id": "NotIn-q-A",
+          "label": "NotIn(q, A)",
+          "passed": true,
+          "message": "Requirement satisfied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "penrose-points-v1:incorrect",
+    "task_id": "penrose-points-v1",
+    "source": "Set A, B\nPoint p, q\nDisjoint(A, B)\nIn(p, A)\nNotIn(p, B)\nIn(q, B)\nNotIn(q, A)\n",
+    "status": 200,
+    "compiled": false,
+    "check": {
+      "task_id": "penrose-points-v1",
+      "passed": false,
+      "passed_count": 0,
+      "total_count": 7,
+      "tests": [
+        {
+          "id": "objects",
+          "label": "Required typed objects",
+          "passed": false,
+          "message": "Declare all requested sets and points with the required names."
+        },
+        {
+          "id": "labels",
+          "label": "Labels on all requested objects",
+          "passed": false,
+          "message": "Label every requested object."
+        },
+        {
+          "id": "Disjoint-A-B",
+          "label": "Disjoint(A, B)",
+          "passed": false,
+          "message": "Specify this relationship and ensure the rendered diagram satisfies it; remove conflicting relationships if necessary."
+        },
+        {
+          "id": "In-p-A",
+          "label": "In(p, A)",
+          "passed": false,
+          "message": "Specify this relationship and ensure the rendered diagram satisfies it; remove conflicting relationships if necessary."
+        },
+        {
+          "id": "NotIn-p-B",
+          "label": "NotIn(p, B)",
+          "passed": false,
+          "message": "Specify this relationship and ensure the rendered diagram satisfies it; remove conflicting relationships if necessary."
+        },
+        {
+          "id": "In-q-B",
+          "label": "In(q, B)",
+          "passed": false,
+          "message": "Specify this relationship and ensure the rendered diagram satisfies it; remove conflicting relationships if necessary."
+        },
+        {
+          "id": "NotIn-q-A",
+          "label": "NotIn(q, A)",
+          "passed": false,
+          "message": "Specify this relationship and ensure the rendered diagram satisfies it; remove conflicting relationships if necessary."
+        }
+      ]
+    }
+  },
+  {
+    "name": "penrose-nested-v1:compile-failure",
+    "task_id": "penrose-nested-v1",
+    "source": "Set A\nSubset(A, missing)",
+    "status": 200,
+    "compiled": false,
+    "check": {
+      "task_id": "penrose-nested-v1",
+      "passed": false,
+      "passed_count": 0,
+      "total_count": 4,
+      "tests": [
+        {
+          "id": "objects",
+          "label": "Required typed objects",
+          "passed": false,
+          "message": "Declare all requested sets and points with the required names."
+        },
+        {
+          "id": "labels",
+          "label": "Labels on all requested objects",
+          "passed": false,
+          "message": "Label every requested object."
+        },
+        {
+          "id": "Subset-A-B",
+          "label": "Subset(A, B)",
+          "passed": false,
+          "message": "Specify this relationship and ensure the rendered diagram satisfies it; remove conflicting relationships if necessary."
+        },
+        {
+          "id": "Subset-B-C",
+          "label": "Subset(B, C)",
+          "passed": false,
+          "message": "Specify this relationship and ensure the rendered diagram satisfies it; remove conflicting relationships if necessary."
+        }
+      ]
+    }
+  }
+]
